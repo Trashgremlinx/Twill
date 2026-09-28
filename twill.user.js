@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.30.2
+// @version      0.32.0
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -52,7 +52,7 @@
   const SOF_DISCORD = 'https://discord.gg/ZQDz8ANTUR';
   const SOF_GUILD = 'https://www.wolvden.com/g/society/991';
   const SOF_PROFILE = 'https://www.wolvden.com/profile/145906';
-  const VERSION = '0.30.2';
+  const VERSION = '0.32.0';
 
   // ================================================================== storage
 
@@ -1673,8 +1673,24 @@
       ['Non-carrier', 'dk-rate-non']
     ];
 
+    // Split the bundled mutation list by how it is obtained, so the counts in
+    // the text below can never drift from the data.
+    const byType = { genetic: [], applicator: [], random: [] };
+    for (const m of Object.values(GENETICS.muts || {})) {
+      if (byType[m.t]) byType[m.t].push(m.n);
+    }
+    const piebald = byType.applicator.filter((n) => /^Piebald/.test(n)).length;
+    const patches = byType.applicator.filter((n) => /^Patches/.test(n)).length;
+    const list = (a) => a.slice().sort().join(', ');
+
     sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
-      text: 'Every genetic mutation passes at the same rates, so this is the whole picture for Albinism, Brachycephaly, Hereditary Cataracts and Melanism alike.' }));
+      text: 'Wolvden has three kinds of mutation and they are inherited in three completely different ways. Only the recessive ones use the table below.' }));
+
+    sheet.append(h('div', { class: 'dk-lb', text: 'Recessive  \u00b7  ' + byType.genetic.length + ', the ones this table is about' }));
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+      text: list(byType.genetic) + '. These come from hidden genes, and hidden genes are recessive, so BOTH parents must carry one for a pup to have any chance of showing it. All four pass at the rates below.' }));
+    sheet.append(h('div', { class: 'dk-note',
+      text: 'Hidden genes only enter your pack on newly generated wolves: a new lead wolf, a wolf befriended in explore, or one made in the Customizer. A newly generated wolf can carry at most one, so there is no such thing as a double carrier straight out of explore. Gene\u2019s Hollow tells you what a wolf carries.' }));
 
     for (const r of rates) {
       const by = {};
@@ -1709,6 +1725,37 @@
     }
     sheet.append(h('div', { class: 'dk-note',
       text: 'A carrier shows nothing on its own page unless you have had its genetics read, and it can still pass the gene either way.' }));
+
+    /* The other two kinds. Neither uses the table above, and confusing an
+       applicator mutation for a recessive one is the easiest mistake to make
+       here: they look identical on a wolf's page. */
+    sheet.append(h('div', { class: 'dk-lb',
+      text: 'Applicator  ·  ' + byType.applicator.length + ' (' + piebald + ' Piebald, ' + patches + ' Patches)' }));
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+      text: 'Applied directly with a Mutie on Demand applicator, to a wolf that has no secondary mutation yet. Every one of them fills the Secondary Mutation slot.' }));
+    sheet.append(h('div', { class: 'dk-note',
+      text: 'They do pass to pups, with a small chance, but they are NOT recessive and cannot be carried. A pup can only get one if a parent visibly has that exact mutation, so there is no hidden version travelling down the generations and no carrier to test for.' }));
+    for (const n of byType.applicator.slice().sort()) {
+      sheet.append(h('div', { class: 'dk-herb-m' },
+        h('span', { text: n }), h('em', { text: 'Secondary Mutation' })));
+    }
+
+    sheet.append(h('div', { class: 'dk-lb', text: 'Random chance  ·  ' + byType.random.length + ' in this copy' }));
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+      text: 'These can turn up in any breeding at all, with no carrier and no applicator involved. The chance is very low: you could breed hundreds of pups and never see one. Secondary and tertiary random mutations appear to be a little more common than primary ones.' }));
+    sheet.append(h('div', { class: 'dk-note',
+      text: 'Two things are said to raise the odds. A mother with lower fertility gives a small boost, and a Wolf Meat item raises the chance for one pup in her next litter.' }));
+    for (const n of byType.random.slice().sort()) {
+      const m = Object.values(GENETICS.muts || {}).find((x) => x.n === n) || {};
+      sheet.append(h('div', { class: 'dk-herb-m' },
+        h('span', { text: n }), h('em', { text: m.slot || 'Mutation' })));
+    }
+
+    sheet.append(h('div', { class: 'dk-lb', text: 'The three slots' }));
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+      text: 'Every wolf has a Mutation slot, a Secondary Mutation slot and a Tertiary Mutation slot, so up to three at once. Each mutation is assigned to one specific slot and can never appear in another. Big changes of shape take the primary slot; overlays and smaller changes take secondary or tertiary. Not every combination stacks.' }));
+    sheet.append(h('div', { class: 'dk-note',
+      text: 'Captured ' + (GENETICS.exported || '') + '. Wolvden’s own mutation page listed eleven random mutations at that point and this copy holds ' + byType.random.length + '; if you find one missing, tell Fallowe rather than trusting the count.' }));
   }
 
   /* Illnesses: what each one costs, and the whole chain out of it.

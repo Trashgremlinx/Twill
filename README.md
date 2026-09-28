@@ -35,7 +35,7 @@ Updates happen by themselves after that. Nothing you have saved is ever lost whe
 
 ## What is in it
 
-Fourteen tools, each of which can be switched off on its own.
+14 tools, each of which can be switched off on its own.
 
 | | |
 |---|---|
@@ -50,17 +50,17 @@ Fourteen tools, each of which can be switched off on its own.
 | **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear |
 | **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
 | **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |
-| **Achievements** | All eleven categories in one place |
+| **Achievements** | All 11 categories in one place |
 | **Fishing colours** | An accessibility filter for red-blind and green-blind players. It does not point at the fish |
 | **Hide users** | Collapses posts from players you would rather not read |
 
-Plus **nine reference guides kept offline**: herbs, scouting, illnesses, prey, battle enemies,
+Plus **9 reference guides kept offline**: herbs, scouting, illnesses, prey, battle enemies,
 befriending, roles, mutation pass rates and pair bonds. 28 herbs and 21 medicines, 18 illnesses,
 61 prey, 146 enemies, every befriending move against every disposition, and what each role runs
 on, joined up rather than sitting in separate tables.
 
-And **eight themes** with a live editor, a post composer that catches the HTML Wolvden silently
-strips, and a Backup screen for moving to another computer.
+And **eight themes** with a live editor, a post composer that catches those pesky HTML breaks,
+and **Backup** so you can carry everything with you to another computer.
 
 ## What it will not do
 
