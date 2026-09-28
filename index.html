@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --cream:#f5efe1; --card:#fbf7ee; --edge:#e0d3b8;
+    --ink:#3b3226; --soft:#6b5c48; --green:#3f6b46; --leaf:#5f8a3e; --bark:#58382e;
+    --on-accent:#f5efe1;
+    --radius:8px;
+/* themes:root */
+    /* Cyprès, the colourway the page opens in. Synced from the kit. */
+    --t-panel:#292317; --t-surface:#352d1f; --t-line:#4a4131; --t-head:#58382e;
+    --t-headtext:#f1ebe0; --t-text:#d9d2c5; --t-muted:#a39b8c; --t-accent:#9c9050;
+    --t-tip:#b8a45c; --t-edge:#c9a94f; --t-onaccent:#1e1a10; --t-good:#4e7b67;
+    --t-goodtext:#eef3ea;
+  /* /themes:root */}
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; padding-block:0 64px; padding-inline:16px;
+    background:var(--cream);
+    background-image:radial-gradient(circle at 12% 8%,rgba(95,138,62,.07),transparent 42%),
+                     radial-gradient(circle at 88% 4%,rgba(88,56,46,.06),transparent 38%);
+    color:var(--ink); font:16px/1.65 Karla,system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  .wrap{max-width:760px;margin:0 auto}
+
+  header{text-align:center;padding:52px 0 8px}
+  header .mark{display:block;margin:0 auto 6px;width:129px;height:150px}
+  h1{margin:0;font:700 44px/1.02 Fraunces,Georgia,serif;color:var(--green);
+   font-variation-settings:'SOFT' 40,'WONK' 1;letter-spacing:-.005em}
+  .sub{margin:8px 0 0;color:var(--soft);font-size:16px}
+  .ver{display:inline-block;margin-top:16px;padding:3px 12px;background:var(--bark);color:var(--cream);
+       border-radius:999px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+
+  .lede{margin:30px 0 0;padding:20px 22px;background:var(--card);border:1px solid var(--edge);
+        border-left:4px solid var(--leaf);border-radius:var(--radius);font-size:17px}
+  .lede strong{color:var(--green)}
+  .lede p{margin:0 0 12px} .lede p:last-child{margin:0}
+
+  h2{margin:48px 0 6px;font:600 26px/1.25 Fraunces,Georgia,serif;
+   font-variation-settings:'SOFT' 40,'WONK' 1;color:var(--bark);border-bottom:2px solid var(--edge);padding-bottom:7px}
+  h3{margin:28px 0 6px;font:600 17px/1.3 Fraunces,Georgia,serif;color:var(--green)}
+  p{margin:0 0 12px}
+  a{color:var(--green);text-underline-offset:2px} a:hover{color:var(--leaf)}
+  code{padding:1px 6px;background:color-mix(in srgb,var(--edge) 45%,var(--cream));
+       border:1px solid var(--edge);border-radius:4px;
+       font:13.5px/1.4 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  .say{color:var(--soft);font-size:14px;margin:6px 0 0}
+
+  ol.steps{list-style:none;counter-reset:s;margin:0;padding:0}
+  ol.steps>li{counter-increment:s;position:relative;margin:0 0 12px;padding:18px 20px 18px 64px;
+              background:var(--card);border:1px solid var(--edge);border-radius:var(--radius)}
+  ol.steps>li::before{content:counter(s);position:absolute;left:18px;top:17px;width:30px;height:30px;
+                      display:grid;place-items:center;background:var(--leaf);color:var(--on-accent);border-radius:50%;
+                      font:700 15px/1 Fraunces,Georgia,serif}
+  ol.steps b{display:block;margin-bottom:4px;font-size:17px;color:var(--bark)}
+  ol.steps p{margin:0 0 8px;font-size:15px} ol.steps p:last-child{margin-bottom:0}
+
+  .note{margin:10px 0 0;padding:10px 14px;font-size:14px;
+        background:color-mix(in srgb,var(--edge) 32%,var(--card));
+        border-left:3px solid var(--leaf);border-radius:0 4px 4px 0;color:var(--soft)}
+  .note b{color:var(--bark)}
+
+  .tablecard{background:var(--card);border:1px solid var(--edge);border-radius:var(--radius);
+             overflow:hidden;margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:9px 12px;border-bottom:1px solid var(--edge);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  td.n{width:170px;font-weight:700;color:var(--green);white-space:nowrap}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 14px}
+  .chips span{background:var(--card);border:1px solid var(--edge);border-radius:999px;
+              padding:4px 13px;font-size:14px;color:var(--green);font-weight:700}
+
+  ul.rules{margin:0;padding:0;list-style:none}
+  ul.rules li{position:relative;margin:0 0 9px;padding:11px 16px 11px 44px;background:var(--card);
+              border:1px solid var(--edge);border-radius:var(--radius);font-size:15px}
+  ul.rules li::before{content:"\2713";position:absolute;left:15px;top:11px;color:var(--leaf);
+                      font-weight:700;font-size:17px}
+  ul.rules b{color:var(--bark)}
+
+  /* ---- example panels, drawn in Twill's own theme ---- */
+  .demos{display:grid;gap:14px}
+  @media(min-width:640px){.demos{grid-template-columns:1fr 1fr}}
+  .tswitch{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 14px}
+  .tswitch button{font:600 13.5px Karla,system-ui,sans-serif;cursor:pointer;
+                  background:var(--card);border:1px solid var(--edge);border-radius:999px;
+                  padding:5px 14px;color:var(--green)}
+  .tswitch button.on,.gchips button.on{color:var(--on-accent)}
+  .tswitch button:hover{border-color:var(--leaf)}
+  .tswitch button.on{background:var(--green);border-color:var(--green);color:var(--cream)}
+  .demo{background:var(--t-panel);border:1px solid var(--t-line);border-radius:var(--t-radius,var(--radius));
+        overflow:hidden;font:12.5px/1.55 Karla,system-ui,sans-serif;color:var(--t-text)}
+  .demo-h{padding:7px 11px;background:var(--t-head);color:var(--t-headtext);
+          font:600 12.5px/1.3 Fraunces,Georgia,serif;display:flex;gap:8px;align-items:baseline}
+  .demo-h span{margin-left:auto;font:400 10.5px Karla,sans-serif;opacity:.85}
+  .demo-b{padding:9px 11px 11px}
+  .lb{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--t-muted);
+      font-weight:600;margin:9px 0 4px}
+  .lb:first-child{margin-top:0}
+  .rowline{display:flex;justify-content:space-between;gap:10px;padding:2px 0;
+           border-bottom:1px solid var(--t-line)}
+  .rowline:last-child{border-bottom:0}
+  .rowline .r{color:var(--t-muted);flex:none}
+  .tip{color:var(--t-tip);font-weight:700}
+  .acc{color:var(--t-accent)}
+  .gene{padding:2px 0 2px 16px;position:relative}
+  .gene::before{content:"";position:absolute;left:3px;top:4px;bottom:4px;width:4px;border-radius:2px;
+                background:linear-gradient(180deg,#d9c98a,#b8a45c 38%,#8d7d42)}
+  .gene.g2::before{background:linear-gradient(180deg,#7fd3b0,#4bb08a 38%,#357f64)}
+  .cap{color:var(--t-muted);font-size:10.5px;margin-top:6px}
+  .demo-note{font-size:12.5px;color:var(--soft);margin:6px 0 0}
+
+  .gchips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0}
+  .gchips button{font:700 14px Karla,system-ui,sans-serif;cursor:pointer;background:var(--card);
+                 border:1px solid var(--edge);border-radius:999px;padding:5px 14px;color:var(--green)}
+  .gchips button:hover{border-color:var(--leaf)}
+  .gchips button.on{background:var(--green);border-color:var(--green);color:var(--cream)}
+  .gpane{display:grid;gap:14px;margin-top:14px}
+  @media(min-width:700px){.gpane{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:start}}
+  .gsay h4{margin:0 0 6px;font:600 18px/1.3 Fraunces,Georgia,serif;color:var(--bark)}
+  .gsay p{margin:0 0 10px;font-size:15px}
+  .gsay p:last-child{margin:0}
+  .gsay .count{font-size:13.5px;color:var(--soft)}
+  .gtab{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+  .gtab i{font-style:normal;font-size:10px;padding:2px 7px;border-radius:999px;
+          border:1px solid var(--t-line);color:var(--t-muted)}
+  .gtab i.on{background:var(--t-accent);border-color:var(--t-accent);color:var(--t-panel);font-weight:700}
+  .gt{display:flex;justify-content:space-between;gap:10px;font-weight:700;margin-top:8px}
+  .gt:first-child{margin-top:0}
+  .gt span:last-child{color:var(--t-muted);font-weight:400;flex:none}
+  .ggrid{width:100%;border-collapse:collapse;font-size:11.5px}
+  .ggrid th{font-weight:600;color:var(--t-muted);text-align:center;padding:0 0 3px;font-size:9.5px;
+            letter-spacing:.06em}
+  .ggrid th:first-child{text-align:left}
+  .ggrid td{padding:2px 0;border-top:1px solid var(--t-line);text-align:center}
+  .ggrid td:first-child{text-align:left;white-space:nowrap;padding-right:8px}
+  .ggrid .p{color:var(--t-accent);font-weight:700}
+  .ggrid .n{color:var(--t-muted)}
+
+  /* ---- FAQ ---- */
+  details{background:var(--card);border:1px solid var(--edge);border-radius:var(--radius);
+          padding:12px 16px;margin-bottom:8px}
+  details[open]{border-color:color-mix(in srgb,var(--edge) 65%,var(--ink))}
+  summary{cursor:pointer;font-weight:700;color:var(--bark);font-size:15.5px}
+  summary::marker{color:var(--leaf)}
+  details p{margin:10px 0 0;font-size:15px}
+  details p:last-child{margin-bottom:0}
+
+  /* ---- roadmap ---- */
+  .road{display:grid;gap:12px}
+  @media(min-width:680px){.road{grid-template-columns:repeat(3,1fr)}}
+  .lane{background:var(--card);border:1px solid var(--edge);border-radius:var(--radius);padding:14px 16px}
+  .lane h4{margin:0 0 3px;font-size:15px;color:var(--bark)}
+  .lane .when{font-size:11.5px;color:var(--soft);margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em}
+  .lane ul{margin:0;padding-left:17px;font-size:14px}
+  .lane li{margin-bottom:5px}
+  .lane.now{border-left:3px solid var(--leaf)}
+  .lane.soon{border-left:3px solid var(--leaf)}
+  .lane.never{border-left:3px solid var(--edge)}
+
+  .plug{margin-top:16px;background:var(--card);border:1px solid var(--edge);
+        border-left:3px solid var(--leaf);border-radius:var(--radius);padding:18px 20px}
+  .plug h3{color:var(--green)}
+  .plug p{font-size:15px}
+  .joinsof{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:18px;
+           text-decoration:none;color:var(--green)}
+  .joinsof img{display:block;padding:11px;background:#f5efe1;border:1px solid var(--edge);
+               border-radius:14px}
+  .joinsof:hover img{border-color:var(--leaf)}
+  .joinsof span{font-weight:700;font-size:15px}
+  .joinsof:hover span{color:var(--leaf);text-decoration:underline}
+  .thanks{background:var(--card);border:1px solid var(--edge);border-radius:var(--radius);padding:16px 18px}
+  .thanks dl{margin:0;display:grid;gap:10px}
+  .thanks dt{font-weight:700;color:var(--green);font-size:15px}
+  .thanks dd{margin:2px 0 0;font-size:14.5px;color:var(--soft)}
+
+  .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .cta a{flex:1 1 210px;text-align:center;padding:13px 18px;background:var(--green);color:var(--cream);
+         border-radius:var(--radius);text-decoration:none;font-size:16px}
+  .cta a:hover{background:var(--leaf);color:var(--on-accent)}
+  .cta a.alt{background:transparent;color:var(--green);border:1px solid var(--green)}
+  .cta a.alt:hover{background:color-mix(in srgb,var(--green) 14%,var(--cream));color:var(--bark)}
+
+  footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--edge);
+         font-size:13.5px;color:var(--soft);text-align:center}
+
+  @media(max-width:560px){
+    h1{font-size:34px}
+    header .mark{width:96px;height:112px}
+    td.n{width:auto;display:block;padding-bottom:0;border:0;white-space:normal}
+    td.d{display:block;padding-top:2px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <img class="mark" src="data:image/png;base64,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" alt="">
+    <h1>Twill</h1>
+    <p class="sub">A Society of Fur toolkit for Wolvden</p>
+    <div class="ver">version 0.29.0</div>
+  </header>
+
+  <h2 style="margin-top:34px">What is Twill?</h2>
+  <div class="lede" style="margin-top:14px">
+    <p>Twill reads the page you already have open, allows you to expand on details you otherwise would need a separate document to do and gives you space to grow your pack in a lore rich environment.</p>
+    <p>Hover over a gene and get expanded details on where it comes from, how it might look bred with another marking and if they can be a combo. Maybe you want to add more detail to your wolf that you simply don't have the ability to see at a glance without a separate lore document. Breeding challenges and planning your pack has become easier than ever.</p>
+    <p><strong>Twill will never play the game for you, we leave that to you!</strong></p>
+  </div>
+
+  <h2>A look at it</h2>
+  <p class="say">Four things it actually puts on screen. Pick a colourway and they repaint,
+  the same way the kit does.</p>
+
+  <div class="tswitch" role="group" aria-label="Preview colourway"><!-- themes:chips -->
+    <button type="button" data-t="cypres" aria-pressed="true">Cypr&egrave;s</button>
+    <button type="button" data-t="parchment" aria-pressed="false">Parchment</button>
+    <button type="button" data-t="winter" aria-pressed="false">Tide</button>
+    <button type="button" data-t="summer" aria-pressed="false">Bloom</button>
+    <button type="button" data-t="treebark" aria-pressed="false">Tree Bark</button>
+    <button type="button" data-t="understory" aria-pressed="false">Understory</button>
+    <button type="button" data-t="cranberries" aria-pressed="false">Frosted Cranberries</button>
+    <button type="button" data-t="ink" aria-pressed="false">Ink</button>
+  <!-- /themes:chips --></div>
+
+  <div class="demos" id="demos">
+
+    <div class="demo">
+      <div class="demo-h">Genetics <span>hover any gene</span></div>
+      <div class="demo-b">
+        <div class="gene"><b>Deira Socks</b> <span style="color:var(--t-muted)">(65% : T6)</span></div>
+        <div class="lb">Category</div>
+        <div>Combo marking &middot; tier 6</div>
+        <div class="lb">Source</div>
+        <div>Breeding only, never a Random Marking Applicator</div>
+        <div class="lb">Bred from</div>
+        <div>Beige &times; Honey</div>
+        <div class="lb">Pass rate</div>
+        <div><span class="tip">65%</span> to a pup</div>
+        <div class="cap">Click to pin the card open and scroll it. The coloured bar says how the
+        trait is obtained, the same way on every row of the page.</div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-h">Den Manager <span>255 food &middot; 5 need attention</span></div>
+      <div class="demo-b">
+        <div class="rowline"><span>&#9662; NEEDS ATTENTION</span><span class="r">5</span></div>
+        <div class="rowline"><span class="acc">Anthelion</span><span class="r">pregnant, due in 3</span></div>
+        <div class="rowline"><span class="acc">Styginetta</span><span class="r">in heat</span></div>
+        <div class="rowline"><span>3 pups</span><span class="r">under 50% survival</span></div>
+        <div class="rowline"><span class="acc">Elyos, Willow, OR1</span><span class="r">0% energy</span></div>
+        <div class="rowline" style="margin-top:6px"><span>&#9656; BREEDING</span><span class="r">3 in heat &middot; 5 cooldowns</span></div>
+        <div class="rowline"><span>&#9656; OLD AGE</span><span class="r">3 elders</span></div>
+        <div class="cap">Every section folds on its own and still answers itself when shut. Any you
+        never use can be switched off entirely.</div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-h">Pairing <span>two wolves in the tray</span></div>
+      <div class="demo-b">
+        <div class="lb">Shared ancestors</div>
+        <div class="rowline"><span class="acc">Roustame Diodore</span><span class="r">great-grandsire, both sides</span></div>
+        <div class="lb">The pup's inbreeding</div>
+        <div><span class="tip" style="font-size:19px">3.1%</span></div>
+        <div class="lb">Markings in reach</div>
+        <div class="rowline"><span>Silver Dilution</span><span class="r">slot 4</span></div>
+        <div class="rowline"><span>Beige Orca</span><span class="r">slot 7</span></div>
+        <div class="cap">Wolvden gives each wolf its own coefficient. This is the pairing you have
+        not made yet, worked out from the trees you have opened.</div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-h">Guides <span>searched: "cough"</span></div>
+      <div class="demo-b">
+        <div class="lb">Illness</div>
+        <div class="rowline"><span><b>Cough</b></span><span class="r">&minus;2 HP</span></div>
+        <div>21% to spread each rollover</div>
+        <div class="lb">Cured by</div>
+        <div class="rowline"><span>Cough Cure</span><span class="r">Goldenseal, Kava, Pineapple Leaf</span></div>
+        <div class="lb">Those herbs grow in</div>
+        <div style="color:var(--t-muted)">Deciduous Forest &middot; Grasslands &middot; Coniferous
+        Forest &middot; Riparian Woodland &middot; Rainforest</div>
+        <div class="cap">One search follows the whole chain: illness, cure, herbs, and the biomes
+        to go and find them in.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  (function(){
+    var T = {/* themes:data */
+      cypres:      {panel:'#292317',surface:'#352d1f',line:'#4a4131',head:'#58382e',
+                    headtext:'#f1ebe0',text:'#d9d2c5',muted:'#a39b8c',accent:'#9c9050',
+                    tip:'#b8a45c',edge:'#c9a94f',onaccent:'#1e1a10',good:'#4e7b67',
+                    goodtext:'#eef3ea',radius:'2px'},
+      parchment:   {panel:'#f8f6fb',surface:'#ece7f5',line:'#dcd3ea',head:'#4a3570',
+                    headtext:'#f8f6fb',text:'#241f2e',muted:'#514b64',accent:'#5b3a92',
+                    tip:'#4a3570',edge:'#a48ec9',onaccent:'#f8f6fb',good:'#e2ebe0',
+                    goodtext:'#33502f',radius:'3px'},
+      winter:      {panel:'#0d2436',surface:'#143247',line:'#235071',head:'#10394f',
+                    headtext:'#e6f4fb',text:'#dbeaf4',muted:'#9cbbcf',accent:'#5cc9ec',
+                    tip:'#f2b134',edge:'#3287b0',onaccent:'#082030',good:'#17553f',
+                    goodtext:'#ddf2e6',radius:'4px'},
+      summer:      {panel:'#fce8ee',surface:'#f8d8e1',line:'#efc2ce',head:'#8c2140',
+                    headtext:'#fce8ee',text:'#4a1f2e',muted:'#6b3a4a',accent:'#8c2140',
+                    tip:'#7d1f3c',edge:'#e39cae',onaccent:'#fce8ee',good:'#e3ecd8',
+                    goodtext:'#44562e',radius:'6px'},
+      treebark:    {panel:'#f7f0e2',surface:'#ebdfc8',line:'#dccbab',head:'#6b4a2f',
+                    headtext:'#f7f0e2',text:'#33261c',muted:'#5f4c3a',accent:'#734413',
+                    tip:'#6b4a2f',edge:'#a9713d',onaccent:'#f7f0e2',good:'#dfe7d6',
+                    goodtext:'#3a5030',radius:'4px'},
+      understory:  {panel:'#16251c',surface:'#20352a',line:'#31503e',head:'#1f3a2c',
+                    headtext:'#eef2e6',text:'#dee7d6',muted:'#9fb094',accent:'#9ac96d',
+                    tip:'#e0964e',edge:'#7fa05c',onaccent:'#16251c',good:'#2f5a42',
+                    goodtext:'#e2f0e2',radius:'4px'},
+      cranberries: {panel:'#eef4f7',surface:'#dce8ee',line:'#c2d5df',head:'#8c1f26',
+                    headtext:'#eef4f7',text:'#1b282e',muted:'#42535d',accent:'#95202a',
+                    tip:'#1f4230',edge:'#9fc8d8',onaccent:'#eef4f7',good:'#d7e8dc',
+                    goodtext:'#1f4a32',radius:'3px'},
+      ink:         {panel:'#16181c',surface:'#1f2227',line:'#30343b',head:'#0d0f12',
+                    headtext:'#e8eaed',text:'#e2e4e8',muted:'#9aa0a8',accent:'#8fb3d9',
+                    tip:'#d4b66c',edge:'#8fb3d9',onaccent:'#0d1117',good:'#1f3a2e',
+                    goodtext:'#9fd6b8',radius:'4px'}
+    /* /themes:data */
+    };
+    var box = document.getElementById('demos');
+    var btns = Array.prototype.slice.call(document.querySelectorAll('.tswitch button'));
+    /* Light or dark, worked out from the panel the way the kit does it. */
+    function isDark(hex){
+      var c = [1,3,5].map(function(i){ return parseInt(hex.substr(i,2),16)/255; })
+        .map(function(x){ return x <= 0.04045 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4); });
+      return (0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2]) < 0.5;
+    }
+    /* The mark is two-tone and sits on nothing, so the colourway has to suit the
+       wash: the pale one on a dark page, the warm one on a light page. Bark is
+       left out here on purpose, because its bone antlers measure 1.6:1 on cream
+       and all you see is a hornless deer. */
+    var MARK_LIGHT = 'data:image/png;base64,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';
+    var MARK_DARK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQEAAAEsCAMAAAD0APYnAAABc2lDQ1BJQ0MgUHJvZmlsZQAAeJyVkM0rBAEYxn8zS+tjtcJBcZi0nNCiFheHla9aDrurLC67szO7amd3mhlJrspVUeLi68BfwFU5K0Wk5CxH4sI2GqN2U3vwXt5fz9vz9r4PiPGcrJlVQdDylhGdCEtziXnJ+0ItbTQhMZiUTX06Nh6nYn3cITj9psfZxf+qPq2YMgg1wIisGxYIk0BkxdId3gZa5GwyDcIp0G3MJeZBuHX0lMvPDmdc/nLYiEdHQWwEpEwZp8pYzhoaiEEgoOWW5d97nE98Sn42BnQA7ZhEmSCMxBRjjBKij2FChOihn176oII/+OOfoYCETAGdVQyWyJDFohuJZUwUJFQMFBRyrDr5/83VVAf63e2+MFQ/2fZbJ3i3oLhp25+Htl08As8jXORL/sIBDL2DZ7OkBfbBvw5nlyUttQPnG9D6oCeN5I/kAURVhdcTaEhA8zXULbiZ/c45vof4GkSuYHcPulTwL34D0zZoFw8tgzQAAABgUExURQAAAMOhfeLVyMyphNN+JPHr5sqieLWnb8OhfcOhfduomduDJuDTxn19feDTxt56Hv//AP1+fePes6+tqrl3dv8AAPz7fdN+JNN+JLhxJeaWHcSigNnGsn9/BcelgdSAJWCMYGQAAAAgdFJOUwD9+/37CxkKoF8O+54CYRMBAggEBAECpl4EDlX/Ap1dyvrtbgAAGXFJREFUeNrtXQlD4yoQpkagwaYhp21d9f//yzdDegQCuQDb+uS93XXdquXLMMc3B4T8rb/1t/7W3/pbf+tv/a2/9bf+1t/6W8+/KC0prDkvpLSgf4D9Qgk4/1nJ8RdW4iIIvwwA+H+/3+32dNYL97j/3wYB3b3g2tGJnVHACV6msJK/SgI6ABQETgyyRl5f9wIQtL8GAUHK68ZedoSUTqRuACAE8rcchKoo97eNvbhtYknoS/+FpJS/5RD0Hy2KtwOBSkdgX7a/B4H+xpzKED67f9Ghan8LAvuZCNB5L3w+PaAj8FI6NpaRUkeg/C0IZDMfbWbKwC9BADZR7gwE7OawNWWA/hoE6G6mHihNTfgrEMgsCJSzNOFvsQWZYeNwY/8vBOgAgRKsg8Mh2hkIFL8SAeo63hYEfoUegOe90xEgFXXRY8YLHx0AeMdtM0cP6IqQOA6B6Tu+UGcQ+fTGcCYCJRGPvTW1j5YuRWDvkIHBC0EG7oYAFVQAtd1OE3rTdB48SNPRw4NhtYUDYbkXAtfn2o5GvPh+51CflbEvakdAmDbjrk6xwOzGqBqCnMbFZNEl5AAcAuqi0oxDsHcqjPjmC/hapGvdLllfYvdkTGWbfh68XNBZh+DFdVx+wHz3N2dfRU9id1MImPsqXKbVOATlfUSAiqr3ll3uG9URoAsOgYsmpUYMjd/3LopQfyMOZYSfu71qFIGSml6O/cHSMtOhetnLeyFAp9Vx2zfdYzIAan9mZFy2xmnZ3UsNUN16U2IT2orIeQi0g7iwcskAMUVA3MkQGIrLhUBPtkcRaAaHoLAfq8J4IWjhuwQFzVwEeo9270YA7cos7TaIoNFxuldYRGecgr6J240gMDCFjtdiHm338vIg3EBpIECsCJSaxnIlwQYm3mEJS9Ntuis3MAOBok9lgONC5iVCnR5xdnWx+0zavRBoZ6TuRP+R7Yk7MBCmCBRUWtWF4QyNFhn8cI7P+iy0U+tEoCxN7bavhFUJVIMzsCf3CooGkrsrJ2z3js4lSF3xPjWpoU5f0DsisJvSSFQ7BJUr1h08WOBd5iCl4sf7cV+lcSaHXqz+lp1s5gAAl+dE6QAAWtF7EpuVrghMTVgUmhawiiscbYtk2/z8TJABAC/3rSWkg4KPStsjvrld/822g21VpVWy6bAoCE/Ffjc8A/fNE1CD3gdd3/b2r1c5DEM9qihkagGAmkVBWWV6H2flSzN638q3Qb2D9kg0G2+l8ko6fK4uosECwL2i4pFEJ6YG0HOnWVXolkJDR8IrSsRjuP+hb9lV1NHdy0yo7prjeVGEeFG0KkOg8x1SADhYNF9etBe17R9tJq2EEGVZ4kvhI8dLAYDi3hlzPKymK7PvDLkZ6BjuEHKd1v3b3KbSChVKwP0zZVRmA+kEDOC/4aHdnx+/Wqok+sWOAD778vZi+/6V7a3IA6xK7F/mrl23pl617y33q/fiMatgf2phNFA9TEfQ/h4APFBThekV/cTC5NvDAEDspjquADxascTPqgKVg6/o/xcCBKASD9gd90MQoAasKvKQy+G2hFWAD9xY2F5b36I9/V1XgFI9KgZUNCoW2O/6K+D296Uq2Hnksknat9C0t3Qnd8m6fFW376p6xrLZhrbAA2CUW4ou2Ln9Dn+Wlz/7iOGny/6ny+cpmYY0D7x5COgFF5wJduT1Z6D4q3yK5mpacFHPrDHGR9txIOX5keOHQheG7h/Fs7WWUyYEPH/GOCwBvzP8mIFUcPyLYDXPHmNHzTE/wv95E8oYdI+fs3RrX+l5faQCEWFMcam8V3SH4s549UPcZ3794BiALeO4HZHi5jez1hkUQS5kb0F4mrIOD8GynwAgzw+H78MBkJCNf3hImEhx9wkufbOJc202Xym/TA5gX9uNEhQFA4/fRHzM31/fYAWRAcL4x3Zjbn3GSjZfrFECybYXVLYp605I5CNweMf9v72+vR5O5OSlUBoQ4O5Zb5ZDkGxht4zUKaBxFSD8HI+qBPNTjgC8vqIYvMJJyD1CggY2kKza/hkCgUoAROh2ajablBFRRFUC72r/rx0Gh9zjh3ElwJvVK9mknKIUJX1YNtuoMpDL/ApABwEhn6u1YMY2HgCgzMNm69T4JskXGIRYfsOnPB1ebwgABu/gFXyuFoHUD4FkwywIbFBBZJGSYozkrzoCr9+yOa1NH7OtLwLgFvAhAghBpKNQ5Ie3PgAIQU6OfU15BHfx5xDArQ4FCZBhUsbJdvb04AWBw3HlMWBhEKitRyklvIniC3y/6gjA38jNIuZHeamcnmkKPDUh7hTM4fCbJF8iRmroSOTh1Vx4DDoE8hx/Hd7fD/MGXYVBAOIAGwIITQwEyPvbAIG3w+l4lpD8QNBhfs9nIsC9EUhgo01q8aqTLYnQU6/coSECsGEl98f8oM6I+sQM1VB7W0PcqCBWUUIEWIyg8NWCwCtK/bHpxQu5nOMsQ7KE+SPAJLHJUgLOUnCDeCL5wYLAKyIAIdJZSSIC3/msiKkm9dZXD8B5l4zZDKIgMvshBNAzzuv87WIlVMB0mmUOSYBjUOOzHqgCcBdp8HK5oxUBPPcIz/v1n5QMHGf5F5J8JBuf4KhzjIEdSzc6lugUBT8G8GBNf6jbMf7b4e0WMr6+57N5A5b6IgC6EDkBQx1i3Bi8WCbvP2g9OjJ8xffjXAQwuE23Bh+2NDZgjNaIZf9Lkw2vg58C3KcLgUPPVwQ3cTYCKKg1Sy8kcZ/pWMCWYYgBT1yDchuBKwIEbABcEOiHCguoo+zKbCIP/gF859e229kCi6i+vCZtesVw+yGjWEMXAk3fU1LB0mktdw4JEvi1xFlED5ieUw68kycgkmMUi4AteHPJgIEAWUIfNllb1XXNtdLydAGBDBBkFaTIOZ77AhNNLA5ROIKA5i0rrzhfky3OCsiW1SACsAE+30gkVwcQUmtXEj4OS+o6Bac3EwG/4LwphFzgLSl2VN6SsCJSvcCRHFwIfL++6R5STvybs0W6gDhPP4/xZ0+7ZeDYg+bsJfvnU1sb/zUCwUUbRlxOWwA77iGg6OMQCxiURdowftuMUxN+6wgcAkiAQoAu45BYVCHAagG7DMBnIBDSWbNTkJ9ZLGJQOt44GgDI+MhTbqGIEIE+caLComOQH9oIsoRBAVXAZBbtIOQ5PldLXAAh4ftJQyBccUlB2iUMCmpDUseZGiKBAYaKidzKkOC5XxcZTzMo9SJF0CXR4lhBtfO394OVJ+zHRXNZUjJvcpdcxiEhBCwOAqTjQF8HpwA++X66IgCv+Q54KUaliPClOSTWREDg1O3w7e3NQhMe8ks+WdUT5HdEABbIQNNE8QVtjsCVILoggPKQk4C9yXIpAsoxKn7KGz6LQH01EYCGLAI+gJrQxTKgageyWKfAKgKnzzMCWFwWFn++BoEYjpE1WXbRg99nprxLIh9zEhSBbHk+QdHkWRxraDsD358nqUj00DrgzKKuSq2mlDSBCyekIyhU7o9UVPn7tzctYkGgWZNVA1XQNEXwKkqLMVBZY0iSYtL4O+ckUDhghMer6gyrwLUDOfm8lFHqAcEBcsY3+uAzMADFEookdsbs2KWL3m4LJeCkJKCLm04ywqiS9fUFPIJ3fDq8awhAkBChVElDoFlbZZNsPkToXoyuRAiqaN7fX9/fv6G4Ps9J5LVSDXT5Jha8lkwd+CMGyBAmH6+VUzEXK9ZXFyQpz4KLqDxdoy5ssznJ6KNaxPpCK5VLvO+8oRDDCdKNx0plQLJEwhSkLMuKlh2PkNNiR9UMhquN1volaSt8iowwe+6PgGxrXlfjHW5cxLkzmHvWGAFd1GShPRSJiU1tVfHmOjFrsewPe0WXZytE1/gIv2NbLPb9wVINgOLc+Re8v0sUntWWKpnKfK/J4loHpKv5D7veSMNESBQatiRj5uw/8UVAlSZNLuxxUyAQGUolSCim8OtA6kqp/E4B2NKPeQcRUQBBEEEdceZbbKpOAf8hXYwPS4GA1N5qAynB4IKmhXoaKIHxL7sHW5D5uUTtIoekOw3Q8tmVM0EVh6iUtWDd6j4lLh+zTqme/xn/kfcrf0D/+FVZJqrIkHgPSFmYrbi0va4t4sr4ud8+3XqXmW7TypuxytAtX/pGzioBDSeWxPHOjLJugsD5U5x3fxdqsAA7vwL+Ne3qKheVErq7EKvaPzAqeLr4UQy+wJwk8KV6xM8fOcxs4tt9JYL5pR/JukO4rEh48RdMt+IGajzOeIBGqNFZApsYC2UgFD+0nqO58/oIlbkK0Qd0jwWlJAGJ4vQreToMoP9MBsoXNJCExSrvJwMhKEPW8K62dSEI98YsDXs7x2InLaKin8+QhdMEyrDgqKTJB5tc9v/v378X+HU/DLDXMCB119TY1alaN9zu2s3CJ8llMiBAkNwLgTRwTZnkvGuMc3lI8Nyvm/53HY54RwRwLEEE8rJytv9oz7338f2OAQveaygL4C6cAbOGAOgB+ODfPXWhqiiLkNeF8NaFwL/+Y0/ubwwwOmqi5HJHFAHo/04TPoD7pBRBFiOJIbaTkd99xV+bxCIjIDAVKHWn4d/9IcBCexm+82o0WlYnP7mYwfsjgESRDJ7OnkhkJY8jA+AYR6gvzmaw+He3Apo9rIIXt82p6XiYSDpC9/2cTE7yQCRBeASCjJB6dgQ2z4VA6OCo8qts+nEE6uAy8GwIiAgIiKc6BWUEPSCeSBNuIuiB9plsgfKISHAE+FMgcB5HxMLfYlk8hQwon1RRpTRCoS9PnwABVdvG4lxdJZ8AAVVApO4woFEKXR89lZyouaWqpI3GuaJYPDwCW1aJeJedqNmyD44Ac90QHyo0CqIIonEoihuLeYfFJ824NwJJEo9HARFgRdRbrCrreOjFRxUu5YmjT2JExJZaY08B+FB1lVGMivKEo95fARNWPr2K3vGSkTN7uY1wDpQnHLu/rCCpFwLQFw/1tBUr2DYCAnhpQVEUUS/+EjL1ekhtxrp7HqKwLR8/cJtT5hMfqnNaX1soAqsCVU/clXrA9XDx5EB4xAYqp33WVKxiwRHAsWRY7sOiXnDGPTqg4D22FwTK4GSDGslF0u6GMyULPAoGpUeA2D8FcPOiCI5Ao+5HUk0OH4w3EYMDn3Zodp011AQ1B11/4eWKs3ObRZSBtdB98+EhBLwurj0sQS0iqoHbTEslB+rCqxhhAqvS9Vex9er8snUdHO78AMWkVt///EKlmBUxzsFm9WyItC6vUw+rkBYRY4LMcNeQLogSKjb1WmWIQlBc+SuehbOIyflio8SMQ8EAtyICW7barU/SOCkYnMJEhzWvSJvDTxSB7SJ0SK63iFj7f+7ZbypZBUQAnIHEGo5iM2wRfl7Y6ne+vXpF3lMWDNkq7G+quwcy+JCU1U6BKvltrrPJg1nElLjjTSTPsjo0W8RWsn14JeH13TQUJTcJkSZJsRnGWfu/xbA87DwOsZY01SrfGwzmgiDwJcYyWom6CjJsfeH62xnRf2d9exCgKKG763LsDfXj0kBkUbv2CKP72lwLv7MgyUigH+lEMkNBEEohZkB1kkyshEAdg9t7qUMoQxUZjzP5Ie8+zeGe8S91s3S6UhumvdQ+ZLhS4g3BVjQTCCBKMhACqit/y1AMVgqwftcC9Y6QVGQ81SEMJ6UMcgyy803rqkplHc+DQcytA6QhsS79tcCUhZuWpZzNjPB1CDDNTeWmZV3apoNTV7LyYzP6VYpJLQLmjZRmEau8WnOyNu/uLhqMJZh/h4m61ktsv8YSs0oDF0EmaZNtT7m2KzIoKnEitDwMTbXJHTD3y93caD9WTM2w6fpCrV+oTkEROCpKsevia81UaWpmOKG5uZt0hklFwXgFv2bPQ7r2Egg1Py11IcBIG6Se6jo2EH9yIfli9hyvITMQyM5jjDSCe270de4nkZcHLNjWIgahBppnMH3s1mMN35MWK4arDxCAMYf0Sj7AkLeaw91cc4mYq2al3XgfYrULoRAAzun23ZWnmZHtZgUC3DaVK9MqgNjMlII5cSETNg+5m18bhCbt4YvngC92awea0Jmsn6cKVF8Z1Ss9hicI/h6o2rzvBSnfkC+N8efeMyGZnAWuIsq1DFFBrYxZGqL3qjIELPlQ95QuQ8DwiHzvQwZjaCJArDokCALmNVOJ4juWubW6VzzKxmVyhhAAR1iYNzDROrUhIEI4RGYAAn7GcVmxaTL7Fjo5K2bA+UPU8qQsp8CfLIR6unRwtzTHwQQLruFDNTB3ji7YxDkIDMZCWuQS1Y//wLphfbkys1UxnzvGC9gCt/hZEGhawaIgkFmhbUVN0mQBnzPfKFE644ShazoodBh8Hfaj+xcVWDptki4ym6sMVYBSL1E8006nDQE28IoSsFs8wCkYdF12vN9siwgiUPNl85AmnQI7AtWAdQihCbNhFVyn2fhMsmT5daQUf+a4nrUhgLmIbXgEmtqFQCVnMWYIwGKmik/JV0osVZSFmdxMgkztE0Oz1+mBOcdVvQmxLls/9r1t/oAStFQ7scnQc1qRMS1qBwJYtjRtuDer6v/rdpyUTqxyJU3POBnGD+su1hgikB5VsMunB1RghE7XVDPTMaYg2VIrAlmVGggwXwQyW8DRRcjZDASwsHxVC1AhszF7AFdYWefO1Hpcpe6H98yeFmRYOqGIB9XeOJmzScV66Gk6FmlV1uY6wzNOBjxCmGnu52w4NKSyiUE1mLxd//NHBmi7pnLWugvfyQAN3mOidlZhJ964vt743UVcjtQzO+eSFpp2DoHANVegb63BHPiEKQBOoPK5YkkUbsbMOXuImQiEOAUW+g1b/GgzQeklX571XMxdH+CcPcQ0wQyhCRnJhwioQllueB9WXqjx88VGmOOtvUoI3teHjgD1rqThQ1MAolWRNpuIjgEo6ScElDsjcNfkHdr0o6rOH5C+7sDQFKj6HDqV3LBlypaGpYXrhzjLQ7TYIIBHZDWGHe+bTTIkyabyjUucHT6qiMZuDHrGK0lS3/oBbslgoHahTYfAlBBUVeHL0rqSoh/2yay0z9wEiIy4pWYEjyAkZOnkFVRKYYjQRPUVATvvRPvHMwAC1pK9sykW0/MrQWN4IsCltPa3KL9UOEBL+wjwAAOJLJExHZNQ7bW+FX3SkVF3s6/sljcIgoCFfmXtrTRyarC5tyZqGntGPdm4p3T3eo+8c0bCSkCzG6M5UV94oVI8ECD21gY8YfZvnGVX2QyAgM3379UIT0/rSbbetb3MykcqRSBdyquHQO3LEA3zRf2UfD1VX4jCSj2LGjMpHAjYA69bK49/xoQOKvhR+D4/+6GjGNUFgWbK234G5g6b8aKXOAjoVRmQChFkTBec06xeMpBZGTNQybRxiO759f4IFEMh35oquAYZH63y1+rK10YnlgxK4vzGHa2jSjV9ERikcdX8s3qY3xhLcoEPmflHqMNzAG6htFeInD3jrhRa+PYWbYz6ESj/K8x7DsbrrRWbwfz7WyxC4La0UK6plq9DNphTisZNWroRO8xn9J+vPY7M4n8GbKAYiUvSYTUMtwvLSNMTkuaf/nchD4kKuMgqc93KBCsT3l2HXDdDycaVBpZktO9rw/zvIR5m1MO3Uk0a4i4qkvYcD0iB60K0JCGs9jyQdNinmARwOCeRrw0EsMXCrtabdtgIrp0eT8+QEm6p5omsCKS5p3HjQtVU03g3r4lBn6JSMDLqJCI9cTXDw3XrwxBXkmcDB3UjaNGQiPO4dO2j3KFiQl05yl9Qa7HamzEzj1mACokJBPRcNMQE7URhNI4HSqwzAfyFoBo2vcLpymJP5kv0JsepTfDC0SShBMhzoT0YaAISpI/GmbVK9Z9Wzgl0C/5l5XQWl5Q5rodPYt/c4cwbz5Q4Thz0IZyDImu8b5jS9Uzi5EkiTN5QFfJzgIMONxt9iKGqL2tXmaShOlzihxDANOA8xdu21rxysvF34cwGH1WxK+LZAq4nIRcwHbbLs9EiFjxwfIB+YR0JANroCKSCLTivtlguQISk+KIkLAs34on3qfJpZ0CHoDj3qw+cAm8E9Ix6sL5S6yFoWK/PcCkdUVvjZVWBFMAeRL/Vb5A5P3daLiX3LLUHma8fa0ILtYVNnPhI6AgsDkTh/vBBSXIS4t4proesgGodC4FepAcnuFmqxChaqY05PY95XzRQZUa8Emtyd/8UqENQrymFMqoig+SQVHxgNkCSKPdX3MpRVtZmNqqiY1iVHaAROOm3QldRzAHXEFgZ1XCzIWuhZzV2u0jPTnEZDQGtr2gd0z/IO6WFNwKV1oYTiy9kNwRwHOTqd12ZUhCAM9TbcOAYFCLWrOqLR+zhz0vDQw6RRVPtHdu+u9ZkMRHwHOVQSaPvYRNgQozKH9y0YRS/8GrJFMSVV9ZPgyBIroeSfioRK7bCI1B2eiBZ5xGPHlv/VOrAWosoV1oVOCOpC2o9H1lDDc0VQncXkvU8tiwOX8gwD//B/H35VvY9zCQNUPZP+jMQInnGTUBUP3ttYF1ljTcCTVZcXUOc1FbHCI8oDEvigTiYm4/ZeVg0TFrvfAH9j2TSSThdkITIHSjJOhcMnfvfHny1sksrwvoXIjjo+jK7gqGPlHFCHx0B8olXTqiRguqaARomt/lcC9PRPP0Q/BjqO0oIknhVM549EQycPd2TC2pcsku49L9dTcZ5S8nf+lt/62/9rcdZ/wGRZXPtx2eXvwAAAABJRU5ErkJggg==';
+
+    function paint(key){
+      var t = T[key]; if (!t) return;
+      var root = document.documentElement;
+      for (var k in t) root.style.setProperty('--t-' + k, t[k]);
+
+      /* The wash: the page stops being cream-and-green and becomes the colourway
+         itself, so picking one shows you what you would actually be wearing. */
+      var page = {
+        '--cream': t.panel, '--card': t.surface, '--edge': t.line,
+        '--ink': t.text, '--soft': t.muted, '--green': t.accent,
+        '--leaf': t.edge || t.accent, '--bark': t.tip, '--on-accent': t.onaccent
+      };
+      for (var v in page) root.style.setProperty(v, page[v]);
+
+      var mark = document.querySelector('header .mark');
+      if (mark) mark.src = isDark(t.panel) ? MARK_DARK : MARK_LIGHT;
+      btns.forEach(function(b){
+        var on = b.getAttribute('data-t') === key;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){ paint(b.getAttribute('data-t')); });
+    });
+    paint('treebark');
+  })();
+  </script>
+
+  <h2>Install it, in four steps</h2>
+
+  <ol class="steps">
+    <li>
+      <b>Install Tampermonkey</b>
+      <p>A free browser extension that runs userscripts. Get it from
+      <a href="https://www.tampermonkey.net/" target="_blank" rel="noopener noreferrer">tampermonkey.net</a>
+      and pick your browser. Chrome, Firefox, Edge, Safari and Opera all work.</p>
+      <div class="note"><b>Chrome and Edge only:</b> you also need Developer mode switched on, or
+      Tampermonkey will refuse to run anything. Go to <code>chrome://extensions</code> (or
+      <code>edge://extensions</code>) and flip the toggle in the corner.</div>
+    </li>
+    <li>
+      <b>Open the Tampermonkey dashboard</b>
+      <p>Click the Tampermonkey icon in your toolbar, then <b>Dashboard</b>. If you cannot see the
+      icon, click the puzzle piece and pin Tampermonkey to the bar.</p>
+    </li>
+    <li>
+      <b>Make a new script and paste Twill into it</b>
+      <p>Click the <b>+</b> tab. A starter script appears: select all of it (<code>Ctrl+A</code>,
+      or <code>Cmd+A</code> on a Mac) and delete it. Then open <code>twill.user.js</code> in a text
+      editor, select all, copy, and paste it in.</p>
+      <div class="note">Notepad, TextEdit, VS Code, anything plain will do. Do not use Word.</div>
+    </li>
+    <li>
+      <b>Save</b>
+      <p><b>File &gt; Save</b>, or <code>Ctrl+S</code>. Twill should now be listed as enabled.</p>
+      <p>Go to <a href="https://www.wolvden.com/" target="_blank" rel="noopener noreferrer">wolvden.com</a>.
+      The <b>Twill</b> mark sits in the bottom right corner of every page. Click it, or press
+      <code>Alt+K</code>.</p>
+    </li>
+  </ol>
+
+  <h3>Updating later</h3>
+  <p>Same four steps, over the top. Everything you have saved stays exactly where it is.</p>
+
+  <h2>Everything in it</h2>
+
+  <h3>On a wolf's page</h3>
+  <div class="tablecard"><table>
+    <tr><td class="n">Genetics</td><td class="d">Hover any gene for a card: what it is, where it
+      comes from, what it pairs into, whether it is lethal. A coloured mark on each row says how
+      that trait is obtained. Built from 251 bases, 194 eye colours, 2,370 markings and 28 mutations</td></tr>
+    <tr><td class="n">Lore</td><td class="d">Your own fields, in sections you name. Rename, reorder,
+      add and delete freely. Wolf-link fields cross-reference both ways, so if one wolf is bonded to
+      another, both pages say so</td></tr>
+    <tr><td class="n">Collection</td><td class="d">Notes the base, eyes and markings of each wolf in
+      your own pack as you open it, counted against the full catalogue</td></tr>
+    <tr><td class="n">Pedigree</td><td class="d">Keeps the family trees the pairing check needs, the
+      last eight you opened</td></tr>
+  </table></div>
+
+  <h3>Across the site</h3>
+  <div class="tablecard"><table>
+    <tr><td class="n">Den Manager</td><td class="d">A card above your caves: care, breeding, pups,
+      roles, old age, trades. Sections fold individually and unused ones switch off</td></tr>
+    <tr><td class="n">Tray</td><td class="d">Pin two wolves, then <b>Pair</b>: what the pups could
+      inherit slot by slot, plus shared ancestors. <b>Compare</b> puts any number side by side</td></tr>
+    <tr><td class="n">Wardrobe</td><td class="d">Custom decor as extra layers, which Wolvden's own
+      list has no room for. Save a look and wear it again. Each slot says what that decor is crafted
+      from and whether you hold it</td></tr>
+    <tr><td class="n">Item Lookup</td><td class="d">A magnifier on any item: 284 recipes, the
+      catalogue, or the trading centre, already searched</td></tr>
+    <tr><td class="n">Shopping List</td><td class="d">Items you want are tagged <b>buy</b>, items
+      you would trade away are tagged <b>in stock</b>, wherever they appear</td></tr>
+    <tr><td class="n">Store Front</td><td class="d">On Manage Your Trades: what to restock, and
+      which trades have offers waiting</td></tr>
+    <tr><td class="n">Notepad</td><td class="d">A movable notepad on every page, <code>Alt+N</code>.
+      Pictures by web address, and a note can be pinned to a wolf so it shows on their page</td></tr>
+    <tr><td class="n">Achievements</td><td class="d">All eleven categories in one place, and
+      unearned ones can be pushed onto your goals</td></tr>
+    <tr><td class="n">Hide users</td><td class="d">Collapses posts from players you would rather not read</td></tr>
+  </table></div>
+
+  <h3>Nine guides, kept offline</h3>
+  <p class="say">Pick one to see what it holds. Every example below is the guide's own output,
+  in whichever colourway you chose above.</p>
+  <div class="gchips" id="gchips" role="group" aria-label="Guides">
+    <button type="button" data-g="herbs" aria-pressed="true">Herb map</button>
+    <button type="button" data-g="scout" aria-pressed="false">Scout map</button>
+    <button type="button" data-g="rates" aria-pressed="false">Pass rates</button>
+    <button type="button" data-g="ills" aria-pressed="false">Illnesses</button>
+    <button type="button" data-g="prey" aria-pressed="false">Food map</button>
+    <button type="button" data-g="bonds" aria-pressed="false">Pair bonds</button>
+    <button type="button" data-g="battle" aria-pressed="false">Battle map</button>
+    <button type="button" data-g="friend" aria-pressed="false">Befriending</button>
+    <button type="button" data-g="roles" aria-pressed="false">Roles</button>
+  </div>
+  <div class="gpane" id="gpane"></div>
+  <p style="margin-top:14px">28 herbs and 21 medicines, 18 illnesses, 61 prey, 146 battle enemies,
+  every befriending move against every disposition, and what each role runs on. They are joined up
+  rather than separate tables, as the fourth example above shows.</p>
+
+  <script>
+  (function(){
+    /* Every example below is a slice of what that guide actually renders, read out
+       of the running kit rather than written to look like it. */
+    var G = {
+      herbs: {
+        name: 'Herb map', right: 'filtered to Rainforest',
+        title: 'Every herb, and everything it turns into',
+        say: ['Twenty-eight herbs, the biomes each one grows in, and every medicine it mixes ' +
+              'into. Pick a biome along the top and the list narrows to what you could actually ' +
+              'gather on that trail.',
+              'It reads the other way too. If you are looking at a cure, it tells you which ' +
+              'herbs go into it and where to find them.'],
+        count: '28 herbs and 21 medicines',
+        rows: [['tabs', ['Everywhere','Grasslands','Rainforest','Swamp'], 2],
+               ['t','Aloe','3 biomes'],
+               ['r','Ringworm Salve','Ringworm'],
+               ['r','Cure-for-All','any illness'],
+               ['r','Rich Healing Salve ×3','Restores 50 HP'],
+               ['m','Desert · Swamp · Rainforest'],
+               ['t','Arnica','every biome'],
+               ['r','Mange Salve','Mange'],
+               ['r','Cure-for-All','any illness'],
+               ['cap','Herbs that are hard to find anywhere else are called out, so you know when a biome is worth the trip.']]
+      },
+      scout: {
+        name: 'Scout map', right: 'grouped by stat',
+        title: 'Who to send, and where',
+        say: ['Thirteen biomes, grouped by the stat each one is scouted against, with its ' +
+              'difficulty and how many herbs it holds.',
+              'A scout who is wrong for a biome unlocks less of it per trip, so the grouping ' +
+              'answers the question you actually have, which is who to send.'],
+        count: '13 biomes, with the herbs only they hold',
+        rows: [['m','Each biome is scouted against one stat, so a scout who is wrong for a biome unlocks less of it per trip.'],
+               ['lb','AGILITY'],
+               ['t','Swamp','CHALLENGING'],
+               ['r','14 herbs grow here','hard to find elsewhere'],
+               ['m','Guaiacum · Turmeric'],
+               ['t','Taiga','DIFFICULT'],
+               ['r','9 herbs grow here',''],
+               ['lb','SPEED'],
+               ['t','Deciduous Forest','EASY'],
+               ['r','17 herbs grow here','starter'],
+               ['cap','Retiring your lead wolf resets the map to your home biome and up to two neighbours.']]
+      },
+      rates: {
+        name: 'Pass rates', right: 'all six pairings',
+        title: 'What a mutation pairing gives you',
+        say: ['All six combinations of mutation, carrier and non-carrier, with what each one ' +
+              'actually passes to a pup.',
+              'Every genetic mutation passes at the same rates, so this one table covers ' +
+              'Albinism, Brachycephaly, Hereditary Cataracts and Melanism alike.'],
+        count: 'the whole picture in six rows',
+        rows: [['t','Mutation × Non-carrier','never a mutated pup'],
+               ['r','0% mutation','15% carrier · 85% non-carrier'],
+               ['t','Carrier × Carrier',''],
+               ['r','10% mutation','10% carrier · 80% non-carrier'],
+               ['t','Mutation × Mutation',''],
+               ['r','20% mutation','10% carrier · 70% non-carrier'],
+               ['cap','A carrier shows nothing on its own page unless you have had its genetics read, and it can still pass the gene either way.']]
+      },
+      ills: {
+        name: 'Illnesses', right: 'searched: "cough"',
+        title: 'The illness, the cure, and the way there',
+        say: ['Eighteen illnesses: what each one costs you in health, whether it stops breeding ' +
+              'or spreads at rollover, and what cures it.',
+              'It does not stop at the cure. It names the herbs that cure is made from and the ' +
+              'biomes those herbs grow in, so one look answers the whole chain.'],
+        count: '18 illnesses, joined to the herb map',
+        rows: [['t','Cough','−2 HP'],
+               ['m','passes through breeding · 21% to spread each rollover'],
+               ['lb','CURED BY'],
+               ['r','Cough Cure','Goldenseal, Kava, Pineapple Leaf'],
+               ['lb','THOSE HERBS GROW IN'],
+               ['m','Deciduous Forest · Grasslands · Coniferous Forest · Riparian Woodland · Rainforest'],
+               ['t','Cystitis','−2 HP'],
+               ['m','cannot breed · slows regeneration'],
+               ['r','Cystitis Cure','Dandelion, Kava, Redwood Sorrel'],
+               ['cap','Every illness doubles mood loss at rollover, on top of what is listed here.']]
+      },
+      prey: {
+        name: 'Food map', right: 'filtered to Tundra',
+        title: 'What your party can bring home',
+        say: ['Sixty-one prey, grouped by size, with the trails each one is on and how many ' +
+              'uses it feeds the pack.',
+              'Filter to a biome and it shows only what is actually out there, which is the ' +
+              'difference between planning a hunt and guessing at one.'],
+        count: '61 prey, from critters upward',
+        rows: [['tabs', ['Everywhere','Grasslands','Tundra','Glacier'], 2],
+               ['lb','CRITTER PREY'],
+               ['t','Gull Carcass','4 uses'],
+               ['m','Tundra · Glacier'],
+               ['t','Hare Carcass','4 uses'],
+               ['m','Grasslands · Deciduous Forest · Mountains · Prairie · Coniferous Forest · Desert · Tundra'],
+               ['cap','Switch the biome and the whole list changes with it, largest prey first.']]
+      },
+      bonds: {
+        name: 'Pair bonds', right: 'at 50 territory',
+        title: 'How many pair breedings you get',
+        say: ['A pair bond lets a non-breeding male father pups with one partner, and how many ' +
+              'pair breedings you are allowed is set by your territory.',
+              'Put your own territory in and it answers directly, or open the whole table and ' +
+              'see what the next expansion would buy you.'],
+        count: 'from under 10 territory up to 200',
+        rows: [['tabs', ['Your territory','The whole table'], 0],
+               ['big','7','pair breedings at 50 territory'],
+               ['r','40 territory','6'],
+               ['r','50 territory','7'],
+               ['r','60 territory','8'],
+               ['cap','Disbanding a bond empties both wolves’ mood and starts a 30 rollover cooldown, so play with them before the next rollover.']]
+      },
+      battle: {
+        name: 'Battle map', right: 'filtered to Tundra',
+        title: 'Who you will meet, and what they leave',
+        say: ['A hundred and forty-six enemies, the levels they turn up at, the stats they ' +
+              'fight on, any trait that changes the fight, and everything they can drop.',
+              'Filter to a biome to see only what is out there, or go looking for the one ' +
+              'enemy that drops the thing you are after.'],
+        count: '146 enemies, variants and seasonals included',
+        rows: [['tabs', ['Everywhere','Tundra','Glacier'], 1],
+               ['t','Alaskan Tundra Wolf','level 1–25'],
+               ['m','fights on Strength, Speed, Agility, Wisdom, Smarts'],
+               ['lb','DROPS'],
+               ['m','Canine Claw, Canine Fang, Wolf Pelt [White], Wolf Skull, Wolf Tail, Scar: Ear [Left], Scar: Ear [Right]'],
+               ['t','Arctic Fox','level 1–20'],
+               ['m','fights on Agility, Wisdom, Smarts · Soft skin'],
+               ['cap','Traits like Group, Large prey and Soft skin are listed because they change how the fight goes.']]
+      },
+      friend: {
+        name: 'Befriending', right: 'every move',
+        title: 'Every move against every disposition',
+        say: ['Twenty moves down the side, four dispositions across the top, and what each ' +
+              'pairing does to the tracker.',
+              'Each arrow is 10%. A wolf’s disposition shows after your first move, or ' +
+              'straight away if you have the Body Language talent.'],
+        count: '20 moves × 4 dispositions',
+        rows: [['grid', ['','AGGR','FRIE','ROMA','STOI'],
+                 [['Bare Teeth','++','––','–','+'],
+                  ['Groom','––','++','+','–'],
+                  ['Nuzzle','–','+','++','––'],
+                  ['Raise Tail','+','–','––','++'],
+                  ['Zoomies','––','++','+','–']]],
+               ['cap','++ very positive · + positive · – negative · –– very negative']]
+      },
+      roles: {
+        name: 'Roles', right: 'what each one runs on',
+        title: 'What each role runs on',
+        say: ['The stat behind every role, from the three hunting positions through forager, ' +
+              'scout and the rest, with the rule that governs how each one improves.',
+              'These are the rules that are easiest to get wrong from inside the game, so they ' +
+              'are written out rather than left to be worked out.'],
+        count: 'every role, and how it climbs',
+        rows: [['t','Hunter: Stalker','Smarts + Wisdom'],
+               ['m','Proficiency rises by 1 for every hunt in this position and decays by 1 each rollover, so it only climbs on more than one hunt a day.'],
+               ['t','Hunter: Chaser','Agility + Speed'],
+               ['m','A wolf only gains proficiency for the first position it is assigned, checked stalker, then chaser, then finisher.'],
+               ['t','Forager','Speed'],
+               ['m','Brings back one or two herbs, plus one more at every 25 proficiency up to 75, so five at most. Winter takes one off.'],
+               ['cap','Stats matter more than proficiency or synergy, so levelling changes hunting success faster than anything else.']]
+      }
+    };
+
+    var pane = document.getElementById('gpane');
+    var chips = Array.prototype.slice.call(document.querySelectorAll('#gchips button'));
+    if (!pane || !chips.length) return;
+
+    function el(tag, cls, text){
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    }
+    function two(cls, left, right, rcls){
+      var n = el('div', cls);
+      n.appendChild(el('span', null, left));
+      n.appendChild(el('span', rcls == null ? 'r' : rcls, right));
+      return n;
+    }
+
+    function body(g){
+      var b = el('div', 'demo-b');
+      g.rows.forEach(function(row){
+        var k = row[0];
+        if (k === 'lb') { b.appendChild(el('div', 'lb', row[1])); }
+        else if (k === 't') { b.appendChild(two('gt', row[1], row[2], '')); }
+        else if (k === 'r') { b.appendChild(two('rowline', row[1], row[2])); }
+        else if (k === 'm') {
+          var m = el('div', null, row[1]);
+          m.style.color = 'var(--t-muted)';
+          b.appendChild(m);
+        }
+        else if (k === 'cap') { b.appendChild(el('div', 'cap', row[1])); }
+        else if (k === 'big') {
+          var w = el('div');
+          var v = el('span', 'tip', row[1]);
+          v.style.fontSize = '19px';
+          w.appendChild(v);
+          w.appendChild(document.createTextNode(' ' + row[2]));
+          b.appendChild(w);
+        }
+        else if (k === 'tabs') {
+          var tabs = el('div', 'gtab');
+          row[1].forEach(function(name, i){
+            tabs.appendChild(el('i', i === row[2] ? 'on' : null, name));
+          });
+          b.appendChild(tabs);
+        }
+        else if (k === 'grid') {
+          var tbl = el('table', 'ggrid'), hr = el('tr');
+          row[1].forEach(function(c){ hr.appendChild(el('th', null, c)); });
+          var thead = el('thead'); thead.appendChild(hr); tbl.appendChild(thead);
+          var tbody = el('tbody');
+          row[2].forEach(function(r){
+            var tr = el('tr');
+            r.forEach(function(c, i){
+              var cls = i === 0 ? null : (c.charAt(0) === '+' ? 'p' : 'n');
+              tr.appendChild(el('td', cls, c));
+            });
+            tbody.appendChild(tr);
+          });
+          tbl.appendChild(tbody);
+          b.appendChild(tbl);
+        }
+      });
+      return b;
+    }
+
+    function show(key){
+      var g = G[key];
+      if (!g) return;
+      pane.textContent = '';
+
+      var say = el('div', 'gsay');
+      say.appendChild(el('h4', null, g.title));
+      g.say.forEach(function(s){ say.appendChild(el('p', null, s)); });
+      say.appendChild(el('p', 'count', g.count));
+
+      var demo = el('div', 'demo');
+      var head = el('div', 'demo-h');
+      head.appendChild(document.createTextNode(g.name));
+      head.appendChild(el('span', null, g.right));
+      demo.appendChild(head);
+      demo.appendChild(body(g));
+
+      pane.appendChild(say);
+      pane.appendChild(demo);
+
+      chips.forEach(function(c){
+        var on = c.getAttribute('data-g') === key;
+        c.classList.toggle('on', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
+    chips.forEach(function(c){
+      c.addEventListener('click', function(){ show(c.getAttribute('data-g')); });
+    });
+    show('herbs');
+  })();
+  </script>
+
+  <h3>Accessibility</h3>
+  <p>Fishing colours are now given an upgrade for those with red-blind or green-blind color vision, or those who may struggle to see the ripple during fishing. Twill does not point to the fish, but merely acts as a colored pane put over the browser to add a little more contrast.</p>
+
+  <h3>Everywhere</h3>
+  <p><b>Eight themes</b> with a live editor, a corner button that can wear the mark in any of its
+  three colourways or stay a plain labelled button, three of the themes (Tree Bark, Understory and
+  Frosted Cranberries) drawn from Twill's own colours, and every swatch in every one of
+  them is yours to change, a <b>post composer</b> that catches the HTML Wolvden
+  silently strips before you find out by posting it, and <b>Backup</b> so you can carry everything
+  to another computer.</p>
+
+  <h2>Questions</h2>
+
+  <details>
+    <summary>Is this allowed? Will I get in trouble?</summary>
+    <p>Wolvden's rules forbid scripts that <em>play</em> the game: automation, auto-refreshers,
+    anything that clicks or submits for you. Twill does none of that. It reads a page you opened
+    yourself and changes how it looks, which is the same thing a custom den layout does.</p>
+    <p>That said, the rules are written broadly and staff are the ones who interpret them. This is
+    a real risk on a real account and you should decide for yourself. Anything that felt close to
+    the line has been deliberately left unbuilt, and the roadmap below names it.</p>
+  </details>
+
+  <details>
+    <summary>Does it send my data anywhere?</summary>
+    <p>No. There is no server, no account, no analytics, and no external request of any kind. Your
+    notes, lore and records sit in your own browser's storage and go nowhere. The script is plain
+    readable text, so you can check that yourself.</p>
+  </details>
+
+  <details>
+    <summary>The file is over half a megabyte. Will it slow the site down?</summary>
+    <p>No. Most of that is the offline reference data: every base, eye colour, marking, mutation,
+    recipe, herb, prey item and battle enemy. It is parsed once when a page loads and then sits in
+    memory. Keeping it in the file is what lets the guides work without ever contacting the wiki.</p>
+  </details>
+
+  <details>
+    <summary>Do I have to use all of it?</summary>
+    <p>No. Every module has its own switch under <b>Modules</b> in the hub. Turn off what you do not
+    want and it stops building anything at all, rather than merely hiding.</p>
+  </details>
+
+  <details>
+    <summary>What happens to my notes if I reinstall or update?</summary>
+    <p>Nothing. Everything is stored under keys that have never changed, even though the kit itself
+    has been renamed more than once. Pasting a new version over the old one keeps all of it. If you
+    are moving to another computer, use <b>Backup</b> in the hub, because browser storage does not
+    follow you.</p>
+  </details>
+
+  <details>
+    <summary>Does it work on a phone?</summary>
+    <p>Yes, wherever userscripts themselves run, which is the real limit rather than Twill.
+    Firefox on Android can run Tampermonkey; Safari on iOS needs a separate app such as
+    Userscripts.</p>
+    <p>On a narrow screen the hub stops being a floating card and spans the width, the tray runs
+    along the bottom clear of the corner button, and everything you tap is given room for a thumb.
+    Gene cards open on a tap rather than a hover, with a close button. There is no separate mobile
+    version to install: it is the same one file, which simply lays itself out differently below a
+    certain width.</p>
+  </details>
+
+  <details>
+    <summary>Will it break when Wolvden changes a page?</summary>
+    <p>Possibly, and that is normal for any userscript. It reads the page's structure, so a rebuild
+    of a page can stop a module finding what it needs. Nothing breaks the game itself: the worst
+    case is that a panel stops appearing. Tell us in Discord and it gets fixed.</p>
+  </details>
+
+  <details>
+    <summary>Can I use it alongside other scripts?</summary>
+    <p>Usually. Twill keeps everything under its own prefix and only adds to a page. If two scripts
+    both decorate the same thing you may get duplicates, so uninstall any older copy of this one
+    before pasting a new version.</p>
+  </details>
+
+  <details>
+    <summary>Why does Chrome need Developer mode?</summary>
+    <p>A Chrome change in 2024 means extensions can no longer run userscripts unless that toggle is
+    on. It is Tampermonkey's requirement, not this script's, and every userscript needs it.</p>
+  </details>
+
+  <details>
+    <summary>Is it free? Can I share it?</summary>
+    <p>Free, and yes. Pass it to anyone. It is made for the Society but nothing in it is
+    guild-locked.</p>
+  </details>
+
+  <h2>Future Journeys</h2>
+  <p>Twill is not finished, and the thing we are most excited about is bigger than another module.</p>
+
+  <div class="plug">
+    <h3 style="margin-top:0">A Society of Fur add-on, one day</h3>
+    <p>An <b>opt-in add-on</b> that connects Twill to the Society of Fur: guild games, event boards,
+    seasonal challenges and whatever else we dream up together. Something that makes the guild feel
+    present while you play, rather than only in the forums.</p>
+    <p><b>It would be a separate, opt-in piece, and Twill itself would not change.</b> The base kit
+    stays entirely local and sends nothing anywhere, exactly as it does now. Anything that talks to
+    the Society would be something you switch on knowingly, and it would say plainly what it sends
+    before you do.</p>
+    <p>If that sounds good, the best thing you can do is come and be part of it.</p>
+    <a class="joinsof" href="https://discord.gg/ZQDz8ANTUR" target="_blank" rel="noopener noreferrer">
+      <img src="data:image/png;base64,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" alt="Society of Fur" width="76" height="76">
+      <span>Come and join us on Discord</span>
+    </a>
+  </div>
+
+  <h2>What it will not do</h2>
+  <ul class="rules">
+    <li>It <b>never loads a page for you</b>. No randomly opened tabs.</li>
+    <li>It <b>never clicks, submits or fills a form for you</b>. No auto-explore, bump tools or
+      pre-chosen answers for battles and befriending.</li>
+    <li>It <b>never refreshes</b> anything on a timer. You must manually bump all trade, raffles
+      and chatter posts still.</li>
+    <li>It <b>sends nothing anywhere</b>. No server, no account, no tracking, no analytics.</li>
+  </ul>
+
+  <h2>Thanks</h2>
+  <div class="thanks">
+    <dl>
+      <dt><a href="https://grousehouse.wiki/" target="_blank" rel="noopener noreferrer">The Grouse House Wiki</a></dt>
+      <dd>Every fact in the guides and the genetics cards comes from there, written in Twill's own
+      words. Thank you to the hardworking individuals who have compiled all of the information
+      there.</dd>
+
+      <dt>Wolvden, by Lioden Ltd</dt>
+      <dd>A big thanks to the developers of our beloved game, the hardworking artists and the team
+      members that make Wolvden what it is today. This is an unofficial fan tool and is not
+      affiliated with or endorsed by them.</dd>
+
+      <dt>The Society of Fur members</dt>
+      <dd>Thank you, community members, for sharing your thoughts, wishes and general feedback
+      during development. You've helped our little community grow into what it is today, and this
+      is us giving back to you.</dd>
+    </dl>
+  </div>
+
+  <h2>Come say hello</h2>
+  <div class="cta">
+    <a href="https://discord.gg/ZQDz8ANTUR" target="_blank" rel="noopener noreferrer">Join us on Discord</a>
+    <a class="alt" href="https://www.wolvden.com/g/society/991" target="_blank" rel="noopener noreferrer">The guild on Wolvden</a>
+  </div>
+  <p style="margin-top:16px;text-align:center">Bugs, ideas and requests are all welcome.</p>
+
+  <footer>
+    Twill 0.22.0 &middot; by
+    <a href="https://www.wolvden.com/profile/145906" target="_blank" rel="noopener noreferrer">Fallowe</a>
+    &middot; an unofficial fan tool, not affiliated with Wolvden or Lioden Ltd
+  </footer>
+
+</div>
+</body>
+</html>
