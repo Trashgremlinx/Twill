@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.30.1
+// @version      0.30.2
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -52,7 +52,7 @@
   const SOF_DISCORD = 'https://discord.gg/ZQDz8ANTUR';
   const SOF_GUILD = 'https://www.wolvden.com/g/society/991';
   const SOF_PROFILE = 'https://www.wolvden.com/profile/145906';
-  const VERSION = '0.30.1';
+  const VERSION = '0.30.2';
 
   // ================================================================== storage
 
@@ -6811,7 +6811,7 @@
 
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0', text:
-        'Fishing colours are now given an upgrade for those with red-blind or green-blind color vision, or those who may struggle to see the ripple during fishing. Twill does not point to the fish, but merely acts as a colored pane put over the browser to add a little more contrast.' }));
+        'Fishing colours are now given an upgrade for those with red-blind or green-blind colour vision, or those who may struggle to see the ripple during fishing. Twill does not point to the fish, but merely acts as a coloured pane put over the browser to add a little more contrast.' }));
 
       box.append(h('div', { class: 'dk-lb', text: 'Colour vision' }));
       const sel = h('select', { 'aria-label': 'Colour vision',
