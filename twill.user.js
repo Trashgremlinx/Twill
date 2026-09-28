@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.29.0
+// @version      0.30.0
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
+// @homepageURL  https://trashgremlinx.github.io/Twill/
+// @downloadURL  https://trashgremlinx.github.io/Twill/twill.user.js
+// @updateURL    https://trashgremlinx.github.io/Twill/twill.user.js
 // @match        https://www.wolvden.com/*
 // @match        https://wolvden.com/*
 // @run-at       document-idle
@@ -49,7 +52,7 @@
   const SOF_DISCORD = 'https://discord.gg/ZQDz8ANTUR';
   const SOF_GUILD = 'https://www.wolvden.com/g/society/991';
   const SOF_PROFILE = 'https://www.wolvden.com/profile/145906';
-  const VERSION = '0.29.0';
+  const VERSION = '0.30.0';
 
   // ================================================================== storage
 
