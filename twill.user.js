@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.32.1
+// @version      0.32.3
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -52,7 +52,11 @@
   const SOF_DISCORD = 'https://discord.gg/ZQDz8ANTUR';
   const SOF_GUILD = 'https://www.wolvden.com/g/society/991';
   const SOF_PROFILE = 'https://www.wolvden.com/profile/145906';
-  const VERSION = '0.32.1';
+  // The licence is linked to GitHub rather than the Pages copy on purpose:
+  // GitHub renders Markdown in the browser, where Pages would hand over the
+  // raw file and some browsers would download it instead of showing it.
+  const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
+  const VERSION = '0.32.3';
 
   // ================================================================== storage
 
@@ -2075,7 +2079,14 @@
         'Wolvden is by Lioden Ltd. This is an unofficial fan tool, not affiliated with them.'),
       h('div', { class: 'dk-note' },
         'By ',
-        h('a', { href: SOF_PROFILE, target: '_blank', rel: 'noopener noreferrer', text: 'Fallowe' }))
+        h('a', { href: SOF_PROFILE, target: '_blank', rel: 'noopener noreferrer', text: 'Fallowe' })),
+
+      h('div', { class: 'dk-lb', text: 'Licence' }),
+      h('div', { class: 'dk-note', style: 'margin-top:0' },
+        'Twill is free to use and free to pass on, and it asks to be passed on whole. ',
+        h('a', { href: TWILL_LICENCE, target: '_blank', rel: 'noopener noreferrer',
+                 text: 'Read the licence' }),
+        '.')
     );
   }
 

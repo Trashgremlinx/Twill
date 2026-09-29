@@ -96,6 +96,15 @@ fan tool and is not affiliated with or endorsed by them.
 
 **The Society of Fur**, for thoughts, wishes and feedback throughout.
 
+## Licence
+
+Twill is free to use and free to pass on, and it asks to be passed on whole. Share the
+link or the file as much as you like, keep the credit where it is, and do not sell it or
+hand on a copy you have edited. An edited copy could break every promise above while
+still wearing this name, which is the one thing that cannot be allowed to happen.
+
+**[Read the licence](LICENCE.md)**
+
 ## Come say hello
 
 - [Join us on Discord](https://discord.gg/ZQDz8ANTUR)
