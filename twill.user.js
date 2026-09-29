@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.32.0
+// @version      0.32.1
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -52,7 +52,7 @@
   const SOF_DISCORD = 'https://discord.gg/ZQDz8ANTUR';
   const SOF_GUILD = 'https://www.wolvden.com/g/society/991';
   const SOF_PROFILE = 'https://www.wolvden.com/profile/145906';
-  const VERSION = '0.32.0';
+  const VERSION = '0.32.1';
 
   // ================================================================== storage
 
@@ -644,6 +644,7 @@
     .dk-herb-m > span { flex: 1 1 auto; min-width: 0; }
     .dk-herb-m em {
       flex: 0 1 auto; min-width: 0; margin-left: auto; text-align: right;
+      padding-left: 10px;
       color: var(--dk-muted); font-style: normal; font-size: 10.5px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
@@ -689,6 +690,13 @@
     .dk-bond-answer span { color: var(--dk-muted); font-size: 11px; }
     .dk-fr-row { display: flex; align-items: center; gap: 3px; padding: 2px 0; }
     .dk-fr-head { color: var(--dk-muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+    /* The column key: the four names in full, in column order, so the short
+       codes in the header never have to be guessed at. */
+    .dk-fr-key {
+      display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 8px 0 2px;
+      font-size: 11px; color: var(--dk-muted);
+    }
+    .dk-fr-key b { color: var(--dk-text); font-weight: 600; }
     .dk-fr-m { flex: 1; min-width: 0; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-fr-c {
       flex: none; width: 34px; text-align: center; border-radius: var(--dk-radius);
@@ -1953,8 +1961,10 @@
           card.append(h('div', { class: 'dk-herb-b',
             text: e.b.length === (GUIDES.biomes || []).length ? 'every biome' : e.b.join('  \u00b7  ') }));
         }
-        if (e.d.length) card.append(h('div', { class: 'dk-herb-m' },
-          h('span', { text: 'drops' }), h('em', { text: e.d.join(', ') })));
+        if (e.d.length) {
+          card.append(h('div', { class: 'dk-lb', text: 'Drops' }));
+          card.append(h('div', { class: 'dk-herb-b', text: e.d.join('  ·  ') }));
+        }
         list.append(card);
       }
       if (!shown) list.append(h('div', { class: 'dk-empty', text: 'Nothing matches.' }));
@@ -1987,7 +1997,15 @@
       text: 'Each arrow is 10% on the tracker. A wolf\u2019s disposition shows after your first move, or straight away with the Body Language talent.' }));
 
     const head = h('div', { class: 'dk-fr-row dk-fr-head' }, h('span', { class: 'dk-fr-m' }));
-    for (const d of disp) head.append(h('span', { class: 'dk-fr-c', text: d.slice(0, 4) }));
+    // Spell the columns out before the table, left to right, since four
+    // letters of a word is not a word.
+    const key = h('div', { class: 'dk-fr-key' });
+    for (const d of disp) {
+      key.append(h('span', {}, h('b', { text: d.slice(0, 4).toUpperCase() }),
+        document.createTextNode(' ' + d)));
+    }
+    sheet.append(key);
+    for (const d of disp) head.append(h('span', { class: 'dk-fr-c', title: d, text: d.slice(0, 4) }));
     sheet.append(head);
 
     for (const mv of moves) {
