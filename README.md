@@ -45,7 +45,7 @@ Updates happen by themselves after that. Nothing you have saved is ever lost whe
 | **Pedigree** | Keeps the family trees the pairing check needs |
 | **Collection** | Notes the base, eyes and markings of your own wolves, counted against the full catalogue |
 | **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades. Every section folds on its own |
-| **Wardrobe** | Custom decor as extra layers, plus looks you can save and wear again |
+| **Wardrobe** | Custom decor as extra layers, plus looks you can save and try on again in the preview |
 | **Item Lookup** | A magnifier on any item: 284 recipes, the catalogue, or the trading centre, already searched |
 | **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear |
 | **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
