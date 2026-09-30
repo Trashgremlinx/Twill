@@ -24,8 +24,9 @@ glance without a separate lore document. Breeding challenges and planning your p
 
 Two steps.
 
-1. Install [Tampermonkey](https://www.tampermonkey.net/), a free browser extension. Chrome and
-   Edge also need **Developer mode** switched on, which is a toggle on their extensions page.
+1. Install [Tampermonkey](https://www.tampermonkey.net/), a free browser extension. On Chrome and
+   Edge, also open the extensions page, click **Details** on Tampermonkey and switch on **Allow
+   User Scripts**. On older versions without that switch, turn on **Developer mode** instead.
 2. Click **[twill.user.js](https://trashgremlinx.github.io/Twill/twill.user.js)** and press
    **Install** when Tampermonkey asks.
 

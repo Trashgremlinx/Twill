@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.32.4
+// @version      0.32.5
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,20 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.32.4';
+  const VERSION = '0.32.5';
+
+  /* Two copies of Twill on one page, say an old test build left installed
+     beside this one, would draw two buttons and two hubs, and both would save
+     to the same storage. Whichever arrives second stands down. The flag
+     catches another copy of this build or a later one; the button catches
+     older builds, which never set the flag. Saved test pages in dev/ carry a
+     frozen copy of the button, so the button check is skipped on those. */
+  if (window.__twill ||
+      (document.getElementById('dk-launch') && !document.querySelector('meta[name="dk-fixture"]'))) {
+    console.warn('Twill ' + VERSION + ': another copy of Twill is already running on this page, so this one is standing down. Remove the extra copy from the Tampermonkey dashboard.');
+    return;
+  }
+  window.__twill = VERSION;
 
   // ================================================================== storage
 
@@ -739,10 +752,12 @@
     .dk-post-warn { margin-top: 6px; color: var(--dk-warn-text); background: var(--dk-warn);
                     padding: 5px 8px; border-radius: var(--dk-radius); font-size: 11.5px; }
     .dk-post-warn strong { display: block; font-weight: 700; }
+    /* contain keeps a post's Bootstrap positioning (fixed-top, sticky-top and
+       the like) inside this box instead of loose on the page. */
     .dk-post-prev {
       margin-top: 4px; padding: 8px 10px; min-height: 40px; overflow: auto;
       background: var(--dk-surface); border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
-      font-size: 12px;
+      font-size: 12px; contain: layout paint;
     }
     .dk-post-prev img { max-width: 100%; }
 
@@ -2497,38 +2512,64 @@
   }
 
   /* Write a post, and be told what Wolvden will quietly throw away before you
-     find out by posting it. Every rule below is something seen breaking on the
-     live site, not a guess; the preview shows what survives. */
+     find out by posting it. The rules follow posts that were tested live:
+     style="..." works exactly as written, and what breaks is a quote of the
+     same kind INSIDE it, which ends the attribute early. An earlier version of
+     this check had that the wrong way round and flagged every normal post.
+     The preview shows what survives. */
+
+  // Every style="..." or style='...' value in a draft, as written.
+  const styleValues = (text) => [...String(text).matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)]
+    .map((m) => (m[2] != null ? m[2] : m[3]));
+  const inStyles = (text, re) => styleValues(text).reduce((n, v) => n + (v.match(re) || []).length, 0);
+
+  // Wolvden ships Bootstrap 4, so its own classes work in a post. Anything else
+  // is a class with no style anywhere to match it.
+  const BOOTSTRAP = new RegExp('^(' + [
+    'row', 'no-gutters', 'container(-fluid)?', 'col(-(sm|md|lg|xl))?(-(\\d{1,2}|auto))?',
+    '[mp][trblxy]?(-(sm|md|lg|xl))?-(n?\\d|auto)', '[wh]-(25|50|75|100|auto)', 'm[wh]-100', 'v[wh]-100',
+    '(text|bg|d|flex|justify-content|align-(items|self|content)|order|float|position|overflow|font-weight|display)-[\\w-]+',
+    '(border|rounded|shadow)(-[\\w-]+)?',
+    '(card|btn|badge|alert|table|list-group|nav|navbar|progress|media|jumbotron|figure|embed-responsive|blockquote)(-[\\w-]+)?',
+    'list-(unstyled|inline(-item)?)', 'img-(fluid|thumbnail)', 'font-italic', 'small', 'lead', 'mark', 'initialism',
+    'h[1-6]', 'clearfix', 'visible', 'invisible', 'sr-only', 'fixed-(top|bottom)', 'sticky-top',
+    'align-(baseline|top|middle|bottom|text-top|text-bottom)'
+  ].join('|') + ')$');
+  const classTokens = (text) => [...String(text).matchAll(/\sclass\s*=\s*("([^"]*)"|'([^']*)'|([^\s>"']+))/gi)]
+    .flatMap((m) => (m[2] || m[3] || m[4] || '').split(/\s+/).filter(Boolean));
+
   const QUIRKS = [
     {
-      id: 'dq',
-      find: /<[^>]*\sstyle\s*=\s*"[^"]*"/gi,
-      what: 'Double quotes around a style attribute',
-      why: 'Wolvden strips the whole attribute. Use single quotes: style=\'…\'.'
+      id: 'quote',
+      // Only a quote of the same kind as the pair around the attribute breaks
+      // it, and what is left then stops mid-declaration: on url( or a colon.
+      count: (text) => styleValues(text).filter((v) => /[(:,]\s*$/.test(v)).length,
+      what: 'A quote inside a style attribute',
+      why: 'A quote of the same kind as the pair around the attribute ends it early, and everything after it is lost. Leave url(…) unquoted, and give font names the other kind of quote: font-family:\'Georgia\'.'
     },
     {
       id: 'radius',
-      find: /border-radius\s*:/gi,
+      count: (text) => inStyles(text, /border(-[a-z]+)*-radius\s*:/gi),
       what: 'border-radius',
       why: 'Ignored. The corners will be square however you write it.'
     },
     {
       id: 'position',
-      find: /(^|[;\s{"'])position\s*:/gi,
+      count: (text) => inStyles(text, /(^|[;\s])position\s*:/gi),
       what: 'position',
       why: 'Ignored, and anything you placed with it lands back in the flow.'
     },
     {
       id: 'script',
-      find: /<\s*(script|iframe|object|embed|form|input|button)\b/gi,
+      count: (text) => (String(text).match(/<\s*(script|iframe|object|embed|form|input|button)\b/gi) || []).length,
       what: 'A tag Wolvden removes outright',
       why: 'Scripts, frames and form controls are stripped from posts.'
     },
     {
       id: 'class',
-      find: /<[^>]*\sclass\s*=/gi,
-      what: 'class attribute',
-      why: 'Your own classes have nothing to match; style the element directly.'
+      count: (text) => classTokens(text).filter((c) => !BOOTSTRAP.test(c)).length,
+      what: 'A class of your own',
+      why: 'Wolvden only has its own Bootstrap classes to match, like row, col-12 or text-center. A class you make up does nothing, so style that element directly.'
     }
   ];
 
@@ -2542,8 +2583,10 @@
     'DD', 'DEL', 'DETAILS', 'DIV', 'DL', 'DT', 'EM', 'FONT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR',
     'I', 'IMG', 'INS', 'LI', 'MARK', 'OL', 'P', 'PRE', 'S', 'SMALL', 'SPAN', 'STRIKE', 'STRONG', 'SUB',
     'SUMMARY', 'SUP', 'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD', 'TR', 'U', 'UL']);
-  const POST_ATTRS = new Set(['align', 'alt', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'color',
+  const POST_ATTRS = new Set(['align', 'alt', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'class', 'color',
     'colspan', 'face', 'height', 'href', 'open', 'rowspan', 'size', 'src', 'style', 'title', 'valign', 'width']);
+  // What Wolvden ignores inside a style, taken out of the preview the same way.
+  const POST_IGNORED = ['border-radius', 'position', 'z-index'];
   // Removed along with everything inside them, rather than unwrapped.
   const POST_DROP = /^(script|style|iframe|frame|frameset|object|embed|form|input|button|select|textarea|svg|math|link|meta|base|template|noscript|audio|video)$/i;
   const POST_URL = /^(https?:\/\/|\/(?!\/)|#)/i;
@@ -2561,6 +2604,20 @@
           const name = a.name.toLowerCase();
           const url = name === 'href' || name === 'src';
           if (!POST_ATTRS.has(name) || (url && !POST_URL.test(a.value.trim()))) child.removeAttribute(a.name);
+        }
+        // Bootstrap's classes work on Wolvden, so they stay; a made-up one does
+        // nothing there, so it goes, and with it anything that could pick up
+        // Twill's own styles.
+        if (child.hasAttribute('class')) {
+          const keep = child.getAttribute('class').split(/\s+/).filter((c) => BOOTSTRAP.test(c));
+          if (keep.length) child.setAttribute('class', keep.join(' '));
+          else child.removeAttribute('class');
+        }
+        // A style keeps everything Wolvden keeps. A quote inside it has already
+        // cut it short in the parse, exactly as it would on the live site.
+        if (child.hasAttribute('style')) {
+          for (const p of POST_IGNORED) child.style.removeProperty(p);
+          if (!child.getAttribute('style').trim()) child.removeAttribute('style');
         }
         // A link in the preview opens beside the page instead of replacing it.
         if (child.tagName === 'A') {
@@ -2588,9 +2645,8 @@
       save('post', postDraft);
       report.textContent = '';
       const found = QUIRKS.map((q) => {
-        q.find.lastIndex = 0;
-        const hits = postDraft.match(q.find);
-        return hits ? { q, n: hits.length } : null;
+        const n = q.count(postDraft);
+        return n ? { q, n } : null;
       }).filter(Boolean);
 
       if (!postDraft.trim()) {
@@ -2605,17 +2661,13 @@
         }
       }
 
-      // The preview strips what Wolvden strips, so you see what will survive.
-      // That part works on the raw text, because the quote style is part of the
-      // rule; what is left then goes through the inert parse above.
+      // The preview strips what Wolvden strips, so you see what will survive:
+      // the tags it removes outright here, and inside the inert parse the
+      // styles it ignores and the classes it has nothing to match.
       preview.textContent = '';
       const survives = postDraft
         .replace(/<\s*(script|iframe|object|embed|form|input|button)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
-        .replace(/<\s*(script|iframe|object|embed|form|input|button)\b[^>]*>/gi, '')
-        .replace(/\sstyle\s*=\s*"[^"]*"/gi, '')
-        .replace(/\sclass\s*=\s*("[^"]*"|'[^']*')/gi, '')
-        .replace(/border-radius\s*:[^;']*;?/gi, '')
-        .replace(/(^|[;\s])position\s*:[^;']*;?/gi, '$1');
+        .replace(/<\s*(script|iframe|object|embed|form|input|button)\b[^>]*>/gi, '');
       preview.append(h('div', {}, inertPost(survives)));
     };
 
@@ -3235,7 +3287,7 @@
       const breedSum = [
         sum.heat.length ? sum.heat.length + ' in heat' : '',
         sum.pregnant.length ? sum.pregnant.length + ' pregnant' : '',
-        sum.cooldownSoon ? sum.cooldownSoon + ' cooldowns' : ''
+        sum.cooldownSoon ? sum.cooldownSoon + (sum.cooldownSoon === 1 ? ' cooldown' : ' cooldowns') : ''
       ].filter(Boolean).join(' · ') || 'nothing due';
       add(section('breeding', 'Breeding', breedSum,
         ...(breeding.length ? breeding : [h('div', { class: 'dk-dm-none', text: 'Nobody in heat or pregnant.' })])));
@@ -7061,11 +7113,23 @@
       c.dataset.dkFish = parts.length ? '1' : '';
     }
 
+    /* The same two settings live on the fishing page and in the hub. Whichever
+       one you move, the other follows, so the two can never disagree. */
+    let pageCtl = null, hubCtl = null;
+    function syncControls() {
+      for (const c of [pageCtl, hubCtl]) {
+        if (!c || !c.mode.isConnected) continue;
+        c.mode.value = fst.mode;
+        c.clarity.value = String(fst.clarity || 0);
+        if (c.out) c.out.textContent = (fst.clarity || 0) + '%';
+      }
+    }
+
     function buildPanel() {
       const wrap = h('section', { id: 'dk-fish', 'aria-label': 'Fishing, made readable' });
       const modeSel = h('select', { 'aria-label': 'Colour vision' },
         ...Object.entries(CVD).map(([v, row]) => h('option', { value: v, text: row[0], selected: fst.mode === v })));
-      modeSel.addEventListener('change', () => { fst.mode = modeSel.value; save('fish', fst); paint(); });
+      modeSel.addEventListener('change', () => { fst.mode = modeSel.value; save('fish', fst); paint(); syncControls(); });
 
       const clarity = h('input', {
         type: 'range', min: '0', max: '100', step: '5', value: String(fst.clarity || 0),
@@ -7074,10 +7138,11 @@
       const out = h('span', { class: 'dk-fish-val', text: (fst.clarity || 0) + '%' });
       clarity.addEventListener('input', () => {
         fst.clarity = Number(clarity.value);
-        out.textContent = fst.clarity + '%';
         paint();
+        syncControls();
       });
       clarity.addEventListener('change', () => save('fish', fst));
+      pageCtl = { mode: modeSel, clarity, out };
 
       wrap.append(
         h('div', { class: 'dk-fish-row' },
@@ -7158,7 +7223,7 @@
 
       box.append(h('div', { class: 'dk-lb', text: 'Colour vision' }));
       const sel = h('select', { 'aria-label': 'Colour vision',
-        onchange: (e) => { fst.mode = e.target.value; save('fish', fst); paint(); } },
+        onchange: (e) => { fst.mode = e.target.value; save('fish', fst); paint(); syncControls(); } },
         ...Object.entries(CVD).map(([v, row]) => h('option', { value: v, text: row[0], selected: fst.mode === v })));
       box.append(sel);
       box.append(h('div', { class: 'dk-note', style: 'margin-top:5px', text:
@@ -7172,9 +7237,10 @@
       box.append(h('div', { class: 'dk-lb', text: 'Clarity' }));
       const rng = h('input', { type: 'range', min: '0', max: '100', step: '5',
         value: String(fst.clarity || 0), 'aria-label': 'Clarity' });
-      rng.addEventListener('input', () => { fst.clarity = Number(rng.value); paint(); });
+      rng.addEventListener('input', () => { fst.clarity = Number(rng.value); paint(); syncControls(); });
       rng.addEventListener('change', () => save('fish', fst));
       box.append(rng);
+      hubCtl = { mode: sel, clarity: rng };
       box.append(h('div', { class: 'dk-note', style: 'margin-top:5px', text:
         'Saturation and contrast over the whole picture, which is what makes the ripple stand off the water. It lifts everything equally and finds nothing, so it is a brighter window on the same game.' }));
 
