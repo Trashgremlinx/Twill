@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.32.5
+// @version      0.33.0
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.32.5';
+  const VERSION = '0.33.0';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -735,6 +735,36 @@
     .dk-goal-add { flex: none; }
     .dk-bar { height: 6px; background: var(--dk-surface); border-radius: 3px; overflow: hidden; }
     .dk-bar i { display: block; height: 100%; background: var(--dk-accent); }
+    /* The Collection checklist. */
+    .dk-ctabs { display: flex; gap: 4px; margin-bottom: 7px; }
+    .dk-ctab {
+      flex: 1; min-width: 0; padding: 4px 2px; margin: 0; cursor: pointer; text-align: center;
+      font: 12px/1.3 var(--dk-body-font); color: var(--dk-muted); background: var(--dk-surface);
+      border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
+    }
+    .dk-ctab small { display: block; font-size: 10.5px; }
+    .dk-ctab[aria-selected="true"] { color: var(--dk-on-accent); background: var(--dk-accent); border-color: var(--dk-accent); }
+    .dk-cfind { width: 100%; margin: 8px 0 6px; }
+    .dk-cfilt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--dk-muted); }
+    .dk-cfilt label { display: inline-flex; align-items: center; gap: 5px; margin: 0; }
+    .dk-cseg { display: inline-flex; }
+    .dk-cseg button {
+      margin: 0; padding: 2px 7px; cursor: pointer; font: 12px/1.4 var(--dk-body-font);
+      color: var(--dk-text); background: var(--dk-surface); border: 1px solid var(--dk-line);
+    }
+    .dk-cseg button + button { border-left: 0; }
+    .dk-cseg button[aria-pressed="true"] { color: var(--dk-on-accent); background: var(--dk-accent); border-color: var(--dk-accent); }
+    .dk-clist { margin-top: 6px; }
+    .dk-cgrp {
+      display: flex; width: 100%; gap: 6px; align-items: baseline; margin: 0; padding: 5px 0; cursor: pointer;
+      text-align: left; font: 12.5px/1.4 var(--dk-body-font); color: var(--dk-text);
+      background: none; border: 0; border-top: 1px solid var(--dk-line);
+    }
+    .dk-cgrp b { flex: 1; min-width: 0; font-weight: normal; }
+    .dk-cgrp span { flex: none; color: var(--dk-muted); font-size: 11.5px; }
+    .dk-chip-got { background: var(--dk-good); color: var(--dk-good-text); border-color: var(--dk-good); }
+    .dk-chip-got::before { content: '✓ '; }
+    .dk-ctier { margin-left: 4px; font-size: 9.5px; opacity: .7; }
     /* The item lookup menu. */
     .dk-lu {
       display: block; width: 100%; margin: 0; padding: 6px 0; cursor: pointer; text-align: left;
@@ -982,41 +1012,6 @@
   const defineModule = (m) => modules.push(m);
   const isOn = (m) => core.enabled[m.id] !== false;
 
-  /* Who is signed in, and whether the wolf on screen is actually theirs.
-
-     Wolvden's header dropdown links to your own profile, and a wolf page says
-     "Owned by <a href=/profile/N>". Same number means your wolf. Any module that
-     keeps a record of "my wolves" has to ask, because every wolf on the site is
-     rendered with exactly the same markup: without this, opening someone else's
-     wolf out of curiosity files it as one of yours. */
-  function myProfileId() {
-    const link = document.querySelector('.dropdown-menu a.dropdown-item[href^="/profile/"], .dropdown-item[href^="/profile/"]');
-    const m = link && (link.getAttribute('href') || '').match(/\/profile\/(\d+)/);
-    return m ? m[1] : null;
-  }
-
-  function ownerId() {
-    const main = document.querySelector('#main');
-    if (!main) return null;
-    for (const el of main.querySelectorAll('a[href^="/profile/"]')) {
-      // "Owned by X" and "Bred by X" sit in the same block, so match on the text
-      // immediately before the link rather than on position.
-      const before = (el.previousSibling && el.previousSibling.textContent) || '';
-      if (!/owned by\s*$/i.test(before.replace(/\s+/g, ' '))) continue;
-      const m = (el.getAttribute('href') || '').match(/\/profile\/(\d+)/);
-      if (m) return m[1];
-    }
-    return null;
-  }
-
-  // Undecidable (no header, an odd layout) counts as "not mine": better to record
-  // nothing than to quietly fill the Collection with other people's wolves.
-  function isMyWolf() {
-    const me = myProfileId();
-    const owner = ownerId();
-    return !!(me && owner && me === owner);
-  }
-
   // Which kind of Wolvden page this is. Offline test copies in dev/ say what they
   // stand in for with <meta name="dk-fixture" content="den | wolf:<id> | hoard | trades">.
   function currentPage() {
@@ -1027,9 +1022,6 @@
     if (fake === 'den' || /^\/den(\/\d+)?\/?$/.test(path)) return { kind: 'den' };
     if ((m = fake.match(/^wolf:(\d+)$/)) || (m = path.match(/^\/wolf\/(\d+)/))) return { kind: 'wolf', id: m[1] };
     if ((m = fake.match(/^family:(\d+)$/)) || (m = path.match(/^\/family\/(\d+)/))) return { kind: 'family', id: m[1] };
-    if ((m = fake.match(/^achievements(?::([a-z]+))?$/)) || (m = path.match(/^\/achievements\/\d+(?:\/([a-z]+))?/))) {
-      return { kind: 'achievements', cat: m[1] || 'recent' };
-    }
     if (fake === 'hoard' || /^\/hoard(\/|$)/.test(path)) return { kind: 'hoard' };
     if (fake === 'trades' || /^\/trading-center\/manage(\/|$)/.test(path)) return { kind: 'trades' };
     if ((m = fake.match(/^trade:(\d+)$/)) || (m = path.match(/^\/trade\/(\d+)/))) return { kind: 'trade', id: m[1] };
@@ -1113,9 +1105,9 @@
   // =============================================================== your things
 
   /* Everything below is yours and stays in this browser: lore you write on a
-     wolf, goals you set for yourself, and a record of pages you have already
-     opened, so Twill can compare one against another later. Nothing is ever
-     fetched: a wolf only enters these records when you open its page yourself. */
+     wolf, goals you set for yourself, the Collection you tick, and the wolves
+     you pin to the tray. Nothing is ever fetched, and nothing from the site is
+     kept beyond those pinned wolves. */
 
   /* Lore's shape is yours to change: sections and fields you name, reorder, add
      and delete. Two stores, kept apart on purpose:
@@ -1213,6 +1205,7 @@
     if (l && l.called) return l.called;
     if (coll[id] && coll[id].n) return coll[id].n;
     if (ped[id] && ped[id].n) return ped[id].n;
+    if (l && l._n) return l._n;
     return '#' + id;
   }
 
@@ -1234,16 +1227,27 @@
 
   let lore = load('lore', {});
   let goals = load('goals', []);
+  // The next two hold wolves pinned in the tray and nothing else: see pruneToTray().
   let ped = load('ped', {});    // wolf id -> { n, gen, coi, inst, lines, a: { id: { d: [depths], p: [slot paths], n } } }
   let coll = load('coll', {});  // wolf id -> { n, b: base, g: genetics, e: eyes, m: [markings] }
-  let ach = load('ach', {});    // achievement name -> { c: category, d: description, e: earned date }
+
+  /* The Collection checklist: catalogue keys you ticked yourself, one list per
+     table. Nothing here is ever read from a page. */
+  const HAVE_TABLES = ['marks', 'bases', 'eyes'];
+  const loadHave = () => {
+    const s = load('have', {});
+    return Object.fromEntries(HAVE_TABLES.map((t) => [t, new Set(Array.isArray(s[t]) ? s[t] : [])]));
+  };
+  let have = loadHave();
+  const saveHave = () => save('have', Object.fromEntries(HAVE_TABLES.map((t) => [t, [...have[t]]])));
+  const haveCount = () => HAVE_TABLES.reduce((n, t) => n + have[t].size, 0);
 
   // Now that the value stores exist, the layout can be read and its thirty-day
   // trash swept; sweepTrash() reaches into `lore` and would hit the temporal
   // dead zone if this ran where reloadPlan is defined.
   reloadPlan();
 
-  function saveLore(id, rec) {
+  function saveLore(id, rec, name) {
     // Anything already written under a field that has since been deleted is left
     // alone: it is in the thirty-day trash and must survive an unrelated save.
     const keep = Object.assign({}, lore[id]);
@@ -1251,17 +1255,44 @@
       const v = String(rec[f.id] == null ? '' : rec[f.id]).trim();
       if (v) keep[f.id] = v; else delete keep[f.id];
     }
-    if (Object.keys(keep).length) lore[id] = keep;
-    else delete lore[id];
+    const was = keep._n;
+    delete keep._n;
+    if (Object.keys(keep).length) {
+      // The wolf's own name, taken from its page as you save, so a link to it
+      // elsewhere reads as a name. Kept only beside lore you wrote yourself.
+      if (name || was) keep._n = name || was;
+      lore[id] = keep;
+    } else delete lore[id];
     save('lore', lore);
   }
 
   let tray = load('tray', []);
   const saveTray = () => save('tray', tray);
 
+  /* Twill keeps a wolf's details and family tree only while that wolf is in the
+     tray, at most 8, and lets them go the moment it leaves. This runs on every
+     page load as well as on every tray change, which is also what clears out
+     the wider records older versions kept, along with the two stores that no
+     longer exist at all: the achievements list and the hoard's item names. */
+  function pruneToTray() {
+    tray = load('tray', []);
+    const keep = new Set(tray);
+    for (const [key, set] of [['coll', (v) => { coll = v; }], ['ped', (v) => { ped = v; }]]) {
+      const all = load(key, {});
+      const gone = Object.keys(all).filter((id) => !keep.has(id));
+      for (const id of gone) delete all[id];
+      if (gone.length) save(key, all);
+      set(all);
+    }
+    for (const key of ['ach', 'owned']) {
+      try { localStorage.removeItem(PREFIX + key); } catch { /* blocked */ }
+    }
+  }
+  pruneToTray();
+
   /* Combo hunting. A pup can only reach a combo marking when one parent brings
      each of its two colours, on the same shape, in the same slot. Both halves of
-     that come off the wolf pages you have opened. */
+     that come off the two pinned wolves' own pages. */
   function combosInReach(a, b) {
     const out = [];
     const shapeAfter = (name, colour) => name.slice(colour.length + 1);
@@ -1349,6 +1380,16 @@
     return { coi: shared.reduce((n, s) => n + s.pct, 0), shared };
   }
 
+  /* A wolf's generation, as its Family page states it ("3rd"). Wolvden counts
+     the longest line back over the whole pedigree, not just the four columns on
+     the page, so this is read off the page rather than worked out from the
+     tree. A pup is always one more than the higher of its two parents. */
+  const genNum = (p) => {
+    const m = String((p && p.gen) || '').match(/\d+/);
+    return m ? Number(m[0]) : null;
+  };
+  const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+
   // How far back the recorded tree actually reaches, so a clean answer can say
   // how much of the pedigree it was able to look at.
   const pedDepth = (p) => {
@@ -1360,32 +1401,59 @@
   // so read either and hand back the pairs.
   const marksOf = (w) => ((w && w.m) || []).map((m) => (Array.isArray(m) ? m : [null, m]));
 
-  // What your own wolves carry, gathered from the wolf pages you have opened.
-  function collectionTally() {
-    const out = { marks: new Map(), bases: new Map(), eyes: new Map() };
-    const put = (map, name, wolf) => {
-      if (!name) return;
-      const row = map.get(name) || map.set(name, []).get(name);
-      if (!row.includes(wolf)) row.push(wolf);
-    };
-    for (const [id, w] of Object.entries(coll)) {
-      // Records from before 0.28.5 carry no owner flag. Those were written under
-      // the old rule, which only ever saved your own wolves, so they count.
-      if (w.own === 0) continue;
-      const who = w.n || id;
-      put(out.bases, w.b, who);
-      put(out.eyes, w.e, who);
-      for (const [, name] of marksOf(w)) put(out.marks, name, who);
-    }
-    return out;
+  // A catalogue entry's display name. Marking keys are stored folded to lower
+  // case and carry no name of their own, so the capitals are put back.
+  const geneName = (table, k) => {
+    const v = (GENETICS[table] || {})[k];
+    return v && v.n ? v.n : k.replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  // The name in a wolf page's heading. The heading carries decoration icons
+  // either side of the name, and the tray's pin button too.
+  function wolfPageName() {
+    const h1 = document.querySelector('#main h1');
+    const head = h1 ? h1.cloneNode(true) : null;
+    if (!head) return '';
+    for (const b of head.querySelectorAll('button, .dk-pin')) b.remove();
+    return head.textContent.replace(/\s+/g, ' ').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').trim();
   }
 
-  // Asked before the Collection is emptied, from either of its two screens.
-  // It says what the Tray loses too, because that is the part people miss.
-  function forgetWolvesText() {
-    const n = Object.keys(coll).length;
-    return 'Forget all ' + n + (n === 1 ? ' wolf' : ' wolves') + ' Twill has recorded? '
-      + 'Your Collection empties, and the Tray cannot pair them until their pages are opened again.';
+  /* What Pair and Compare need from a wolf's own page: its genes, sex and age.
+     Only ever called for a wolf in the tray, on that wolf's page. */
+  function readWolfPage() {
+    const main = document.querySelector('#main');
+    if (!main) return null;
+    const row = (label) => {
+      for (const lab of main.querySelectorAll('td.b')) {
+        if (lab.textContent.replace(/\s+/g, ' ').trim() !== label) continue;
+        const cell = lab.nextElementSibling;
+        if (!cell) return '';
+        // The value is the cell's first text. Genetics marks the cell itself and
+        // only appends after the value, so this holds whether it ran or not.
+        const node = [...cell.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+        if (node) return node.textContent.replace(/\s+/g, ' ').trim();
+        // Some values are links rather than plain text (Carrier Status).
+        const link = cell.querySelector('a');
+        return link ? link.textContent.replace(/\s+/g, ' ').trim() : '';
+      }
+      return '';
+    };
+    // Markings keep their slot, because a combo marking only happens when both
+    // parents bring their colour in the same slot.
+    const marks = [];
+    for (let i = 1; i <= 10; i++) {
+      const v = row('Slot ' + i);
+      if (v && !/^none\.?$/i.test(v)) marks.push([i, v]);
+    }
+    const muts = ['Mutation', 'Secondary Mutation', 'Tertiary Mutation']
+      .map(row).filter((v) => v && !/^none\.?$/i.test(v));
+    const rec = {
+      n: wolfPageName(),
+      b: row('Base'), g: row('Base Genetics'), e: row('Eyes'), m: marks,
+      s: row('Skin'), no: row('Nose'), c: row('Claws'),
+      mu: muts, ca: row('Carrier Status'), sx: row('Sex'), ag: row('Age')
+    };
+    return rec.b || marks.length ? rec : null;   // null: not a wolf page after all
   }
 
   // ===================================================================== hub
@@ -1499,6 +1567,30 @@
     }
   });
 
+  /* Each open Wolvden tab holds its own copy of what Twill knows. When another
+     tab reads a wolf's page or its Family page, or changes the tray, this tab
+     takes the newer copy at once: a Pairing or Compare screen left open fills
+     itself in, the tray redraws, and the next save here starts from the newer
+     copy instead of writing an old one back over it. The browser raises this
+     itself for every other tab of the same site; nothing is sent anywhere. */
+  window.addEventListener('storage', (e) => {
+    if (e.storageArea !== localStorage || !e.key || !e.key.startsWith(PREFIX)) return;
+    const key = e.key.slice(PREFIX.length);
+    if (key === 'ped') ped = load('ped', {});
+    else if (key === 'coll') coll = load('coll', {});
+    else if (key === 'tray') tray = load('tray', []);
+    else if (key === 'have') have = loadHave();
+    else return;
+    resync();
+  });
+
+  // Tell every module, and any open screen that shows them, that the tray or
+  // what Twill keeps for it has changed.
+  function resync() {
+    for (const m of modules) if (m.sync && isOn(m)) safely(m, 'sync');
+    if (!hub.hidden && ['pair', 'compare', 'collection', 'collect', 'pedigree', 'tray'].includes(screen)) render();
+  }
+
   // Where the current screen appends its contents.
   let sheet = null;
 
@@ -1511,7 +1603,6 @@
       : screen === 'recipes' ? 'Recipes'
       : screen === 'modules' ? 'Modules'
       : screen === 'collection' ? 'Collection'
-      : screen === 'achievements' ? 'Achievements'
       : screen === 'pair' ? 'Pairing'
       : screen === 'compare' ? 'Compare'
       : screen === 'compose' ? 'Compose a post'
@@ -1559,7 +1650,6 @@
     else if (screen === 'recipes') renderRecipes();
     else if (screen === 'modules') renderModules();
     else if (screen === 'collection') renderCollection();
-    else if (screen === 'achievements') renderAchievements();
     else if (screen === 'pair') renderPair(pairIds);
     else if (screen === 'compare') renderCompare(pairIds);
     else if (screen === 'compose') renderCompose();
@@ -2136,7 +2226,7 @@
 
       h('div', { class: 'dk-lb', text: 'What it will not do' }),
       h('div', { class: 'dk-note', style: 'margin-top:0',
-        text: 'Twill only ever reads a page you opened yourself. It never clicks, submits, fetches, refreshes, or plays anything for you. There is no server and no account, so nothing you write into it ever leaves this browser.' }),
+        text: 'Twill only ever reads a page you opened yourself, and keeps nothing from the site beyond the few wolves you pin to the tray. It never clicks, submits, fetches, refreshes, or plays anything for you. There is no server and no account, so nothing you write into it ever leaves this browser.' }),
 
       h('div', { class: 'dk-lb', text: 'Credit' }),
       h('div', { class: 'dk-note', style: 'margin-top:0' },
@@ -2189,9 +2279,7 @@
     ));
     rest.append(h('div', { class: 'dk-lb', text: 'Twill' }));
     row('Modules', () => { screen = 'modules'; render(); }, on + ' of ' + modules.length + ' on');
-    row('Collection', () => { screen = 'collection'; render(); }, Object.keys(coll).length + ' wolves recorded');
-    row('Achievements', () => { screen = 'achievements'; render(); },
-      Object.keys(ach).length ? Object.values(ach).filter((a) => a.e).length + ' of ' + Object.keys(ach).length + ' seen' : 'not read yet');
+    row('Collection', () => { screen = 'collection'; render(); }, haveCount() ? haveCount().toLocaleString('en-GB') + ' ticked' : 'a checklist you tick yourself');
     row('Compose a post', () => { screen = 'compose'; render(); }, 'checks what Wolvden will strip');
     row('Look  ·  ' + themeLabel(), () => { screen = 'look'; render(); });
     row('Backup', () => { screen = 'backup'; render(); });
@@ -2202,8 +2290,8 @@
   }
 
   // Goals are yours to write. A goal can carry a counter, and where Twill
-  // already counts the thing (markings collected, achievements earned) it fills
-  // that in itself rather than asking you to keep score.
+  // already counts the thing (markings ticked in your Collection) it fills that
+  // in itself rather than asking you to keep score.
   function renderGoals(box) {
     box.append(h('div', { class: 'dk-lb', text: 'Goals' }));
     const list = h('div');
@@ -2251,12 +2339,8 @@
   // If a goal names something Twill counts, show the count beside it.
   function goalProgress(g) {
     const t = norm(g.text);
-    if (/achievement/.test(t) && Object.keys(ach).length) {
-      const got = Object.values(ach).filter((a) => a.e).length;
-      return got + ' of ' + Object.keys(ach).length + ' seen';
-    }
     if (/marking/.test(t)) {
-      const n = collectionTally().marks.size;
+      const n = have.marks.size;
       if (n) return n + ' of ' + Object.keys(GENETICS.marks).length + ' markings';
     }
     return null;
@@ -2293,9 +2377,9 @@
   let geneCards = null;
 
   /* One search over everything Twill holds: the recipe catalogue, the genetics
-     tables, your notes, your lore, your goals, and whatever you have recorded of
-     your own collection and achievements. Separate scripts cannot do this; it
-     only works because it is all one store. */
+     tables, your notes, your lore, your goals, and what you have ticked in your
+     Collection. Separate scripts cannot do this; it only works because it is all
+     one store. */
   function renderSearch(box, query) {
     const q = norm(query);
     if (q.length < 2) {
@@ -2346,21 +2430,20 @@
     }
 
     // --- your own things ---
-    const mine = collectionTally();
-    const owned = [];
-    for (const [kind, map] of [['marking', mine.marks], ['base', mine.bases], ['eyes', mine.eyes]]) {
-      for (const [name, who] of map) {
-        if (norm(name).includes(q)) owned.push(line(name, kind + '  ·  ' + who.slice(0, 4).join(', ') + (who.length > 4 ? ' +' + (who.length - 4) : '')));
+    const ticked = [];
+    for (const [table, kind] of [['marks', 'marking'], ['bases', 'base'], ['eyes', 'eyes']]) {
+      for (const k of have[table]) {
+        if (k.includes(q)) ticked.push(line(geneName(table, k), kind + '  ·  ticked'));
       }
     }
-    group('In your pack', owned, 8);
+    group('In your Collection', ticked, 8);
 
     const loreHits = [];
     for (const [id, rec] of Object.entries(lore)) {
       const blob = norm(Object.values(rec).join(' '));
       if (!blob.includes(q)) continue;
       const which = loreFields().filter((f) => rec[f.id] && norm(rec[f.id]).includes(q)).map((f) => f.label);
-      loreHits.push(line(rec.called || ('Wolf #' + id), (which.join(', ') || 'lore') + '  ·  #' + id,
+      loreHits.push(line(rec.called || rec._n || ('Wolf #' + id), (which.join(', ') || 'lore') + '  ·  #' + id,
         () => window.open('/wolf/' + id, '_blank', 'noopener')));
     }
     group('Lore', loreHits, 8);
@@ -2372,12 +2455,8 @@
     group('Goals', goals.filter((g) => norm(g.text).includes(q))
       .map((g) => line(g.text, g.done ? 'done' : 'open')), 6);
 
-    const achHits = Object.entries(ach).filter(([n, a]) => norm(n + ' ' + (a.d || '')).includes(q))
-      .map(([n, a]) => line(n, (a.e ? 'earned ' + String(a.e).slice(0, 10) : 'not yet') + '  ·  ' + (a.c || '')));
-    group('Achievements', achHits, 6);
-
     if (!total) {
-      box.append(h('div', { class: 'dk-empty', text: 'Nothing matches. Twill only knows pages you have opened yourself, so a wolf or an achievement you have never looked at will not be in here.' }));
+      box.append(h('div', { class: 'dk-empty', text: 'Nothing matches.' }));
     }
   }
 
@@ -2391,16 +2470,25 @@
     const nameOf = (id, w) => (w && w.n) || (ped[id] && ped[id].n) || ('#' + id);
     const nA = nameOf(idA, A), nB = nameOf(idB, B);
 
+    // "Nightshade", "Nightshade and Ash": who is still missing something.
+    const both = (list) => list.map(([, name]) => name).join(' and ');
+
     sheet.append(h('div', { class: 'dk-lb', text: nA + '  ×  ' + nB }));
     if (!A || !B) {
-      sheet.append(h('div', { class: 'dk-empty', text: 'Open ' + (!A ? nA : nB) + '’s page once and Twill will have its genes. It only ever reads a page you visit yourself.' }));
+      const need = [[idA, nA, A], [idB, nB, B]].filter(([, , w]) => !w);
+      sheet.append(h('div', { class: 'dk-note', style: 'margin-top:4px', text:
+        'Twill has no genes for ' + both(need) + ' yet. A pinned wolf’s genes are read from its own page while you are on it.' }));
       return;
     }
 
+    // A section: a heading, the answer, and a line saying what it means. The
+    // line can carry links, so it can also be built from nodes.
     const sec = (label, main, why) => sheet.append(h('div', { class: 'dk-pair-sec' },
       h('div', { class: 'dk-pop-lb', text: label }),
       main == null ? null : (typeof main === 'string' ? h('div', { class: 'dk-pop-list', text: main }) : main),
-      why ? h('div', { class: 'dk-muted', style: 'font-size:11px;margin-top:2px', text: why }) : null));
+      why == null ? null : typeof why === 'string'
+        ? h('div', { class: 'dk-muted', style: 'font-size:11px;margin-top:2px', text: why })
+        : h('div', { class: 'dk-note', style: 'font-size:11px;margin-top:2px' }, why)));
 
     // --- what the pups could get ---
     const hits = combosInReach(A, B);
@@ -2440,22 +2528,31 @@
       [A.ca, B.ca].some((c) => /carrier/i.test(c || '')) ? 'One of them is a carrier, so a recessive can still surface.'
         : [A.ca, B.ca].some((c) => /unknown/i.test(c || '')) ? 'Carrier status is unknown on at least one, so a hidden recessive is possible.' : null);
 
-    // --- and how closely they are related ---
+    // --- the pups' generation, and how closely the two are related ---
+    // Both come off the Family page, the only place Wolvden shows either.
     const pa = ped[idA], pb = ped[idB];
-    if (!pa || !pb) {
-      sec('Shared ancestors', null,
-        'Open ' + (!pa ? nA : nB) + '’s Family tab once and the pup’s COI appears here too.');
+    const noTree = [[idA, nA, pa], [idB, nB, pb]].filter(([, , p]) => !p);
+    if (noTree.length) {
+      sec('Generation and shared ancestors', null,
+        'Twill has no family tree for ' + both(noTree) + ' yet. A pinned wolf’s tree is read from its Family page while you are on it.');
       return;
     }
+
+    const gA = genNum(pa), gB = genNum(pb);
+    if (gA && gB) {
+      sec('Generation', ordinal(Math.max(gA, gB) + 1) + ' generation',
+        'One more than the higher of the two parents: ' + nA + ' is ' + ordinal(gA) + ' and ' + nB + ' is ' + ordinal(gB) + '.');
+    }
+
     const result = pairCoi(idA, pa, idB, pb);
     if (!result) {
       // A number worked out from depths alone can be badly wrong either way,
       // so no number is given until both trees have been read with their lines.
       const unreadable = [[pa, nA], [pb, nB]].filter(([p]) => pedLines(p) === 'unreadable').map(([, n]) => n);
-      const old = [[pa, nA], [pb, nB]].filter(([p]) => pedLines(p) === 'old').map(([, n]) => n);
+      const old = [[idA, nA, pa], [idB, nB, pb]].filter(([, , p]) => pedLines(p) === 'old');
       sec('Shared ancestors', null, unreadable.length
         ? 'Twill could not tell which line each ancestor sits on in ' + unreadable.join(' and ') + '’s tree, so it will not guess a COI for this pair.'
-        : 'Open ' + old.join(' and ') + '’s Family tab once more. Twill now keeps which line each ancestor sits on, which a COI needs, and this tree was kept before it did.');
+        : both(old) + '’s tree was kept before Twill noted which line each ancestor sits on, which a COI needs. It is read again the next time you are on that Family page.');
       return;
     }
     const { coi, shared } = result;
@@ -2480,7 +2577,7 @@
   function renderCompare(ids) {
     const ws = ids.map((id) => ({ id, w: coll[id] })).filter((x) => x.w);
     if (ws.length < 2) {
-      sheet.append(h('div', { class: 'dk-empty', text: 'Pin at least two wolves whose pages you have opened. Twill only knows a wolf once you have looked at it.' }));
+      sheet.append(h('div', { class: 'dk-empty', text: 'Compare needs at least two pinned wolves with their genes read. A pinned wolf’s genes are read from its own page while you are on it.' }));
       return;
     }
     const rows = [['Sex', (w) => (w.sx || '').replace(/\s*\(.*/, '')], ['Age', (w) => w.ag || ''],
@@ -2693,74 +2790,144 @@
     check();
   }
 
-  function renderCollection() {
-    const mine = collectionTally();
-    const rows = [
-      ['Markings', mine.marks, Object.keys(GENETICS.marks).length],
-      ['Bases', mine.bases, Object.keys(GENETICS.bases).length],
-      ['Eyes', mine.eyes, Object.keys(GENETICS.eyes).length]
-    ];
-    const ownCount = Object.values(coll).filter((w) => w.own !== 0).length;
-    const otherCount = Object.keys(coll).length - ownCount;
-    if (!ownCount) {
-      sheet.append(h('div', { class: 'dk-empty', text: 'Nothing recorded yet. Twill adds a wolf here when you open its page, so walk through your den once and it will fill in.' }));
-      return;
+  /* The Collection is a checklist you keep yourself: tick what you have and the
+     counts follow. Nothing on any page fills it in. Markings are grouped by
+     shape, bases by Wolvden's own colour groups, eyes by where they come from. */
+  const collView = { tab: 'marks', q: '', tier: '', show: 'all', open: new Set() };
+  const collLists = {};
+  function collList(table) {
+    if (collLists[table]) return collLists[table];
+    const titled = (x) => x.replace(/\b\w/g, (c) => c.toUpperCase());
+    let out;
+    if (table === 'marks') {
+      // A marking key is its colour then its shape, and some colours are two
+      // words, so take the longest base name it starts with as the colour.
+      const colours = Object.keys(GENETICS.bases).sort((x, y) => y.length - x.length);
+      out = Object.entries(GENETICS.marks).map(([k, row]) => {
+        const c = colours.find((x) => k.startsWith(x + ' '));
+        const cut = c ? c.length + 1 : k.indexOf(' ') + 1;
+        return { k, name: titled(k), group: titled(k.slice(cut) || k), label: titled(k.slice(0, cut).trim() || k), tier: row[0] };
+      });
+    } else {
+      out = Object.entries(GENETICS[table]).map(([k, v]) => ({
+        k, name: v.n, label: v.n, group: (table === 'bases' ? v.g : v.s) || 'Other'
+      }));
     }
-    for (const [label, map, whole] of rows) {
-      sheet.append(h('div', { class: 'dk-lb', text: label + '  ·  ' + map.size + ' of ' + whole }));
-      const bar = h('div', { class: 'dk-bar' }, h('i', { style: 'width:' + Math.min(100, Math.round(map.size / whole * 100)) + '%' }));
-      sheet.append(bar);
-      const names = [...map.keys()].sort();
-      sheet.append(h('div', { class: 'dk-chips' }, ...names.slice(0, 40).map((n) =>
-        h('span', { class: 'dk-chip', title: map.get(n).join(', '), text: n + (map.get(n).length > 1 ? ' ×' + map.get(n).length : '') }))));
-      if (names.length > 40) sheet.append(h('div', { class: 'dk-empty', text: '+ ' + (names.length - 40) + ' more' }));
-    }
-    sheet.append(h('div', { class: 'dk-note' },
-      ownCount + ' of your own wolves recorded, from the pages you have opened'
-        + (otherCount ? ', and ' + otherCount + ' belonging to others, kept only so the Tray can pair them' : '') + '. ',
-      h('button', {
-        type: 'button', class: 'dk-btn dk-quiet', text: 'Forget all',
-        onclick: () => {
-          if (!confirm(forgetWolvesText())) return;
-          coll = {}; save('coll', coll); render();
-        }
-      })));
+    out.sort((x, y) => x.group.localeCompare(y.group) || x.name.localeCompare(y.name));
+    return (collLists[table] = out);
   }
 
-  function renderAchievements() {
-    const all = Object.entries(ach);
-    if (!all.length) {
-      sheet.append(h('div', { class: 'dk-empty', text: 'Nothing read yet. Open your achievements page and each category tab once; Twill keeps what it sees so you can look at all of them together here.' }));
-      return;
-    }
-    const cats = {};
-    for (const [name, a] of all) {
-      const c = a.c || 'other';
-      (cats[c] || (cats[c] = { got: [], left: [] }))[a.e ? 'got' : 'left'].push(name);
-    }
-    const got = all.filter(([, a]) => a.e).length;
-    sheet.append(h('div', { class: 'dk-lb', text: 'Overall  ·  ' + got + ' of ' + all.length }));
-    sheet.append(h('div', { class: 'dk-bar' }, h('i', { style: 'width:' + Math.round(got / all.length * 100) + '%' })));
+  function renderCollection() {
+    const v = collView;
+    const TABS = [['marks', 'Markings'], ['bases', 'Bases'], ['eyes', 'Eyes']];
+    const label = TABS.find(([t]) => t === v.tab)[1];
+    const all = collList(v.tab);
+    const whole = (t) => Object.keys(GENETICS[t]).length;
+    const fmt = (n) => n.toLocaleString('en-GB');
 
-    for (const c of Object.keys(cats).sort()) {
-      const { got: g, left } = cats[c];
-      const whole = g.length + left.length;
-      sheet.append(h('div', { class: 'dk-lb', text: c + '  ·  ' + g.length + ' of ' + whole }));
-      sheet.append(h('div', { class: 'dk-bar' }, h('i', { style: 'width:' + Math.round(g.length / whole * 100) + '%' })));
-      for (const name of left.slice(0, 6)) {
-        sheet.append(h('div', { class: 'dk-find dk-find-act' },
-          h('div', {}, h('strong', { text: name }), h('span', { text: ach[name].d || '' })),
-          h('button', {
-            type: 'button', class: 'dk-btn dk-quiet dk-goal-add', text: '+ goal',
-            onclick: (e) => {
-              if (!goals.some((x) => x.text === name)) { goals.push({ text: name, done: false }); saveGoals(); }
-              e.target.textContent = 'added';
-            }
-          })));
-      }
-      if (left.length > 6) sheet.append(h('div', { class: 'dk-empty', text: '+ ' + (left.length - 6) + ' more to earn' }));
+    const counts = {};
+    const tabs = h('div', { class: 'dk-ctabs', role: 'tablist' });
+    for (const [t, name] of TABS) {
+      counts[t] = h('small');
+      tabs.append(h('button', {
+        type: 'button', role: 'tab', class: 'dk-ctab', 'aria-selected': String(v.tab === t),
+        onclick: () => { v.tab = t; v.tier = ''; v.open.clear(); render(); }
+      }, name, counts[t]));
     }
-    sheet.append(h('div', { class: 'dk-note', text: 'Only the categories you have opened are in here. Nothing is fetched: each tab is read as you visit it.' }));
+    const fill = h('i');
+    sheet.append(tabs, h('div', { class: 'dk-bar' }, fill));
+
+    const find = h('input', { type: 'search', class: 'dk-cfind', value: v.q,
+      placeholder: 'Search ' + label.toLowerCase(), 'aria-label': 'Search ' + label.toLowerCase() });
+    find.addEventListener('input', () => { v.q = find.value; paint(); });
+    const filters = h('div', { class: 'dk-cfilt' });
+    if (v.tab === 'marks') {
+      const tiers = [...new Set(all.map((e) => e.tier))].sort((x, y) => x - y);
+      filters.append(h('label', {}, 'Tier ', h('select', {
+        'aria-label': 'Tier', onchange: (e) => { v.tier = e.target.value; paint(); }
+      }, h('option', { value: '', text: 'Any', selected: v.tier === '' }),
+      ...tiers.map((t) => h('option', { value: String(t), text: String(t), selected: v.tier === String(t) })))));
+    }
+    const seg = h('div', { class: 'dk-cseg', role: 'group', 'aria-label': 'Show' });
+    for (const [val, text] of [['all', 'All'], ['left', 'Still to get'], ['got', 'Got']]) {
+      seg.append(h('button', {
+        type: 'button', 'aria-pressed': String(v.show === val), text,
+        onclick: (ev) => {
+          v.show = val;
+          for (const btn of seg.children) btn.setAttribute('aria-pressed', String(btn === ev.currentTarget));
+          paint();
+        }
+      }));
+    }
+    filters.append(seg);
+    const list = h('div', { class: 'dk-clist' });
+    sheet.append(find, filters, list);
+
+    function paint() {
+      for (const [t] of TABS) counts[t].textContent = fmt(have[t].size) + ' of ' + fmt(whole(t));
+      fill.style.width = Math.min(100, Math.round(have[v.tab].size / whole(v.tab) * 100)) + '%';
+      const mine = have[v.tab];
+      const q = norm(v.q);
+      // Totals per group come from the whole table, so a filter never changes them.
+      const sums = new Map();
+      for (const e of all) {
+        const g = sums.get(e.group) || sums.set(e.group, { got: 0, of: 0 }).get(e.group);
+        g.of++;
+        if (mine.has(e.k)) g.got++;
+      }
+      const shown = new Map();
+      for (const e of all) {
+        if (q && !norm(e.name).includes(q)) continue;
+        if (v.tier !== '' && String(e.tier) !== v.tier) continue;
+        if (v.show !== 'all' && (v.show === 'got') !== mine.has(e.k)) continue;
+        (shown.get(e.group) || shown.set(e.group, []).get(e.group)).push(e);
+      }
+      list.textContent = '';
+      if (!shown.size) {
+        list.append(h('div', { class: 'dk-empty', text: v.show === 'got' && !mine.size
+          ? 'Nothing ticked yet. Pick All, then click a name to tick it.' : 'Nothing matches.' }));
+        return;
+      }
+      // Searching or filtering opens every group it leaves standing.
+      const narrowed = q || v.tier !== '' || v.show !== 'all';
+      for (const [group, entries] of shown) {
+        const open = narrowed || v.open.has(group);
+        const sum = sums.get(group);
+        list.append(h('button', {
+          type: 'button', class: 'dk-cgrp', 'aria-expanded': String(open),
+          onclick: () => { if (v.open.has(group)) v.open.delete(group); else v.open.add(group); paint(); }
+        }, h('b', { text: (open ? '▾ ' : '▸ ') + group }), h('span', { text: sum.got + ' of ' + sum.of })));
+        if (!open) continue;
+        list.append(h('div', { class: 'dk-chips' }, ...entries.map((e) => {
+          const got = mine.has(e.k);
+          return h('button', {
+            type: 'button', class: 'dk-chip' + (got ? ' dk-chip-got' : ''), 'aria-pressed': String(got),
+            title: e.name + (got ? ', ticked' : ''),
+            onclick: () => {
+              have = loadHave();   // another tab may have ticked something since
+              if (have[v.tab].has(e.k)) have[v.tab].delete(e.k); else have[v.tab].add(e.k);
+              saveHave();
+              paint();
+            }
+          }, e.label, e.tier != null ? h('span', { class: 'dk-ctier', text: 'T' + e.tier }) : null);
+        })));
+      }
+    }
+    paint();
+
+    sheet.append(h('div', { class: 'dk-note' },
+      'Click a name to tick it, and again to untick it. You keep this list yourself: Twill never fills it in from a page. ',
+      h('button', {
+        type: 'button', class: 'dk-btn dk-quiet', text: 'Untick everything',
+        onclick: () => {
+          const n = haveCount();
+          if (!n || !confirm('Untick all ' + fmt(n) + ' in your Collection?')) return;
+          have = loadHave();
+          for (const t of HAVE_TABLES) have[t].clear();
+          saveHave();
+          render();
+        }
+      })));
   }
 
   // Everything Twill keeps lives under denkit: keys, so a backup is just
@@ -2806,6 +2973,9 @@
         }
         if (!confirm('Replace all Twill settings with the ones in the box?')) return;
         for (const [k, v] of Object.entries(incoming.data)) save(k, v);
+        // A backup made by an older version can carry wolves outside the tray,
+        // and the two stores Twill no longer keeps. Neither comes back.
+        pruneToTray();
         Object.assign(core, { theme: 'preset:cypres', drafts: {}, custom: {}, enabled: {}, corner: 'br', button: 'full', buttonSize: 40, buttonPlate: false }, load('core', {}));
         paintTheme();
         placeUi();
@@ -5783,7 +5953,7 @@
                   next[f.id] = ref ? (ref.id || ref.text) : '';
                 } else next[f.id] = v;
               }
-              saveLore(id, next);
+              saveLore(id, next, wolfPageName());
               redraw(false);
             }
           }),
@@ -6012,8 +6182,8 @@
         const rec = lore[id];
         const live = Object.keys(rec).filter((k) => loreField(k)).length;
         box.append(h('a', { class: 'dk-find dk-find-link', href: '/wolf/' + id, title: 'Open this wolf' },
-          h('strong', { text: rec.called || rec.title || 'Wolf #' + id }),
-          h('span', { text: live + ' fields  \u00b7  #' + id })));
+          h('strong', { text: rec.called || rec._n || rec.title || 'Wolf #' + id }),
+          h('span', { text: live + (live === 1 ? ' field' : ' fields') + '  \u00b7  #' + id })));
       }
       box.append(h('div', { class: 'dk-note', text: 'Lore lives in this browser only. It is never shown to anyone else and never sent anywhere. Back it up from the Backup screen.' }));
     }
@@ -6113,62 +6283,69 @@
 
     /* No answer is given here. A COI on its own tells you half of what a pairing
        raises, so the check happens in the tray's Pairing view, beside what the
-       pups could actually inherit. This card only says the tree has been kept. */
-    function build(id, me) {
+       pups could actually inherit. This card only says whether the tree has
+       been kept, which happens only for a wolf in the tray. */
+    function build(me, kept) {
       const host = h('section', { id: 'dk-ped', 'aria-label': 'Pedigree' });
-      const kept = Object.keys(me.a).length;
+      const n = Object.keys(me.a).length;
+      const facts = [me.gen ? me.gen + ' generation' : '', me.coi ? 'own COI ' + me.coi : '',
+        kept ? n + ' named ancestor' + (n === 1 ? '' : 's') + ' kept' : ''].filter(Boolean).join('  ·  ');
       const body = h('div', { class: 'dk-ped-b' },
         h('div', {}, h('b', { text: me.n || 'This wolf' }),
-          h('span', { class: 'dk-ped-note', style: 'display:block;margin-top:2px',
-            text: [me.gen ? me.gen + ' generation' : '', me.coi ? 'own COI ' + me.coi : '',
-              kept + ' named ancestor' + (kept === 1 ? '' : 's') + ' kept'].filter(Boolean).join('  ·  ') })),
-        h('div', { class: 'dk-ped-note' },
-          'Pin this wolf and one other, then Pair them: the shared ancestors and the pup’s COI show up there, next to the markings, eyes, skin, nose and base the pups could get.'));
-      host.append(h('div', { class: 'dk-ped-h' }, h('b', { text: 'Pedigree kept' })), body);
+          facts ? h('span', { class: 'dk-ped-note', style: 'display:block;margin-top:2px', text: facts }) : null),
+        h('div', { class: 'dk-ped-note', text: kept
+          ? 'Pair this wolf with another in the tray: the pups’ generation, the shared ancestors and the pup’s COI show up there, next to the markings, eyes, skin, nose and base the pups could get. Take it out of the tray and Twill forgets this tree.'
+          : 'Not kept. Twill keeps a family tree only for a wolf in your tray. Pin this one with the button beside its name and its tree is kept straight away.' }));
+      host.append(h('div', { class: 'dk-ped-h' }, h('b', { text: kept ? 'Pedigree kept' : 'Pedigree' })), body);
       return host;
     }
 
-    /* Keep the eight most recently opened trees, the same ceiling the tray uses,
-       so the two stay in step: any wolf you can still pin, you can still pair.
-       Recency comes from a stored timestamp rather than key order, because a
-       plain object sorts integer-like keys (wolf ids) numerically, not by
-       insertion. Trees without one are pre-cap records and go first. */
-    const PED_MAX = 8;
+    // The tree on this Family page. It is read for the card either way, but only
+    // saved while this wolf is in the tray.
+    let pageTree = null;
 
-    function trimPed() {
-      const ids = Object.keys(ped);
-      if (ids.length <= PED_MAX) return;
-      ids.sort((a, b) => (ped[b].t || 0) - (ped[a].t || 0));
-      for (const id of ids.slice(PED_MAX)) delete ped[id];
+    function keepTree(fresh) {
+      const page = currentPage();
+      if (!pageTree) return;
+      const kept = tray.includes(page.id);
+      if (kept && (fresh || !ped[page.id])) {
+        // Start from the stored trees, not this tab's copy, so a tree read in
+        // another tab since this one loaded is never written over.
+        ped = load('ped', {});
+        ped[page.id] = Object.assign({}, pageTree, { t: Date.now() });
+        save('ped', ped);
+      }
+      const next = build(pageTree, kept);
+      if (card) {
+        card.replaceWith(next);
+      } else {
+        const anchor = document.querySelector('#main hr') || document.querySelector('#main .row');
+        if (!anchor) return;
+        anchor.parentNode.insertBefore(next, anchor);
+      }
+      card = next;
     }
 
     function start() {
       const page = currentPage();
       if (page.kind !== 'family' || card) return;
-      const me = readTree();
-      if (!me) return;
-      me.t = Date.now();
-      ped[page.id] = me;
-      trimPed();
-      save('ped', ped);
+      pageTree = readTree();
+      if (!pageTree) return;
       document.head.append(styleEl);
-      const anchor = document.querySelector('#main hr') || document.querySelector('#main .row');
-      if (!anchor) return;
-      card = build(page.id, me);
-      anchor.parentNode.insertBefore(card, anchor);
+      keepTree(true);
     }
 
     function stop() {
       if (card) card.remove();
-      card = null;
+      card = pageTree = null;
       styleEl.remove();
     }
 
     function settings(box) {
       const ids = Object.keys(ped).sort((a, b) => (ped[b].t || 0) - (ped[a].t || 0));
-      box.append(h('div', { class: 'dk-lb', text: 'Pedigrees recorded  ·  ' + ids.length + ' of ' + PED_MAX }));
+      box.append(h('div', { class: 'dk-lb', text: 'Family trees kept  ·  ' + ids.length }));
       if (!ids.length) {
-        box.append(h('div', { class: 'dk-empty', text: 'Open a wolf’s Family tab. Twill keeps the tree it finds so it can compare two wolves later.' }));
+        box.append(h('div', { class: 'dk-empty', text: 'None yet. A wolf in your tray has its tree kept when you are on its Family page.' }));
       }
       for (const id of ids) {
         box.append(h('div', { class: 'dk-find' },
@@ -6179,14 +6356,20 @@
         type: 'button', class: 'dk-btn dk-quiet', text: 'Forget all',
         onclick: () => {
           const n = Object.keys(ped).length;
-          if (!confirm('Forget all ' + n + (n === 1 ? ' family tree' : ' family trees') + '? Opening a Family tab again keeps it again.')) return;
+          if (!confirm('Forget all ' + n + (n === 1 ? ' family tree' : ' family trees') + '? The wolves stay in the tray.')) return;
           ped = {}; save('ped', ped); screen = 'pedigree'; render();
         }
       })));
-      box.append(h('div', { class: 'dk-note', text: 'Twill keeps the last 8 family trees you opened, the same number the tray holds, and drops the oldest beyond that. Two wolves can only be compared once you have opened both of their family pages yourself. Twill never loads a page you did not visit. The comparison itself lives in the tray’s Pairing view.' }));
+      box.append(h('div', { class: 'dk-note', text: 'Twill keeps a family tree only for a wolf in your tray, 8 at most, read from its Family page while you are on it. Take the wolf out of the tray and its tree goes too. Twill never loads a page for you. The comparison itself lives in the tray’s Pairing view.' }));
     }
 
-    return { id: 'pedigree', name: 'Pedigree', blurb: 'Keeps family trees for pairing', start, stop, reload: () => { ped = load('ped', {}); }, settings };
+    return {
+      id: 'pedigree', name: 'Pedigree', blurb: 'Keeps family trees for the tray', start, stop,
+      reload: () => { ped = load('ped', {}); }, settings,
+      // The tray changed: keep this page's tree if its wolf was just pinned, and
+      // say so on the card either way.
+      sync: () => keepTree(false)
+    };
   })());
 
   // ===================================================== module: shopping list
@@ -6253,33 +6436,14 @@
 
     const scan = () => document.querySelectorAll('.item').forEach(mark);
 
-    /* While we are walking the Hoard anyway, remember what is in it by name.
-       The wardrobe uses this to say whether a decor you have picked is one you
-       can actually use: Wolvden's own page gives no ownership signal at all.
-       Names only, from your own Hoard, and only a page you opened yourself. */
-    function rememberOwned() {
-      if (currentPage().kind !== 'hoard') return;
-      const seen = new Set(load('owned', []) || []);
-      const before = seen.size;
-      for (const item of document.querySelectorAll('.item')) {
-        if (item.querySelector('a[href*="/wolf/"]')) continue;
-        const head = item.querySelector('.item-head');
-        const img = item.querySelector('img[alt]');
-        const nm = ((head && head.textContent) || (img && img.alt) || '').replace(/\s+/g, ' ').trim();
-        if (nm) seen.add(nm);
-      }
-      if (seen.size !== before) save('owned', [...seen]);
-    }
-
     function start() {
       const page = currentPage();
       if (observer || !['hoard', 'trades', 'trade', 'other'].includes(page.kind)) return;
       if (!document.querySelector('.item')) return;
       document.head.append(styleEl);
       scan();
-      rememberOwned();
       // Hoard filtering and paging redraw in place.
-      observer = new MutationObserver(() => { scan(); rememberOwned(); });
+      observer = new MutationObserver(scan);
       observer.observe(document.querySelector('#hoard') || document.body, { childList: true, subtree: true });
     }
 
@@ -6334,6 +6498,7 @@
        on a wolf's page and on its family page; the strip docks at the bottom. */
     let strip = null;
     let pin = null;
+    let refreshPin = null;      // redraws the pin's label when the tray changes elsewhere
 
     const styleEl = h('style', {}, `
       #dk-tray {
@@ -6405,7 +6570,7 @@
         strip.append(chip, h('button', {
           type: 'button', class: 'dk-tray-x', text: '×', title: 'Take ' + nameFor(id) + ' out',
           'aria-label': 'Remove ' + nameFor(id),
-          onclick: () => { tray = tray.filter((x) => x !== id); picked = picked.filter((x) => x !== id); saveTray(); paint(); }
+          onclick: () => { tray = load('tray', []).filter((x) => x !== id); picked = picked.filter((x) => x !== id); saveTray(); trayChanged(); }
         }));
       }
       // Pair wants exactly two; Compare is happy with any of them.
@@ -6425,6 +6590,26 @@
       }
     }
 
+    /* A pinned wolf's genes are read from its own page, here and now, while you
+       are on it. Nothing is read for a wolf that is not in the tray. */
+    function keepThis(fresh) {
+      const page = currentPage();
+      if (page.kind !== 'wolf' || !tray.includes(page.id)) return;
+      if (!fresh && coll[page.id]) return;
+      const rec = readWolfPage();
+      if (!rec) return;
+      coll = load('coll', {});   // start from the stored copy, never this tab's
+      coll[page.id] = rec;
+      save('coll', coll);
+    }
+
+    // After any change to the tray: drop what left it, keep what joined it, and
+    // let the Pedigree and any open screen catch up.
+    function trayChanged() {
+      pruneToTray();
+      resync();
+    }
+
     function addPin(id, host) {
       const set = () => {
         const on = tray.includes(id);
@@ -6434,13 +6619,15 @@
       pin = h('button', {
         type: 'button', class: 'dk-pin', title: 'Pin this wolf so you can pair it with another',
         onclick: () => {
+          // Start from the stored tray, in case another tab changed it.
+          tray = load('tray', []);
           if (tray.includes(id)) tray = tray.filter((x) => x !== id);
           else tray = tray.concat(id).slice(-8);
           saveTray();
-          set();
-          paint();
+          trayChanged();
         }
       });
+      refreshPin = set;
       set();
       host.append(pin);
     }
@@ -6457,115 +6644,60 @@
         const head = document.querySelector('#main h1');
         if (head) addPin(page.id, head);
       }
+      keepThis(true);   // refresh a pinned wolf's age and genes while on its page
     }
 
     function stop() {
       if (strip) strip.remove();
       if (pin) pin.remove();
-      strip = pin = null;
+      strip = pin = refreshPin = null;
       styleEl.remove();
     }
 
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0' },
-        'Wolvden has no page that shows two wolves at once, so pin them as you browse. The tray keeps up to 8; pick two and Pair reads across everything Twill has of them.'));
+        'Wolvden has no page that shows two wolves at once, so pin them as you browse. The tray keeps up to 8; pick two and Pair reads across everything Twill has of them. A pinned wolf’s genes come from its own page and its family tree from its Family page, read while you are on them. Take a wolf out and Twill forgets both.'));
       box.append(h('div', { class: 'dk-lb', text: 'In the tray  ·  ' + tray.length }));
       for (const id of tray) {
         box.append(h('div', { class: 'dk-find' },
           h('strong', { text: nameFor(id) }),
-          h('span', { text: [coll[id] ? 'genes read' : 'page not opened', ped[id] ? 'tree read' : 'family tab not opened'].join('  ·  ') })));
+          h('span', { text: (coll[id] ? 'genes read' : 'no genes yet') + '  ·  ' + (ped[id] ? 'tree read' : 'no tree yet') })));
       }
       if (!tray.length) box.append(h('div', { class: 'dk-empty', text: 'Nothing pinned. The button sits beside a wolf’s name.' }));
       box.append(h('div', { class: 'dk-btns' }, h('button', {
         type: 'button', class: 'dk-btn dk-quiet', text: 'Empty the tray',
         onclick: () => {
-          if (!confirm('Take every wolf out of the tray?')) return;
-          tray = []; saveTray(); paint(); screen = 'tray'; render();
+          if (!confirm('Take every wolf out of the tray? Twill forgets their genes and family trees too.')) return;
+          tray = []; saveTray(); trayChanged(); screen = 'tray'; render();
         }
       })));
     }
 
     return {
       id: 'tray', name: 'Tray', blurb: 'Pin two wolves, then pair them',
-      start, stop, reload: () => { tray = load('tray', []); }, settings
+      start, stop, reload: () => { tray = load('tray', []); }, settings,
+      // The tray changed, here or in another tab, or a wolf in it was read: redraw,
+      // and read this page's wolf if it has just been pinned.
+      sync: () => { keepThis(false); paint(); if (refreshPin) refreshPin(); }
     };
   })());
 
   // =================================================== module: collection
 
   defineModule((() => {
-    // No page furniture: this one just remembers what your own wolves carry, from
-    // the wolf pages you open, so the Collection screen has something to count.
-    function start() {
-      const page = currentPage();
-      if (page.kind !== 'wolf') return;
-      const main = document.querySelector('#main');
-      if (!main) return;
-      const row = (label) => {
-        for (const lab of main.querySelectorAll('td.b')) {
-          if (lab.textContent.replace(/\s+/g, ' ').trim() !== label) continue;
-          const cell = lab.nextElementSibling;
-          if (!cell) return '';
-          // The value is the cell's first text. Genetics marks the cell itself and
-          // only appends after the value, so this holds whether it ran or not.
-          const node = [...cell.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
-          if (node) return node.textContent.replace(/\s+/g, ' ').trim();
-          // Some values are links rather than plain text (Carrier Status).
-          const link = cell.querySelector('a');
-          return link ? link.textContent.replace(/\s+/g, ' ').trim() : '';
-        }
-        return '';
-      };
-      // Markings keep their slot, because a combo marking only happens when both
-      // parents bring their colour in the same slot.
-      const marks = [];
-      for (let i = 1; i <= 10; i++) {
-        const v = row('Slot ' + i);
-        if (v && !/^none\.?$/i.test(v)) marks.push([i, v]);
-      }
-      const muts = ['Mutation', 'Secondary Mutation', 'Tertiary Mutation']
-        .map(row).filter((v) => v && !/^none\.?$/i.test(v));
-      // The heading carries decoration icons either side of the name, and by now
-      // the tray has put its pin button in there too.
-      const h1 = main.querySelector('h1');
-      const head = h1 ? h1.cloneNode(true) : null;
-      if (head) for (const b of head.querySelectorAll('button, .dk-pin')) b.remove();
-      const rec = {
-        n: head ? head.textContent.replace(/\s+/g, ' ').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').trim() : '',
-        b: row('Base'), g: row('Base Genetics'), e: row('Eyes'), m: marks,
-        s: row('Skin'), no: row('Nose'), c: row('Claws'),
-        mu: muts, ca: row('Carrier Status'), sx: row('Sex'), ag: row('Age'),
-        // Whose wolf this is, under its own key: 'm' was already taken, by the
-        // markings. Every wolf page is recorded, because the Tray has
-        // to be able to pair one of yours with one from a trade or the forums,
-        // but only your own are counted as part of your Collection.
-        own: isMyWolf() ? 1 : 0
-      };
-      if (!rec.b && !marks.length) return;   // not a wolf page after all
-      coll[page.id] = rec;
-      save('coll', coll);
-    }
-
+    // No page furniture and nothing read from any page: the Collection is a
+    // checklist you tick yourself, on its own screen in the hub.
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0' },
-        'Each wolf is noted as you open its page: base, eyes and markings, and nothing else. Only your own pack is counted here, so browsing trades and the forums does not inflate your Collection, but wolves belonging to other players are still kept so the Tray can pair one of yours with one of theirs. Only your own browser ever sees any of it.'));
-      box.append(h('div', { class: 'dk-note' },
-        'Recorded before version 0.13.1 and looks wrong? Earlier versions saved every wolf page you opened, yours or not. Forget all, then walk your den once to rebuild it cleanly.'));
-      box.append(h('div', { class: 'dk-lb', text: 'Recorded  ·  ' + Object.keys(coll).length + ' wolves' }));
+        'A checklist of every base, eye colour and marking in the game. Tick the ones you have and Twill counts them for you. You keep it yourself: Twill never fills it in from a page.'));
+      box.append(h('div', { class: 'dk-lb', text: 'Ticked  ·  ' + haveCount().toLocaleString('en-GB') }));
       box.append(h('div', { class: 'dk-btns' },
-        h('button', { type: 'button', class: 'dk-btn', text: 'Open Collection', onclick: () => { screen = 'collection'; render(); } }),
-        h('button', {
-          type: 'button', class: 'dk-btn dk-quiet', text: 'Forget all',
-          onclick: () => {
-            if (!confirm(forgetWolvesText())) return;
-            coll = {}; save('coll', coll); screen = 'collect'; render();
-          }
-        })));
+        h('button', { type: 'button', class: 'dk-btn', text: 'Open Collection', onclick: () => { screen = 'collection'; render(); } })));
     }
 
     return {
-      id: 'collect', name: 'Collection', blurb: 'Remembers what your wolves carry',
-      start, stop() {}, reload: () => { coll = load('coll', {}); }, settings
+      id: 'collect', name: 'Collection', blurb: 'A checklist of what you have',
+      start() {}, stop() {}, reload: () => { have = loadHave(); }, settings
     };
   })());
 
@@ -6726,9 +6858,6 @@
       return (RECIPE_BOOK.recipes || []).find((r) => normName(r.n) === want) || null;
     }
 
-    // Decor you hold, learned from your own Hoard (see the hoard reader below).
-    const ownedSet = () => new Set((load('owned', []) || []).map(normName));
-
     /* What is in the ten slots right now, drawn in Twill's own panel.
 
        An earlier build wrote a small note into each of Wolvden's table cells
@@ -6738,14 +6867,11 @@
        through someone else's table anyway. Nothing is written into the game's
        DOM now except the preview layers, which have their own observer. */
     function slotList(into) {
-      const owned = ownedSet();
-      const known = owned.size > 0;
       const rows = [];
       for (const sel of slots()) {
         const pick = chosenOf(sel);
         if (!pick) continue;
         const r = recipeFor(pick.name);
-        const has = owned.has(normName(pick.name));
         const line = h('div', { class: 'dk-wd-slot' },
           h('div', { class: 'dk-wd-sname' },
             h('strong', { text: pick.name }),
@@ -6753,10 +6879,6 @@
         if (r) {
           line.append(h('div', { class: 'dk-wd-rec',
             text: 'crafted  \u00b7  ' + r.i.map(([n, q]) => n + (q > 1 ? ' \u00d7' + q : '')).join(', ') }));
-        }
-        if (known) {
-          line.append(h('div', { class: 'dk-wd-own ' + (has ? 'dk-wd-yes' : 'dk-wd-no'),
-            text: has ? 'in your hoard' : 'not in your hoard' }));
         }
         rows.push(line);
       }
@@ -6801,17 +6923,10 @@
           h('strong', { text: 'Trying on ' + o.n }),
           h('span', { text: 'The picture shows this look. Your dropdowns are untouched.' })),
         h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Stop trying on', onclick: stopTrying })));
-      const owned = ownedSet();
-      const rows = lookDecor(o).map((d) => {
-        const name = d.opt.textContent.trim();
-        const has = owned.has(normName(name));
-        return h('div', { class: 'dk-wd-slot' },
-          h('div', { class: 'dk-wd-sname' },
-            h('strong', { text: name }),
-            h('span', { text: 'SLOT ' + d.slot + (d.below ? '  ·  behind' : '') })),
-          owned.size ? h('div', { class: 'dk-wd-own ' + (has ? 'dk-wd-yes' : 'dk-wd-no'),
-            text: has ? 'in your hoard' : 'not in your hoard' }) : null);
-      });
+      const rows = lookDecor(o).map((d) => h('div', { class: 'dk-wd-slot' },
+        h('div', { class: 'dk-wd-sname' },
+          h('strong', { text: d.opt.textContent.trim() }),
+          h('span', { text: 'SLOT ' + d.slot + (d.below ? '  ·  behind' : '') }))));
       for (const c of o.c || []) {
         if (!c.on) continue;
         rows.push(h('div', { class: 'dk-wd-slot' }, h('div', { class: 'dk-wd-sname' },
@@ -6891,12 +7006,6 @@
         h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Save look', onclick: keep })));
 
       slotList(body);
-
-      const owned = ownedSet();
-      body.append(h('div', { class: 'dk-wd-hint', style: 'margin-top:8px',
-        text: owned.size
-          ? 'Whether you hold a decor is checked against the ' + owned.size + ' items Twill has seen in your hoard.'
-          : 'Open your Hoard once and Twill will learn what you hold, then say which of these you can actually use.' }));
     }
 
     function build() {
@@ -6954,7 +7063,6 @@
         .dk-wd-sname strong { font-weight: 600; }
         .dk-wd-sname span { margin-left: auto; flex: none; color: var(--dk-muted); font-size: 10px; letter-spacing: .05em; }
         .dk-wd-rec { color: var(--dk-muted); font-size: 10.5px; line-height: 1.45; }
-        .dk-wd-own { font-size: 10.5px; }
         .dk-wd-trying {
           display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; padding: 8px 10px;
           background: var(--dk-surface); border-left: 3px solid var(--dk-accent); border-radius: 0;
@@ -6963,8 +7071,6 @@
         .dk-wd-trying-t strong { display: block; font-weight: 600; }
         .dk-wd-trying-t span { display: block; color: var(--dk-muted); font-size: 11px; }
         .dk-wd-on { flex: none; color: var(--dk-accent); font-size: 11px; }
-        .dk-wd-yes { color: var(--dk-accent); }
-        .dk-wd-no { color: var(--dk-muted); }
       `);
       if (!styleEl.isConnected) document.head.appendChild(styleEl);
       panel = build();
@@ -6999,7 +7105,7 @@
 
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0', text:
-        'Wolvden\u2019s wardrobe already lets you preview every decor, owned or not, 10 at a time. Twill adds the 3 things it does not: custom decor as extra layers, looks you can keep and compare, and a line under each slot saying where that decor comes from and whether you hold it.' }));
+        'Wolvden\u2019s wardrobe already lets you preview every decor, owned or not, 10 at a time. Twill adds the 3 things it does not: custom decor as extra layers, looks you can keep and compare, and a line under each slot saying where that decor comes from.' }));
       box.append(h('div', { class: 'dk-lb', text: 'Saved' }));
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0',
         text: ws.outfits.length + (ws.outfits.length === 1 ? ' outfit' : ' outfits') + ', '
@@ -7252,66 +7358,6 @@
     return {
       id: 'fishing', name: 'Fishing colours', blurb: 'Makes the red, green and ripples readable',
       start, stop, reload: reloadFish, settings
-    };
-  })());
-
-  // ================================================= module: achievements
-
-  defineModule((() => {
-    // Earned entries are alert-info and carry an "Earned on" line; the ones still
-    // to get are alert-light. Both give a name and a description.
-    function start() {
-      const page = currentPage();
-      if (page.kind !== 'achievements') return;
-      const main = document.querySelector('#main');
-      if (!main) return;
-      let found = 0;
-      for (const box of main.querySelectorAll('.alert')) {
-        const name = box.querySelector('h4');
-        if (!name) continue;
-        const title = name.textContent.replace(/\s+/g, ' ').trim();
-        if (!title) continue;
-        const earned = [...box.querySelectorAll('small')].map((s) => s.textContent)
-          .find((t) => /Earned on/i.test(t));
-        // The description is the text after the rule, minus the earned line.
-        let desc = box.textContent.replace(name.textContent, '');
-        for (const s of box.querySelectorAll('small')) desc = desc.replace(s.textContent, '');
-        desc = desc.replace(/\s+/g, ' ').trim();
-        // The Recent tab names each entry's category; a category tab is the url.
-        const catLink = box.querySelector('a[href*="/achievements/"]');
-        const fromLink = catLink && (catLink.getAttribute('href').match(/\/achievements\/\d+\/(\w+)/) || [])[1];
-        const cat = page.cat !== 'recent' ? page.cat : (fromLink || 'other');
-        ach[title] = { c: cat, d: desc, e: earned ? earned.replace(/.*Earned on\s*/i, '').trim() : '' };
-        found++;
-      }
-      if (found) save('ach', ach);
-    }
-
-    function settings(box) {
-      const all = Object.entries(ach);
-      box.append(h('div', { class: 'dk-note', style: 'margin-top:0' },
-        'Wolvden puts each category behind its own tab. Twill keeps what it reads as you visit them, so you can see all of it in one place.'));
-      box.append(h('div', { class: 'dk-lb', text: 'Read so far  ·  ' + all.length }));
-      const cats = {};
-      for (const [, a] of all) cats[a.c || 'other'] = (cats[a.c || 'other'] || 0) + 1;
-      for (const c of Object.keys(cats).sort()) {
-        box.append(h('div', { class: 'dk-find' }, h('strong', { text: c }), h('span', { text: cats[c] + ' read' })));
-      }
-      box.append(h('div', { class: 'dk-btns' },
-        h('button', { type: 'button', class: 'dk-btn', text: 'Open Achievements', onclick: () => { screen = 'achievements'; render(); } }),
-        h('button', {
-          type: 'button', class: 'dk-btn dk-quiet', text: 'Forget all',
-          onclick: () => {
-            const n = Object.keys(ach).length;
-            if (!confirm('Forget all ' + n + (n === 1 ? ' achievement' : ' achievements') + ' Twill has read? Visiting the achievement tabs again reads them back.')) return;
-            ach = {}; save('ach', ach); screen = 'achieve'; render();
-          }
-        })));
-    }
-
-    return {
-      id: 'achieve', name: 'Achievements', blurb: 'Every category in one place',
-      start, stop() {}, reload: () => { ach = load('ach', {}); }, settings
     };
   })());
 

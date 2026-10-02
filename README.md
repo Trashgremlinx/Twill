@@ -36,22 +36,21 @@ Updates happen by themselves after that. Nothing you have saved is ever lost whe
 
 ## What is in it
 
-14 tools, each of which can be switched off on its own.
+13 tools, each of which can be switched off on its own.
 
 | | |
 |---|---|
 | **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. Built from 251 bases, 194 eye colours, 2,370 markings and 28 mutations |
 | **Lore** | Your own fields on a wolf's page, in sections you name. Wolf-link fields cross reference both ways, so if one wolf is bonded to another, both pages say so |
-| **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, plus shared ancestors and the inbreeding figure for a pairing you have not made yet |
-| **Pedigree** | Keeps the family trees the pairing check needs |
-| **Collection** | Notes the base, eyes and markings of your own wolves, counted against the full catalogue |
+| **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, plus shared ancestors and the inbreeding figure for a pairing you have not made yet |
+| **Pedigree** | Keeps the family trees the pairing check needs, for the wolves in your tray |
+| **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
 | **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades. Every section folds on its own |
 | **Wardrobe** | Custom decor as extra layers, plus looks you can save and try on again in the preview |
 | **Item Lookup** | A magnifier on any item: 284 recipes, the catalogue, or the trading centre, already searched |
 | **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear |
 | **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
 | **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |
-| **Achievements** | All 11 categories in one place |
 | **Fishing colours** | An accessibility filter for red-blind and green-blind players. It does not point at the fish |
 | **Hide users** | Collapses posts from players you would rather not read |
 
@@ -71,6 +70,8 @@ and **Backup** so you can carry everything with you to another computer.
 - It **never refreshes** anything on a timer. You still bump your own trades, raffles and
   chatter posts.
 - It **sends nothing anywhere**. No server, no account, no tracking, no analytics.
+- It **does not gather up the site**. Nothing is kept from Wolvden beyond the wolves you pin
+  to the tray, 8 at most, and they are forgotten when you take them out.
 
 These are facts about the source rather than promises. There is no `fetch`, `XMLHttpRequest`,
 `sendBeacon`, `WebSocket`, `setInterval`, `.submit()` or `location.href` anywhere in the file,
@@ -79,7 +80,9 @@ and the script runs with `@grant none`.
 ## Your data
 
 Everything lives in your own browser's `localStorage`, under keys prefixed `denkit:`, and never
-leaves your machine. Your notes, lore, records and settings are readable only by that browser.
+leaves your machine. Almost all of it is what you wrote yourself: notes, lore, goals, lists, your
+Collection ticks and settings. The only thing taken from Wolvden's pages is the genes and family
+tree of each wolf you pin to the tray, 8 at most, and those are deleted when the wolf leaves it.
 Clearing site data removes all of it, so use **Backup** in the hub if you are moving computers.
 
 The file is around 600KB because every fact it explains is bundled inside it: bases, eye colours,
