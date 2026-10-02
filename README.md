@@ -33,6 +33,9 @@ Two steps.
 Then open Wolvden. The Twill mark sits in the corner of every page. Click it, or press `Alt+K`.
 
 Updates happen by themselves after that. Nothing you have written or set is lost when it updates.
+Don't want to wait? Click the Tampermonkey icon in your browser and choose **Check for userscript
+updates**, or click the install link again. If Tampermonkey asks before installing the new version,
+say yes.
 
 ## What is in it
 
