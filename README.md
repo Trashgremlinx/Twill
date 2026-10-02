@@ -36,13 +36,13 @@ Updates happen by themselves after that. Nothing you have written or set is lost
 
 ## What is in it
 
-13 tools, each of which can be switched off on its own.
+14 tools, each of which can be switched off on its own.
 
 | | |
 |---|---|
-| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. Built from 251 bases, 194 eye colours, 2,370 markings and 28 mutations |
+| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 251 bases, 194 eye colours, 2,370 markings, 28 mutations and 40 personalities |
 | **Lore** | Your own fields on a wolf's page, in sections you name. Wolf-link fields cross reference both ways, so if one wolf is bonded to another, both pages say so |
-| **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, plus shared ancestors and the inbreeding figure for a pairing you have not made yet |
+| **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet |
 | **Pedigree** | Keeps the family trees the pairing check needs, for the wolves in your tray |
 | **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
 | **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades. Every section folds on its own |
@@ -51,6 +51,7 @@ Updates happen by themselves after that. Nothing you have written or set is lost
 | **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear |
 | **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
 | **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |
+| **Explore bars** | Your Energy and HP drawn just above the explore box, so a phone never has to scroll down for them. On by default on phones, with a switch for computers |
 | **Fishing colours** | An accessibility filter for red-blind and green-blind players. It does not point at the fish |
 | **Hide users** | Collapses posts from players you would rather not read |
 

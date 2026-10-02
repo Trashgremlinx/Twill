@@ -116,6 +116,12 @@
                 background:linear-gradient(180deg,#d9c98a,#b8a45c 38%,#8d7d42)}
   .gene.g2::before{background:linear-gradient(180deg,#7fd3b0,#4bb08a 38%,#357f64)}
   .cap{color:var(--t-muted);font-size:10.5px;margin-top:6px}
+  .xbrow{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+  .xblab{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.06em;
+         text-transform:uppercase;color:var(--t-muted);margin-bottom:3px}
+  .xblab b{color:var(--t-text);letter-spacing:0}
+  .xbtrack{height:7px;border-radius:4px;overflow:hidden;background:color-mix(in srgb,var(--t-text) 13%,transparent)}
+  .xbtrack i{display:block;height:100%;border-radius:4px}
   .ctabs{display:flex;gap:4px;margin-bottom:6px}
   .ctab{flex:1;min-width:0;text-align:center;padding:3px 2px;font-size:11px;line-height:1.25;
         border:1px solid var(--t-line);background:var(--t-surface);color:var(--t-muted);border-radius:var(--t-radius)}
@@ -229,7 +235,7 @@
     <img class="mark" src="data:image/png;base64,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" alt="">
     <h1>Twill</h1>
     <p class="sub">A Society of Fur toolkit for Wolvden</p>
-    <div class="ver">version 0.33.1</div>
+    <div class="ver">version 0.34.0</div>
   </header>
 
   <h2 style="margin-top:34px">What is Twill?</h2>
@@ -404,7 +410,7 @@
   </script>
 
   <h2>Under the hood</h2>
-  <p class="say">All 13, each with what it does and a slice of what it actually draws.
+  <p class="say">All 14, each with what it does and a slice of what it actually draws.
   Pick one. They repaint in whichever colourway you chose above.</p>
   <div class="gchips" id="pchips" role="group" aria-label="Panels"></div>
   <div class="gpane" id="ppane"></div>
@@ -422,7 +428,9 @@
               'obtained, what it can breed into, and whether it is lethal. Clicking pins the ' +
               'card so it can be scrolled.',
               'The coloured mark beside each gene says at a glance how that trait is obtained, ' +
-              'so a page of markings can be read without opening anything.'],
+              'so a page of markings can be read without opening anything. The personality gets ' +
+              'a pill naming its disposition, and a card with its stats, what pups inherit, and ' +
+              'who it argues with on a hunt.'],
         rows: [['t','Deira Socks','tier 6 · breeding (combos)'],
                ['lb','CATEGORY'], ['m','Tier 6 · Breeding (combos)'],
                ['lb','SOURCE'], ['m','Breeding'],
@@ -578,6 +586,17 @@
                ['m','A look is gone the moment you leave this page. Save one to keep it.'],
                ['cap','Nothing leaves the preview. Wolvden is never told about any of this.']]
       },
+      xbars: {
+        name: 'Explore bars', right: 'phones', where: 'Above the explore box',
+        title: 'Energy and HP where you are looking',
+        say: ['On a phone Wolvden puts the Energy and HP bars at the very bottom of the explore ' +
+              'page. This draws a small copy of them just above the explore box, and it follows the ' +
+              'game’s own bars as they change.',
+              'The game’s bars are never moved, and nothing is clicked or stored. On by default on ' +
+              'phones and narrow windows, with a switch for computers.'],
+        rows: [['xbars', [['Energy','60%',60,'#f0a12c'], ['HP','41 / 41',100,'#1d84c6']]],
+               ['cap','Hunger and EXP can be added in its settings.']]
+      },
       fishing: {
         name: 'Fishing colours', right: 'accessibility', where: 'On the fishing page',
         title: 'An accessibility filter, not an assistant',
@@ -606,7 +625,7 @@
     };
 
     var ORDER = ['genes','lore','collect','pedigree','tray','den','lookup','trades',
-                 'notes','wish','wardrobe','fishing','hide'];
+                 'notes','wish','wardrobe','xbars','fishing','hide'];
 
     var chipBox = document.getElementById('pchips');
     var pane = document.getElementById('ppane');
@@ -644,6 +663,22 @@
         else if (k === 't') b.appendChild(two('gt', row[1], row[2], ''));
         else if (k === 'r') b.appendChild(two('rowline', row[1], row[2]));
         else if (k === 'cap') b.appendChild(el('div', 'cap', row[1]));
+        else if (k === 'xbars') {
+          var xr = el('div', 'xbrow');
+          row[1].forEach(function(x){
+            var cell = el('div'), lab = el('div', 'xblab');
+            lab.appendChild(el('span', null, x[0]));
+            lab.appendChild(el('b', null, x[1]));
+            var tr = el('div', 'xbtrack'), fill = el('i');
+            fill.style.width = x[2] + '%';
+            fill.style.background = x[3];
+            tr.appendChild(fill);
+            cell.appendChild(lab);
+            cell.appendChild(tr);
+            xr.appendChild(cell);
+          });
+          b.appendChild(xr);
+        }
         else if (k === 'ctabs') {
           var tabs = el('div', 'ctabs');
           row[1].forEach(function(t){
@@ -768,7 +803,8 @@
   <div class="tablecard"><table>
     <tr><td class="n">Genetics</td><td class="d">Hover any gene for a card: what it is, where it
       comes from, what it pairs into, whether it is lethal. A coloured mark on each row says how
-      that trait is obtained. Built from 251 bases, 194 eye colours, 2,370 markings and 28 mutations</td></tr>
+      that trait is obtained, and the personality gets a pill naming its disposition. Built from 251
+      bases, 194 eye colours, 2,370 markings, 28 mutations and 40 personalities</td></tr>
     <tr><td class="n">Lore</td><td class="d">Your own fields, in sections you name. Rename, reorder,
       add and delete freely. Wolf-link fields cross-reference both ways, so if one wolf is bonded to
       another, both pages say so</td></tr>
@@ -781,7 +817,8 @@
     <tr><td class="n">Den Manager</td><td class="d">A card above your caves: care, breeding, pups,
       roles, old age, trades. Sections fold individually and unused ones switch off</td></tr>
     <tr><td class="n">Tray</td><td class="d">Pin two wolves, then <b>Pair</b>: what the pups could
-      inherit slot by slot, what generation they will be, plus shared ancestors. <b>Compare</b> puts any number side by side</td></tr>
+      inherit slot by slot, what generation they will be, which personality groups they are likely
+      to get, plus shared ancestors. <b>Compare</b> puts any number side by side</td></tr>
     <tr><td class="n">Wardrobe</td><td class="d">Custom decor as extra layers, which Wolvden's own
       list has no room for. Save a look and try it on again in the picture. Each slot says what that decor is crafted
       from</td></tr>
@@ -795,6 +832,8 @@
       Pictures by web address, and a note can be pinned to a wolf so it shows on their page</td></tr>
     <tr><td class="n">Collection</td><td class="d">A checklist of every base, eye colour and marking
       in the game. Tick what you have and Twill keeps count</td></tr>
+    <tr><td class="n">Explore bars</td><td class="d">Your Energy and HP drawn just above the explore
+      box, so a phone never has to scroll down for them. On by default on phones, with a switch for computers</td></tr>
     <tr><td class="n">Hide users</td><td class="d">Collapses posts from players you would rather not read</td></tr>
   </table></div>
 
@@ -1213,7 +1252,7 @@
   <p style="margin-top:16px;text-align:center">Bugs, ideas and requests are all welcome.</p>
 
   <footer>
-    Twill <span class="footver">0.33.1</span> &middot; by
+    Twill <span class="footver">0.34.0</span> &middot; by
     <a href="https://www.wolvden.com/profile/145906" target="_blank" rel="noopener noreferrer">Fallowe</a>
     &middot; an unofficial fan tool, not affiliated with Wolvden or Lioden Ltd
   </footer>
