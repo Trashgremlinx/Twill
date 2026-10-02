@@ -32,7 +32,7 @@ Two steps.
 
 Then open Wolvden. The Twill mark sits in the corner of every page. Click it, or press `Alt+K`.
 
-Updates happen by themselves after that. Nothing you have saved is ever lost when it updates.
+Updates happen by themselves after that. Nothing you have written or set is lost when it updates.
 
 ## What is in it
 
@@ -47,7 +47,7 @@ Updates happen by themselves after that. Nothing you have saved is ever lost whe
 | **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
 | **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades. Every section folds on its own |
 | **Wardrobe** | Custom decor as extra layers, plus looks you can save and try on again in the preview |
-| **Item Lookup** | A magnifier on any item: 284 recipes, the catalogue, or the trading centre, already searched |
+| **Item Lookup** | A magnifier on every item in your Hoard and on trades: 284 recipes, the catalogue, or the trading centre, already searched |
 | **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear |
 | **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
 | **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |

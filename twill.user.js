@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.33.0
+// @version      0.33.1
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.33.0';
+  const VERSION = '0.33.1';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -6458,7 +6458,7 @@
 
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0' },
-        'One item name per line. Twill tags them wherever it sees them, so a browse through the trading centre or your own hoard answers itself.'));
+        'One item name per line. Twill tags them wherever it sees them, so a look through your own hoard or someone’s trade answers itself.'));
 
       for (const [key, label, hintText] of [['want', 'Buy', 'Items you are looking for'],
         ['give', 'In Stock', 'Items you have spare and would trade away']]) {
@@ -6481,7 +6481,7 @@
         box.append(h('div', { class: 'dk-lb', text: 'On your Buy list' }));
         for (const row of owned.slice(0, 20)) box.append(row);
       }
-      box.append(h('div', { class: 'dk-note', text: 'Tags show on any page that draws Wolvden’s item cards, which is your Hoard today. Trade listings will pick them up too once Twill has seen that page’s markup.' }));
+      box.append(h('div', { class: 'dk-note', text: 'Tags show on any page that draws Wolvden’s item cards: your Hoard, and a single trade when you open it. The trading centre’s search and browse lists show only each trade’s title, never the items in it, so tags cannot appear there.' }));
     }
 
     return {

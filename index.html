@@ -60,7 +60,7 @@
   ol.steps>li::before{content:counter(s);position:absolute;left:18px;top:17px;width:30px;height:30px;
                       display:grid;place-items:center;background:var(--leaf);color:var(--on-accent);border-radius:50%;
                       font:700 15px/1 Fraunces,Georgia,serif}
-  ol.steps b{display:block;margin-bottom:4px;font-size:17px;color:var(--bark)}
+  ol.steps>li>b{display:block;margin-bottom:4px;font-size:17px;color:var(--bark)}
   ol.steps p{margin:0 0 8px;font-size:15px} ol.steps p:last-child{margin-bottom:0}
 
   .note{margin:10px 0 0;padding:10px 14px;font-size:14px;
@@ -116,6 +116,28 @@
                 background:linear-gradient(180deg,#d9c98a,#b8a45c 38%,#8d7d42)}
   .gene.g2::before{background:linear-gradient(180deg,#7fd3b0,#4bb08a 38%,#357f64)}
   .cap{color:var(--t-muted);font-size:10.5px;margin-top:6px}
+  .ctabs{display:flex;gap:4px;margin-bottom:6px}
+  .ctab{flex:1;min-width:0;text-align:center;padding:3px 2px;font-size:11px;line-height:1.25;
+        border:1px solid var(--t-line);background:var(--t-surface);color:var(--t-muted);border-radius:var(--t-radius)}
+  .ctab small{display:block;font-size:9.5px}
+  .ctab.on{background:var(--t-accent);border-color:var(--t-accent);color:var(--t-onaccent)}
+  .cbar{height:5px;background:var(--t-surface);border-radius:3px;overflow:hidden;margin-bottom:7px}
+  .cbar i{display:block;height:100%;background:var(--t-accent)}
+  .cfind{border:1px solid var(--t-line);background:var(--t-surface);color:var(--t-text);
+         padding:3px 7px;font-size:11px;margin-bottom:6px;border-radius:var(--t-radius)}
+  .cfilt{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:10.5px;color:var(--t-muted);margin-bottom:5px}
+  .cfilt i{font-style:normal;border:1px solid var(--t-line);background:var(--t-surface);color:var(--t-text);padding:1px 6px}
+  .cfilt i.on{background:var(--t-accent);border-color:var(--t-accent);color:var(--t-onaccent)}
+  .cfilt b{font-weight:400;margin-right:6px}
+  .cgrp{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--t-line);
+        padding:4px 0 3px;font-size:11.5px}
+  .cgrp span:last-child{color:var(--t-muted);flex:none}
+  .cchips{display:flex;flex-wrap:wrap;gap:3px;padding-bottom:5px}
+  .cchips span{font-size:10.5px;padding:0 6px;border:1px solid var(--t-line);background:var(--t-surface);
+               color:var(--t-text);border-radius:var(--t-radius)}
+  .cchips span.got{background:var(--t-good);border-color:var(--t-good);color:var(--t-goodtext)}
+  .cchips span.got::before{content:"\2713  "}
+  .cchips em{font-style:normal;font-size:9px;opacity:.7;margin-left:3px}
   .demo-note{font-size:12.5px;color:var(--soft);margin:6px 0 0}
 
   .gchips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0}
@@ -207,7 +229,7 @@
     <img class="mark" src="data:image/png;base64,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" alt="">
     <h1>Twill</h1>
     <p class="sub">A Society of Fur toolkit for Wolvden</p>
-    <div class="ver">version 0.33.0</div>
+    <div class="ver">version 0.33.1</div>
   </header>
 
   <h2 style="margin-top:34px">What is Twill?</h2>
@@ -269,13 +291,14 @@
     <div class="demo">
       <div class="demo-h">Pairing <span>two wolves in the tray</span></div>
       <div class="demo-b">
+        <div class="lb">Generation</div>
+        <div>4th generation</div>
+        <div class="lb">Combos in reach</div>
+        <div class="rowline"><span class="tip">Silver Dilution</span><span class="r">tier 6 &middot; slot 4</span></div>
+        <div style="color:var(--t-muted)">from White Dilution &times; Black Dilution</div>
         <div class="lb">Shared ancestors</div>
-        <div class="rowline"><span class="acc">Roustame Diodore</span><span class="r">great-grandsire, both sides</span></div>
-        <div class="lb">The pup's inbreeding</div>
-        <div><span class="tip" style="font-size:19px">3.1%</span></div>
-        <div class="lb">Markings in reach</div>
-        <div class="rowline"><span>Silver Dilution</span><span class="r">slot 4</span></div>
-        <div class="rowline"><span>Beige Orca</span><span class="r">slot 7</span></div>
+        <div><span class="tip" style="font-size:19px">0.78%</span> <span style="color:var(--t-muted)">predicted pup COI, at least</span></div>
+        <div class="rowline"><span class="acc">Roustame Diodore</span><span class="r">great-grandsire on both sides</span></div>
         <div class="cap">Wolvden gives each wolf its own coefficient. This is the pairing you have
         not made yet, worked out from the two pinned wolves' trees.</div>
       </div>
@@ -431,12 +454,15 @@
               'ticks themselves, with a running count against the full catalogue.',
               'Markings are grouped by shape, bases by Wolvden’s own colour groups and eyes by ' +
               'where they come from. Twill never fills it in from a page.'],
-        rows: [['lb','MARKINGS · 412 OF 2,370'],
-               ['r','Socks','9 of 15'],
-               ['m','✓ Aspen · ✓ Beige · ✓ Deira · ✓ Honey · Argent · Doubloon · Saffron'],
-               ['r','Half Socks','4 of 14'],
-               ['lb','BASES · 88 OF 251'],
-               ['lb','EYES · 61 OF 194'],
+        rows: [['ctabs', [['Markings','412 of 2,370',1], ['Bases','88 of 251'], ['Eyes','61 of 194']]],
+               ['cbar', 17],
+               ['cfind', 'socks'],
+               ['cfilt', 'Tier: Any', ['All','Still to get','Got'], 0],
+               ['cgrp', '\u25be Socks', '9 of 15'],
+               ['cchips', [['Argent',6], ['Aspen',1,1], ['Beige',1,1], ['Cedar',1,1], ['Cream',1,1],
+                           ['Deira',6,1], ['Doubloon',6], ['Ducat',6], ['Gold',1,1], ['Honey',1,1],
+                           ['Nocturne',1], ['Saffron',6], ['Shell',1,1], ['White',1,1], ['Yellow',1]]],
+               ['cgrp', '\u25b8 Half Socks', '4 of 14'],
                ['cap','Click a name to tick it, and again to untick it.']]
       },
       pedigree: {
@@ -450,7 +476,7 @@
                ['r','ᴘᴀᴄʜᴏʟɪ','3rd generation'],
                ['r','Own COI','0%'],
                ['r','Named ancestors kept','4'],
-               ['cap','Pin this wolf and one other, then Pair them: the pups’ generation, the shared ancestors and the pup’s COI show up there.']]
+               ['cap','Pair this wolf with another in the tray: the pups’ generation, the shared ancestors and the pup’s COI show up there.']]
       },
       tray: {
         name: 'Tray', right: 'two wolves pinned', where: 'Anywhere, docked at the bottom',
@@ -460,12 +486,14 @@
               'has of both and works out what the pups could inherit, slot by slot.',
               'Twill keeps a pinned wolf’s genes and family tree only while it is in the tray, ' +
               '8 at most. It does not breed anything and has no connection to the breeding form.'],
-        rows: [['lb','SHARED ANCESTORS'],
-               ['r','Roustame Diodore','great-grandsire, both sides'],
-               ['lb','THE PUP’S INBREEDING'],
-               ['big','3.1%',''],
-               ['lb','MARKINGS IN REACH'],
-               ['r','Silver Dilution','slot 4'], ['r','Beige Orca','slot 7'],
+        rows: [['lb','GENERATION'],
+               ['m','4th generation'],
+               ['lb','COMBOS IN REACH'],
+               ['r','Silver Dilution','tier 6 · slot 4'],
+               ['m','from White Dilution × Black Dilution'],
+               ['lb','SHARED ANCESTORS'],
+               ['big','0.78%','predicted pup COI, at least'],
+               ['r','Roustame Diodore','+0.78% · 3 back'],
                ['cap','Wolvden gives each wolf its own coefficient. This is the pairing you have not made yet.']]
       },
       den: {
@@ -486,11 +514,12 @@
                ['cap','Nothing here is new information. It is the den page, sorted.']]
       },
       lookup: {
-        name: 'Item Lookup', right: 'your Hoard', where: 'On any page with items',
+        name: 'Item Lookup', right: 'your Hoard', where: 'On your Hoard and on trades',
         title: 'A direct catalogue',
-        say: ['A small magnifier appears beside an item. Opening it says which of the 284 ' +
-              'bundled recipes use that item, and offers two links.',
-              'Both open in a new tab, and only when clicked, exactly as an ordinary link does.'],
+        say: ['A small magnifier appears on each item and offers two links: the Item Catalogue ' +
+              'and the Trading Center, already searched for it. Items that one of the 284 ' +
+              'bundled recipes uses or makes also get a badge listing those recipes.',
+              'Both links open in a new tab, and only when clicked, exactly as an ordinary link does.'],
         rows: [['t','Bovine Carcass','look up'],
                ['r','Item Catalogue','opens searched for this item'],
                ['r','Trading Center','trades holding this exact item'],
@@ -539,8 +568,8 @@
         title: 'Custom decor, drawn where it would sit',
         say: ['Wolvden’s own list has no room for custom decor, so this draws an image into ' +
               'the preview alongside ordinary decor, from an address the player pastes in.',
-              'A set can be saved as an outfit and looked at again later. It does not apply, ' +
-              'buy or equip anything. Preview only.'],
+              'A look can be saved as an outfit and tried on again in the preview later, without ' +
+              'touching Wolvden’s own slots. It does not apply, buy or equip anything.'],
         rows: [['t','Twill','custom decor, outfits'],
                ['lb','CUSTOM DECOR AND OTHER ART'],
                ['m','Paste the address of an image and it is drawn into the preview with everything else.'],
@@ -570,8 +599,8 @@
               'can be clicked to open the post anyway.',
               'It changes only what that browser draws. Nobody is blocked, nobody is told, and ' +
               'it can be undone at any time.'],
-        rows: [['r','Post hidden','show anyway'],
-               ['r','Post hidden','show anyway'],
+        rows: [['r','Hidden: SomePlayer','show'],
+               ['r','Hidden: AnotherPlayer','show'],
                ['cap','Purely a display choice, in one browser, reversible at any time.']]
       }
     };
@@ -615,6 +644,38 @@
         else if (k === 't') b.appendChild(two('gt', row[1], row[2], ''));
         else if (k === 'r') b.appendChild(two('rowline', row[1], row[2]));
         else if (k === 'cap') b.appendChild(el('div', 'cap', row[1]));
+        else if (k === 'ctabs') {
+          var tabs = el('div', 'ctabs');
+          row[1].forEach(function(t){
+            var tab = el('div', 'ctab' + (t[2] ? ' on' : ''), t[0]);
+            tab.appendChild(el('small', null, t[1]));
+            tabs.appendChild(tab);
+          });
+          b.appendChild(tabs);
+        }
+        else if (k === 'cbar') {
+          var bar = el('div', 'cbar'), fill = el('i');
+          fill.style.width = row[1] + '%';
+          bar.appendChild(fill);
+          b.appendChild(bar);
+        }
+        else if (k === 'cfind') b.appendChild(el('div', 'cfind', row[1]));
+        else if (k === 'cfilt') {
+          var f = el('div', 'cfilt');
+          f.appendChild(el('b', null, row[1]));
+          row[2].forEach(function(lab, i){ f.appendChild(el('i', i === row[3] ? 'on' : null, lab)); });
+          b.appendChild(f);
+        }
+        else if (k === 'cgrp') b.appendChild(two('cgrp', row[1], row[2], ''));
+        else if (k === 'cchips') {
+          var cc = el('div', 'cchips');
+          row[1].forEach(function(c){
+            var chip = el('span', c[2] ? 'got' : null, c[0]);
+            chip.appendChild(el('em', null, 'T' + c[1]));
+            cc.appendChild(chip);
+          });
+          b.appendChild(cc);
+        }
         else if (k === 'm') {
           var m = el('div', null, row[1]);
           m.style.color = 'var(--t-muted)';
@@ -724,8 +785,8 @@
     <tr><td class="n">Wardrobe</td><td class="d">Custom decor as extra layers, which Wolvden's own
       list has no room for. Save a look and try it on again in the picture. Each slot says what that decor is crafted
       from</td></tr>
-    <tr><td class="n">Item Lookup</td><td class="d">A magnifier on any item: 284 recipes, the
-      catalogue, or the trading centre, already searched</td></tr>
+    <tr><td class="n">Item Lookup</td><td class="d">A magnifier on every item in your Hoard and on
+      trades: 284 recipes, the catalogue, or the trading centre, already searched</td></tr>
     <tr><td class="n">Shopping List</td><td class="d">Items you want are tagged <b>buy</b>, items
       you would trade away are tagged <b>in stock</b>, wherever they appear</td></tr>
     <tr><td class="n">Store Front</td><td class="d">On Manage Your Trades: what to restock, and
@@ -1034,9 +1095,9 @@
     <p>Wolvden's rules forbid scripts that <em>play</em> the game: automation, auto-refreshers,
     anything that clicks or submits for you. Twill does none of that. It reads a page you opened
     yourself and changes how it looks, which is the same thing a custom den layout does.</p>
-    <p>That said, the rules are written broadly and staff are the ones who interpret them. This is
-    a real risk on a real account and you should decide for yourself. Anything that felt close to
-    the line has been deliberately left unbuilt, and the roadmap below names it.</p>
+    <p>Twill was checked with the Wolvden mod team before it was shared, and changed where they
+    asked. It is still an unofficial user script, not affiliated with Wolvden or Lioden Ltd, and
+    you use it at your own risk. Please bring any Twill trouble to us, never to Wolvden staff.</p>
   </details>
 
   <details>
@@ -1045,7 +1106,7 @@
     your own browser's storage and go nowhere, and Twill itself never sends or fetches anything.
     The script is plain readable text, so you can check that yourself.</p>
     <p>One honest footnote: <b>Tampermonkey</b> checks
-    <a href="https://trashgremlinx.github.io/Twill/" target="_blank" rel="noopener noreferrer">the page this was downloaded
+    <a href="https://trashgremlinx.github.io/Twill/" target="_blank" rel="noopener noreferrer">the site it was installed
     from</a> now and then to see whether a newer version exists. That is the extension doing it, not
     Twill, and it is what saves you reinstalling by hand. It tells GitHub only what any visit to a
     web page tells a host. If you would rather it did not, turn updates off for Twill in
@@ -1068,8 +1129,8 @@
   <details>
     <summary>What happens to my notes if I reinstall or update?</summary>
     <p>Nothing. Everything is stored under keys that have never changed, even though the kit itself
-    has been renamed more than once. Updating keeps all of it, whether Tampermonkey does it for you
-    or you paste a new version over the old one. If you are moving to another computer, use
+    has been renamed more than once. Updating keeps everything you have written and set, whether
+    Tampermonkey does it for you or you paste a new version over the old one. If you are moving to another computer, use
     <b>Backup</b> in the hub, because browser storage does not follow you.</p>
   </details>
 
@@ -1152,7 +1213,7 @@
   <p style="margin-top:16px;text-align:center">Bugs, ideas and requests are all welcome.</p>
 
   <footer>
-    Twill 0.22.0 &middot; by
+    Twill <span class="footver">0.33.1</span> &middot; by
     <a href="https://www.wolvden.com/profile/145906" target="_blank" rel="noopener noreferrer">Fallowe</a>
     &middot; an unofficial fan tool, not affiliated with Wolvden or Lioden Ltd
   </footer>
