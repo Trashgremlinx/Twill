@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.34.0
+// @version      0.35.1
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.34.0';
+  const VERSION = '0.35.1';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -472,6 +472,9 @@
       border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
       box-shadow: var(--dk-shadow); font: 12px/1.5 var(--dk-body-font); text-align: left;
     }
+    /* Compare needs a column per wolf, so the hub widens while it is open and
+       shrinks back to 320px as soon as you leave it. */
+    #dk-hub.dk-hub-wide { width: min(900px, calc(100vw - 24px)); }
     #dk-hub.dk-c-br { right: 12px; bottom: 50px; }
     #dk-hub.dk-c-bl { left: 12px; bottom: 50px; }
     #dk-hub.dk-c-tr { right: 12px; top: 50px; }
@@ -804,6 +807,14 @@
       color: var(--dk-muted); position: sticky; left: 0; background: var(--dk-panel);
     }
     .dk-cmp td.dk-cmp-d { color: var(--dk-accent); font-weight: 600; }
+    .dk-cmp td { min-width: 110px; }
+    .dk-cmp-seg { display: inline-flex; margin: 2px 0 6px; }
+    .dk-cmp-seg button {
+      margin: 0; padding: 2px 9px; cursor: pointer; font: 11.5px/1.5 var(--dk-body-font);
+      color: var(--dk-text); background: var(--dk-surface); border: 1px solid var(--dk-line);
+    }
+    .dk-cmp-seg button + button { border-left: 0; }
+    .dk-cmp-seg button[aria-pressed="true"] { color: var(--dk-on-accent); background: var(--dk-accent); border-color: var(--dk-accent); }
 
     /* The gene colour legend, in Genetics settings. */
     .dk-gene-key { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 11.5px; }
@@ -1021,6 +1032,39 @@
   const modules = [];
   const defineModule = (m) => modules.push(m);
   const isOn = (m) => core.enabled[m.id] !== false;
+
+  /* Whose wolf is on screen. Wolvden's header menu links to your own profile,
+     and a wolf's page says "Owned by" followed by a link to its owner's. Lore is
+     written by a wolf's owner, so this decides whether the Lore panel can be
+     edited. Every wolf on the site is drawn with the same markup, so there is no
+     other way to tell. */
+  const profileOf = (a) => ((a && a.getAttribute('href')) || '').match(/\/profile\/(\d+)/);
+  function myProfileId() {
+    for (const a of document.querySelectorAll('.dropdown-menu a[href*="/profile/"], a.dropdown-item[href*="/profile/"]')) {
+      const m = profileOf(a);
+      if (m) return m[1];
+    }
+    return null;
+  }
+  function wolfOwner() {
+    const main = document.querySelector('#main');
+    if (!main) return null;
+    for (const a of main.querySelectorAll('a[href*="/profile/"]')) {
+      const prev = a.previousSibling;
+      const before = prev && prev.nodeType === 3 ? prev.textContent : '';
+      if (!/owned by\s*$/i.test(before.replace(/\s+/g, ' '))) continue;
+      const m = profileOf(a);
+      if (m) return { id: m[1], name: a.textContent.replace(/\s+/g, ' ').trim() };
+    }
+    return null;
+  }
+  // true: yours. false: someone else's. null: Twill cannot tell, and then
+  // nothing is unlocked and nothing is deleted.
+  function wolfIsMine() {
+    const me = myProfileId(), owner = wolfOwner();
+    if (!me || !owner) return null;
+    return me === owner.id;
+  }
 
   // Which kind of Wolvden page this is. Offline test copies in dev/ say what they
   // stand in for with <meta name="dk-fixture" content="den | wolf:<id> | hoard | trades">.
@@ -1267,14 +1311,28 @@
       const v = String(rec[f.id] == null ? '' : rec[f.id]).trim();
       if (v) keep[f.id] = v; else delete keep[f.id];
     }
-    const was = keep._n;
+    const was = keep._n, pub = keep._pub;
     delete keep._n;
+    delete keep._pub;
     if (Object.keys(keep).length) {
       // The wolf's own name, taken from its page as you save, so a link to it
       // elsewhere reads as a name. Kept only beside lore you wrote yourself.
       if (name || was) keep._n = name || was;
+      // Which fields you have made public, by field id.
+      if (Array.isArray(pub) && pub.length) keep._pub = pub;
       lore[id] = keep;
     } else delete lore[id];
+    save('lore', lore);
+  }
+
+  // Mark one field of one wolf's lore as public or private.
+  function setPublic(id, fieldId, on) {
+    lore = load('lore', {});
+    const rec = lore[id];
+    if (!rec) return;
+    const pub = new Set(rec._pub || []);
+    if (on) pub.add(fieldId); else pub.delete(fieldId);
+    if (pub.size) rec._pub = [...pub]; else delete rec._pub;
     save('lore', lore);
   }
 
@@ -1611,6 +1669,7 @@
 
   function render() {
     if (hub.hidden) return;
+    hub.classList.toggle('dk-hub-wide', screen === 'compare');
     const mod = modules.find((m) => m.id === screen);
     const title = screen === 'home' ? 'Twill'
       : screen === 'look' ? 'Look'
@@ -2601,6 +2660,9 @@
   /* Side by side, for the wolves in the tray. Wolvden has no page that shows two
      at once, so this is the only place they meet. Values the fewest wolves share
      are picked out, because the differences are the whole point of looking. */
+  // Whether Compare hides the rows every wolf shares. Kept for the session only.
+  let cmpOnlyDiff = false;
+
   function renderCompare(ids) {
     const ws = ids.map((id) => ({ id, w: coll[id] })).filter((x) => x.w);
     if (ws.length < 2) {
@@ -2628,12 +2690,23 @@
       const tally = vals.reduce((m, v) => (m[v] = (m[v] || 0) + 1, m), {});
       const top = Math.max(...Object.values(tally));
       const allDiffer = top === 1;
+      if (cmpOnlyDiff && top === vals.length) continue;              // every wolf the same
       body.push(h('tr', {}, h('th', { class: 'dk-cmp-r', text: label }),
         ...vals.map((v) => h('td', { class: allDiffer || tally[v] < top ? 'dk-cmp-d' : '', text: v }))));
     }
-    sheet.append(h('div', { class: 'dk-cmp-wrap' },
-      h('table', { class: 'dk-cmp' }, h('thead', {}, head), h('tbody', {}, ...body))));
-    sheet.append(h('div', { class: 'dk-note', text: 'Differences are picked out in the theme’s link colour. A row every wolf shares is left plain, and a marking slot none of them use is left out entirely.' }));
+    const seg = h('div', { class: 'dk-cmp-seg', role: 'group', 'aria-label': 'Rows' },
+      ...[[false, 'Every row'], [true, 'Only differences']].map(([only, text]) => h('button', {
+        type: 'button', text, 'aria-pressed': String(cmpOnlyDiff === only),
+        onclick: () => { cmpOnlyDiff = only; render(); }
+      })));
+    sheet.append(seg);
+    if (!body.length) {
+      sheet.append(h('div', { class: 'dk-empty', text: 'These wolves match on every row.' }));
+    } else {
+      sheet.append(h('div', { class: 'dk-cmp-wrap' },
+        h('table', { class: 'dk-cmp' }, h('thead', {}, head), h('tbody', {}, ...body))));
+    }
+    sheet.append(h('div', { class: 'dk-note', text: 'Differences are picked out in the theme’s link colour. A row every wolf shares is left plain, and a marking slot none of them use is left out entirely. Only differences hides the shared rows too.' }));
   }
 
   /* Write a post, and be told what Wolvden will quietly throw away before you
@@ -5973,6 +6046,18 @@
       .dk-lore-id { color: var(--dk-muted); font-size: 11px; }
       .dk-lore-brow { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
       .dk-lore-brow span { color: var(--dk-muted); font-size: 11px; }
+      .dk-lore-f.dk-lore-own { grid-template-columns: 104px 1fr auto; align-items: baseline; }
+      .dk-lore-pub {
+        margin: 0; padding: 0 6px; cursor: pointer; font: 600 9.5px/1.6 var(--dk-body-font);
+        letter-spacing: .05em; color: var(--dk-muted); background: transparent;
+        border: 1px solid var(--dk-line); border-radius: var(--dk-radius); white-space: nowrap;
+      }
+      .dk-lore-pub[aria-pressed="true"] { color: var(--dk-good-text); background: var(--dk-good); border-color: var(--dk-good); }
+      .dk-lore-msg { margin-top: 8px; padding: 7px 9px; font-size: 11.5px; border-left: 3px solid var(--dk-good);
+        background: color-mix(in srgb, var(--dk-good) 22%, transparent); }
+      .dk-lore-msg.dk-lore-warn { border-left-color: var(--dk-warn); background: color-mix(in srgb, var(--dk-warn) 28%, transparent); }
+      .dk-lore-msg textarea { margin-top: 6px !important; font-size: 11px !important; }
+      .dk-lore-theirs { border-left: 3px solid var(--dk-tip-title); padding-left: 9px; }
     `);
 
     const loreLink = (id, label) => h('a', { class: 'dk-lore-wolf', href: '/wolf/' + id, text: label });
@@ -6000,14 +6085,23 @@
 
     function view(id, rec, redraw) {
       const body = h('div', { class: 'dk-lore-b' });
+      const pub = new Set(rec._pub || []);
+      // Every field starts private. The switch only marks what Make public may
+      // copy; nothing leaves this browser until you paste it yourself.
+      const pubSwitch = (f) => h('button', {
+        type: 'button', class: 'dk-lore-pub', 'aria-pressed': String(pub.has(f.id)),
+        text: pub.has(f.id) ? 'PUBLIC' : 'PRIVATE',
+        title: pub.has(f.id) ? 'Make this field private again' : 'Include this field when you make lore public',
+        onclick: () => { setPublic(id, f.id, !pub.has(f.id)); redraw(false); }
+      });
       for (const sec of lorePlan.sections) {
-        const dl = h('dl', { class: 'dk-lore-f' });
+        const dl = h('dl', { class: 'dk-lore-f dk-lore-own' });
         const longs = [];
         for (const f of sec.fields) {
           if (!rec[f.id]) continue;
           if (f.type === 'long') { longs.push(f); continue; }
           const val = valueOf(f, rec);
-          if (val) dl.append(h('dt', { text: f.label }), val);
+          if (val) dl.append(h('dt', { text: f.label }), val, pubSwitch(f));
         }
         if (!dl.children.length && !longs.length) continue;      // nothing written here
         body.append(h('div', { class: 'dk-lore-sec' },
@@ -6015,7 +6109,9 @@
           dl.children.length ? dl : null,
           ...longs.map((f) => h('div', { class: 'dk-lore-story' },
             // "Story" inside a section called "Story" reads as a stutter.
-            f.label.toLowerCase() === sec.label.toLowerCase() ? null : h('b', { text: f.label }),
+            h('div', { class: 'dk-lore-brow' },
+              f.label.toLowerCase() === sec.label.toLowerCase() ? h('span') : h('b', { text: f.label }),
+              pubSwitch(f)),
             h('div', { text: rec[f.id] })))));
       }
 
@@ -6030,9 +6126,142 @@
           h('div', { class: 'dk-lore-sh', text: 'Mentioned by' }), list));
       }
 
+      const msg = h('div');
       body.append(h('div', { class: 'dk-lore-btns' },
+        pub.size ? h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Make public',
+          onclick: () => copyPublic(publicBlock(rec), msg, false) }) : null,
         h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Edit', onclick: () => redraw(true) })));
+      body.append(msg);
+      body.append(staleNote(rec));
       return body;
+    }
+
+    /* ---- public lore ----
+       Made public by hand: Twill builds a small block from the fields you
+       switched to Public and copies it, and you paste it at the end of the
+       wolf's Biography on its Settings tab. Twill never touches the Biography
+       box. Everyone then sees it there, Twill or not, and other copies of Twill
+       recognise the block by its "Kept with Twill" line and show it in their
+       Lore panel. Nothing is sent anywhere and nothing is kept. The HTML is
+       what Wolvden posts keep: no quotes inside a style, no display, no style
+       on a link, and one line, because a Biography can turn line breaks into
+       blank lines. */
+    const SIGNATURE = 'Kept with Twill';
+    const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    function publicFields(rec) {
+      const pub = new Set(rec._pub || []);
+      const out = [];
+      for (const f of loreFields()) {
+        if (!pub.has(f.id) || !rec[f.id]) continue;
+        const ref = f.type === 'wolf' ? wolfRef(rec[f.id]) : null;
+        out.push(ref && ref.id
+          ? { label: f.label, text: wolfName(ref.id), wolf: ref.id }
+          : { label: f.label, text: String(rec[f.id]).trim() });
+      }
+      return out;
+    }
+
+    function publicBlock(rec) {
+      const parts = publicFields(rec).map((x) => '<b>' + esc(x.label) + ':</b> ' + (x.wolf
+        ? '<a href="/wolf/' + x.wolf + '"><span style="color:#734413;border-bottom:1px solid #734413;">' + esc(x.text) + '</span></a>'
+        : esc(x.text).replace(/\r?\n/g, '<br>')));
+      if (!parts.length) return '';
+      return '<div style="background:#f7f0e2;border:1px solid #dccbab;color:#33261c;padding:10px 14px;font-family:Georgia,serif;font-size:13px;line-height:1.6;">'
+        + '<div style="font-size:16px;color:#6b4a2f;border-bottom:1px solid #dccbab;margin-bottom:6px;"><b>Lore</b></div>'
+        + parts.join('<br>')
+        + '<div style="font-size:11px;color:#5f4c3a;margin-top:6px;">' + SIGNATURE + '</div></div>';
+    }
+
+    // The block in this wolf's Biography, read back into label and value pairs.
+    // Only text and wolf links come out; nothing of the Biography's HTML is
+    // ever put on the page.
+    function readBioLore() {
+      const bio = document.querySelector('#main .wolf-bio');
+      if (!bio) return null;
+      const sig = [...bio.querySelectorAll('div')].find((d) => d.textContent.trim() === SIGNATURE);
+      const box = sig && sig.parentElement;
+      if (!box || !bio.contains(box) || box === bio) return null;
+      const fields = [];
+      let cur = null;
+      for (const node of box.childNodes) {
+        if (node === sig) break;
+        if (node.nodeType === 1 && node.tagName === 'B' && /:\s*$/.test(node.textContent)) {
+          cur = { label: node.textContent.replace(/:\s*$/, '').trim(), text: '', wolf: null };
+          fields.push(cur);
+          continue;
+        }
+        if (!cur) continue;
+        if (node.nodeType === 3) cur.text += node.textContent;
+        else if (node.tagName === 'BR') cur.text += '\n';
+        else if (node.nodeType === 1) {
+          const link = node.matches('a[href]') ? node : node.querySelector('a[href]');
+          const m = link && (link.getAttribute('href') || '').match(/\/wolf\/(\d+)/);
+          if (m) cur.wolf = m[1];
+          cur.text += node.textContent;
+        }
+      }
+      for (const x of fields) x.text = x.text.replace(/^\s+|\s+$/g, '');
+      return fields.filter((x) => x.label && x.text);
+    }
+
+    const sameLore = (a, b) => {
+      const flat = (list) => JSON.stringify(list.map((x) => [x.label, x.text.replace(/\s+/g, ' ')]));
+      return flat(a) === flat(b);
+    };
+
+    // On your own wolf: does the Biography still match what you made public?
+    function staleNote(rec) {
+      const inBio = readBioLore();
+      const want = publicFields(rec);
+      const box = h('div');
+      if (inBio && inBio.length && !want.length) {
+        box.append(h('div', { class: 'dk-lore-msg dk-lore-warn', text: 'This wolf’s Biography still has a Lore block, but no field is public any more. Delete the block from the Biography to make its lore private again.' }));
+      } else if (inBio && want.length && !sameLore(inBio, want)) {
+        const msg = h('div');
+        box.append(h('div', { class: 'dk-lore-msg dk-lore-warn' },
+          h('b', { text: 'The Biography has an older version of this lore. ' }),
+          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Copy the new one',
+            onclick: () => copyPublic(publicBlock(rec), msg, true) }),
+          msg));
+      }
+      return box;
+    }
+
+    // Copy the block, or hand it over to copy by hand if the browser will not.
+    function copyPublic(html, into, replacing) {
+      into.textContent = '';
+      const where = replacing
+        ? 'Open this wolf’s Settings tab, replace the old Lore block at the end of the Biography with it, and press Update Wolf.'
+        : 'Open this wolf’s Settings tab, paste it at the very end of the Biography, and press Update Wolf.';
+      const size = 'About ' + html.length.toLocaleString('en-GB') + ' of the Biography’s 20,000 characters.';
+      const done = () => into.append(h('div', { class: 'dk-lore-msg' }, h('b', { text: 'Copied. ' }), where + ' ' + size));
+      const byHand = () => {
+        const ta = h('textarea', { rows: 3, readonly: true, value: html, 'aria-label': 'Public lore to copy' });
+        into.append(h('div', { class: 'dk-lore-msg' }, h('b', { text: 'Copy this. ' }), where + ' ' + size, ta));
+        ta.focus();
+        ta.select();
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(html).then(done, byHand);
+      else byHand();
+    }
+
+    // Someone else's wolf: only what its owner made public, read only.
+    function theirs(owner, fields) {
+      const host = h('section', { id: 'dk-lore', 'aria-label': 'Lore' });
+      const dl = h('dl', { class: 'dk-lore-f' });
+      for (const x of fields) {
+        dl.append(h('dt', { text: x.label }),
+          x.wolf ? h('dd', {}, loreLink(x.wolf, x.text)) : h('dd', { style: 'white-space:pre-line', text: x.text }));
+      }
+      host.append(
+        h('div', { class: 'dk-lore-h', style: 'cursor:default' }, h('b', { text: 'Lore' }),
+          h('span', { text: owner && owner.name ? owner.name + '’s lore' : 'the owner’s lore' })),
+        h('div', { class: 'dk-lore-b' },
+          h('div', { class: 'dk-lore-theirs' }, dl),
+          h('div', { class: 'dk-muted', style: 'font-size:11px;margin-top:6px',
+            text: 'Read from this wolf’s Biography, as its owner wrote it. Not saved anywhere.' })));
+      return host;
     }
 
     function editor(id, rec, redraw) {
@@ -6112,8 +6341,23 @@
       const last = [...document.querySelectorAll('#main table')].filter((t) => t.querySelector('td.b')).pop();
       const anchor = tabs || (last && last.closest('.row')) || null;
       if (!anchor) return;
+      /* Lore is written by a wolf's owner. On a wolf that is certainly someone
+         else's, any lore written for it before this rule is deleted; when Twill
+         cannot tell whose wolf it is, nothing is deleted and nothing can be
+         edited. Either way, what the owner made public is shown. */
+      const mine = wolfIsMine();
+      if (mine === false) {
+        lore = load('lore', {});
+        if (lore[page.id]) { delete lore[page.id]; save('lore', lore); }
+      }
+      if (mine === true) {
+        block = build(page.id);
+      } else {
+        const fields = readBioLore();
+        if (!fields || !fields.length) return;
+        block = theirs(wolfOwner(), fields);
+      }
       document.head.append(styleEl);
-      block = build(page.id);
       anchor.parentNode.insertBefore(block, anchor.nextSibling);
     }
 
@@ -6288,6 +6532,11 @@
         text: lorePlan.base
           ? 'Your default is saved. Either reset changes the layout only; nothing you have written is touched.'
           : 'Save the layout you have built and it becomes what a reset returns to. Resetting changes the layout only; nothing you have written is touched.' }));
+
+      // --- who sees it ---
+      box.append(h('div', { class: 'dk-lb', text: 'Your wolves, and public lore' }));
+      box.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+        text: 'Lore is written on your own wolves only. Every field starts private. Switch a field to Public on the wolf’s page, press Make public, and paste what it copies at the end of that wolf’s Biography: everyone can then read it there, and other Twill users see it in their Lore panel. Twill never edits the Biography for you.' }));
 
       // --- what is written ---
       box.append(h('div', { class: 'dk-lb', text: 'Written so far  \u00b7  ' + ids.length }));

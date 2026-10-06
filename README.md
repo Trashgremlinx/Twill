@@ -44,7 +44,7 @@ say yes.
 | | |
 |---|---|
 | **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 251 bases, 194 eye colours, 2,370 markings, 28 mutations and 40 personalities |
-| **Lore** | Your own fields on a wolf's page, in sections you name. Wolf-link fields cross reference both ways, so if one wolf is bonded to another, both pages say so |
+| **Lore** | Your own fields on your own wolves, in sections you name. Wolf-link fields cross reference both ways. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players can read it too |
 | **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet |
 | **Pedigree** | Keeps the family trees the pairing check needs, for the wolves in your tray |
 | **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
