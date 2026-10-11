@@ -63,7 +63,7 @@ befriending, roles, mutation pass rates and pair bonds. 28 herbs and 21 medicine
 61 prey, 146 enemies, every befriending move against every disposition, and what each role runs
 on, joined up rather than sitting in separate tables.
 
-And **eight themes** with a live editor, a post composer that catches those pesky HTML breaks,
+And **ten themes in light and dark** with a sun and moon to swap them, **24 seasonal themes**, a font picker and a live editor, a post composer that catches those pesky HTML breaks,
 and **Backup** so you can carry everything with you to another computer.
 
 ## What it will not do

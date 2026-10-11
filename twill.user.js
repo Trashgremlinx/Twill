@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.35.1
+// @version      0.36.0
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.35.1';
+  const VERSION = '0.36.0';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -265,8 +265,46 @@
       titleFont: "'Segoe UI', system-ui, sans-serif",
       bodyFont: "'Segoe UI', system-ui, sans-serif",
       radius: 4
+    },
+    /* The starting pair: Vellum for a computer set to light mode, Antler Night
+       for one set to dark. Both are drawn from the stag: antler, bark, hide,
+       moss and chalk. */
+    vellum: {
+      name: 'Vellum',
+      panel: '#f8f1e4', surface: '#f0e5d2', line: '#dfccb0',
+      head: '#3e3224', headText: '#f3ebdd',
+      text: '#3e3224', muted: '#644f37',
+      accent: '#4b5a3f', onAccent: '#f8f1e4',
+      good: '#dfe7d6', goodText: '#3a5030',
+      warn: '#f2ddd2', warnText: '#7d3d22',
+      edge: '#a68058',
+      tipTitle: '#644626',
+      glass: 76,
+      titleFont: "Georgia, 'Times New Roman', serif",
+      bodyFont: "Georgia, 'Times New Roman', serif",
+      radius: 4
+    },
+    antlernight: {
+      name: 'Antler Night',
+      panel: '#2e261d', surface: '#362d23', line: '#54452f',
+      head: '#3e3224', headText: '#efe4d6',
+      text: '#e0d3c6', muted: '#b3a184',
+      accent: '#c4a27e', onAccent: '#241e17',
+      good: '#2f5a42', goodText: '#e2f0e2',
+      warn: '#6b3f28', warnText: '#f6e2d4',
+      edge: '#a68058',
+      tipTitle: '#d0bda5',
+      glass: 62,
+      titleFont: "Georgia, 'Times New Roman', serif",
+      bodyFont: "Georgia, 'Times New Roman', serif",
+      radius: 4
     }
   };
+
+  /* @seasons-begin: a light and a dark theme for every month. They only appear
+     during their own month, going by this computer's clock; nothing is fetched. */
+  const SEASONAL = {"jan-l":{"name":"Hoarfrost","panel":"#e4eff8","surface":"#d4dfe8","line":"#bbc7d1","head":"#1d3557","headText":"#ffffff","text":"#162536","muted":"#546270","accent":"#1f5fa8","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#5083bc","tipTitle":"#1d3557","glass":76,"titleFont":"Cambria, Georgia, serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":2,"month":1,"mood":"ice-blue and navy, frost on every branch"},"jan-d":{"name":"Long Night","panel":"#0e1a36","surface":"#1d2944","line":"#39445d","head":"#070d1f","headText":"#eef2fa","text":"#e6ecf8","muted":"#a5adbe","accent":"#b8d4ff","onAccent":"#0e1a36","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#8ea6cd","tipTitle":"#ffffff","glass":62,"titleFont":"Cambria, Georgia, serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":2,"month":1,"mood":"deep navy, silver moonlight"},"feb-l":{"name":"Sweetbriar","panel":"#ffe0d9","surface":"#efd0c9","line":"#d8b7b2","head":"#b3122e","headText":"#ffffff","text":"#3b1216","muted":"#765050","accent":"#b3122e","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#c64659","tipTitle":"#8a0f22","glass":76,"titleFont":"'Palatino Linotype', 'Book Antiqua', Palatino, serif","bodyFont":"'Trebuchet MS', 'Lucida Grande', sans-serif","radius":12,"month":2,"mood":"Valentine red on peach-pink"},"feb-d":{"name":"Rosewood","panel":"#2a0f1a","surface":"#381e29","line":"#533944","head":"#160609","headText":"#f9ebf0","text":"#f6e3ea","muted":"#b9a3ac","accent":"#ff7aa8","onAccent":"#2a0f1a","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#ca5f84","tipTitle":"#ffc2d6","glass":62,"titleFont":"'Palatino Linotype', 'Book Antiqua', Palatino, serif","bodyFont":"'Trebuchet MS', 'Lucida Grande', sans-serif","radius":12,"month":2,"mood":"dark wine and candlelit pink"},"mar-l":{"name":"Primrose","panel":"#faf3c2","surface":"#eae3b4","line":"#d1cb9e","head":"#3f6b2a","headText":"#ffffff","text":"#2c2a10","muted":"#6a6645","accent":"#3f6b2a","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#6e8d50","tipTitle":"#7a5b00","glass":76,"titleFont":"Constantia, Georgia, serif","bodyFont":"Candara, Optima, 'Segoe UI', sans-serif","radius":8,"month":3,"mood":"pale primrose yellow and new leaves"},"mar-d":{"name":"Rainfall","panel":"#1e3142","surface":"#2c3e4e","line":"#455665","head":"#122030","headText":"#ebf2f4","text":"#e2ecf0","muted":"#a7b4bc","accent":"#9be8c8","onAccent":"#1e3142","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#7cbaa6","tipTitle":"#f2dc6b","glass":62,"titleFont":"Constantia, Georgia, serif","bodyFont":"Candara, Optima, 'Segoe UI', sans-serif","radius":8,"month":3,"mood":"steel-blue sky and fresh rain"},"apr-l":{"name":"Lilac","panel":"#ede3fb","surface":"#ddd3eb","line":"#c5bad4","head":"#4b2a7f","headText":"#ffffff","text":"#251838","muted":"#615572","accent":"#6a36b0","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#8b61c3","tipTitle":"#4b2a7f","glass":76,"titleFont":"'Palatino Linotype', 'Book Antiqua', Palatino, serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":14,"month":4,"mood":"lavender and violet, an orchard in bloom"},"apr-d":{"name":"Midnight Lilies","panel":"#1c1840","surface":"#2a274d","line":"#454266","head":"#110e2b","headText":"#f1efff","text":"#ebe8ff","muted":"#adaac6","accent":"#f5a8e8","onAccent":"#1c1840","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#bf84be","tipTitle":"#b9a8ff","glass":62,"titleFont":"'Palatino Linotype', 'Book Antiqua', Palatino, serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":14,"month":4,"mood":"indigo night and moonlit lilies"},"may-l":{"name":"Meadow","panel":"#dff4e4","surface":"#cfe4d4","line":"#b6cdbd","head":"#17613f","headText":"#ffffff","text":"#14301f","muted":"#516b5a","accent":"#0f6644","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#438a6c","tipTitle":"#6b5200","glass":76,"titleFont":"Georgia, 'Times New Roman', serif","bodyFont":"'Trebuchet MS', 'Lucida Grande', sans-serif","radius":6,"month":5,"mood":"mint green and buttercups"},"may-d":{"name":"Hedgerow","panel":"#0f2a1d","surface":"#1e382b","line":"#3a5246","head":"#071a11","headText":"#ecf7f0","text":"#e4f3ea","muted":"#a4b7ac","accent":"#ffc2d9","onAccent":"#0f2a1d","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#c39caa","tipTitle":"#f4f1e6","glass":62,"titleFont":"Georgia, 'Times New Roman', serif","bodyFont":"'Trebuchet MS', 'Lucida Grande', sans-serif","radius":6,"month":5,"mood":"deep emerald, hawthorn blossom"},"jun-l":{"name":"Honeycomb","panel":"#ffe39a","surface":"#eed38e","line":"#d5bc7c","head":"#3a2608","headText":"#ffffff","text":"#2e1f05","muted":"#6d5a32","accent":"#7a3f00","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#9b6826","tipTitle":"#5c3500","glass":76,"titleFont":"Cambria, Georgia, serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":10,"month":6,"mood":"rich honey gold and dark comb"},"jun-d":{"name":"Midsummer","panel":"#0b2a2e","surface":"#1a383c","line":"#355255","head":"#05191c","headText":"#e8f7f6","text":"#def3f2","muted":"#9fb7b7","accent":"#ffcf5c","onAccent":"#0b2a2e","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#c2a650","tipTitle":"#ff9f7a","glass":62,"titleFont":"Cambria, Georgia, serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":10,"month":6,"mood":"midnight teal and a bonfire"},"jul-l":{"name":"Seaglass","panel":"#d9f2f2","surface":"#c9e2e2","line":"#b1cbcb","head":"#0a6670","headText":"#ffffff","text":"#10302f","muted":"#4c6a6a","accent":"#a8331a","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#b46350","tipTitle":"#0a5a63","glass":76,"titleFont":"'Trebuchet MS', 'Lucida Grande', sans-serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":16,"month":7,"mood":"sea-glass aqua and coral"},"jul-d":{"name":"Firefly","panel":"#121410","surface":"#21231e","line":"#3e4038","head":"#2a2a0c","headText":"#f3f4e4","text":"#eef0d8","muted":"#acae9c","accent":"#ffe14a","onAccent":"#121410","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#c4ae3c","tipTitle":"#ffe14a","glass":62,"titleFont":"'Trebuchet MS', 'Lucida Grande', sans-serif","bodyFont":"'Segoe UI', system-ui, sans-serif","radius":16,"month":7,"mood":"pitch-dark meadow full of fireflies"},"aug-l":{"name":"Heather","panel":"#fbd9ea","surface":"#ebc9da","line":"#d3b2c3","head":"#7a0f4f","headText":"#ffffff","text":"#331528","muted":"#6f5062","accent":"#a0186a","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#b7488a","tipTitle":"#7a0f4f","glass":76,"titleFont":"Rockwell, 'Courier New', Georgia, serif","bodyFont":"Verdana, Geneva, sans-serif","radius":4,"month":8,"mood":"moorland heather, hot magenta"},"aug-d":{"name":"Thunderhead","panel":"#2b2f35","surface":"#383c42","line":"#51545a","head":"#15171a","headText":"#eff0f2","text":"#e8eaed","muted":"#afb2b6","accent":"#fff27a","onAccent":"#2b2f35","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#cac169","tipTitle":"#c9d3de","glass":62,"titleFont":"Rockwell, 'Courier New', Georgia, serif","bodyFont":"Verdana, Geneva, sans-serif","radius":4,"month":8,"mood":"gunmetal storm clouds, a crack of lightning"},"sep-l":{"name":"Sweater Weather","panel":"#f1e2cc","surface":"#e1d2bd","line":"#cabaa6","head":"#7a3b1a","headText":"#ffffff","text":"#2e1c10","muted":"#685748","accent":"#a63a14","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#b96442","tipTitle":"#7a3b1a","glass":76,"titleFont":"Garamond, 'Apple Garamond', Georgia, serif","bodyFont":"Candara, Optima, 'Segoe UI', sans-serif","radius":6,"month":9,"mood":"oatmeal knit, cinnamon and maple leaves"},"sep-d":{"name":"Mulled Cider","panel":"#2c1b1e","surface":"#3a292b","line":"#544444","head":"#1a0f11","headText":"#f9efe6","text":"#f6e8dc","muted":"#b9aaa3","accent":"#f0b46e","onAccent":"#2c1b1e","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#bf8e5a","tipTitle":"#e8826a","glass":62,"titleFont":"Garamond, 'Apple Garamond', Georgia, serif","bodyFont":"Candara, Optima, 'Segoe UI', sans-serif","radius":6,"month":9,"mood":"cocoa, caramel and a cinnamon stick"},"oct-l":{"name":"Pumpkin Patch","panel":"#ffd9b3","surface":"#eec9a5","line":"#d4b291","head":"#2b1240","headText":"#ffffff","text":"#2a170a","muted":"#6a513d","accent":"#6a2a8f","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#8f5698","tipTitle":"#9a3d00","glass":76,"titleFont":"Georgia, 'Times New Roman', serif","bodyFont":"Georgia, 'Times New Roman', serif","radius":4,"month":10,"mood":"pumpkin orange under a witching-purple header"},"oct-d":{"name":"Ember Hour","panel":"#261e16","surface":"#342c23","line":"#4e453c","head":"#3a1408","headText":"#f4ebe1","text":"#f0e2d4","muted":"#b3a79b","accent":"#ff6a1f","onAccent":"#261e16","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#c9571d","tipTitle":"#ffb03b","glass":62,"titleFont":"Georgia, 'Times New Roman', serif","bodyFont":"Georgia, 'Times New Roman', serif","radius":4,"month":10,"mood":"Halloween dusk, embers glowing on bark"},"nov-l":{"name":"Fog","panel":"#e4e5e8","surface":"#d4d5d8","line":"#bdbec1","head":"#2c2d31","headText":"#ffffff","text":"#202125","muted":"#5b5c60","accent":"#8a1f3d","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#a05068","tipTitle":"#2c2d31","glass":76,"titleFont":"Corbel, 'Lucida Grande', sans-serif","bodyFont":"Corbel, 'Lucida Grande', sans-serif","radius":0,"month":11,"mood":"cool fog grey and oxblood"},"nov-d":{"name":"Mushroom","panel":"#3a2533","surface":"#473340","line":"#5e4c57","head":"#24151f","headText":"#f4eeef","text":"#efe6e8","muted":"#b9acb2","accent":"#e7b2a0","onAccent":"#3a2533","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#bc8f85","tipTitle":"#d8c3a5","glass":62,"titleFont":"Corbel, 'Lucida Grande', sans-serif","bodyFont":"Corbel, 'Lucida Grande', sans-serif","radius":0,"month":11,"mood":"deep mauve and toadstool pink"},"dec-l":{"name":"Frostfall","panel":"#f4f9fb","surface":"#e3e8ea","line":"#c9ced0","head":"#a11d22","headText":"#ffffff","text":"#1d2326","muted":"#5e6366","accent":"#1b6b3a","onAccent":"#ffffff","good":"#dfe7d6","goodText":"#3a5030","warn":"#f2ddd2","warnText":"#7d3d22","edge":"#518e6a","tipTitle":"#a11d22","glass":76,"titleFont":"Cambria, Georgia, serif","bodyFont":"Cambria, Georgia, serif","radius":3,"month":12,"mood":"snow white, a holly-red header"},"dec-d":{"name":"Gingerbread","panel":"#3d2414","surface":"#4b3323","line":"#644e3f","head":"#26150a","headText":"#fff9f2","text":"#fff6ec","muted":"#c5b7ab","accent":"#ff7a7a","onAccent":"#3d2414","good":"#2f5a42","goodText":"#e2f0e2","warn":"#6b3f28","warnText":"#f6e2d4","edge":"#ce6560","tipTitle":"#8fe39a","glass":62,"titleFont":"Cambria, Georgia, serif","bodyFont":"Cambria, Georgia, serif","radius":10,"month":12,"mood":"a gingerbread house, icing and sweets"}};
+  /* @seasons-end */
 
   const COLOUR_FIELDS = [
     ['panel', 'Panel'], ['surface', 'Surface'],
@@ -308,31 +346,136 @@
     "Consolas, Menlo, monospace", "'Courier New', Courier, monospace"
   ];
 
-  // theme: 'preset:<id>' or 'custom:<id>'
-  // drafts: per-preset edits you have not saved as a theme yet
+  /* A theme key is 'preset:<id>', 'season:<id>' or 'custom:<id>'.
+     themeLight / themeDark: the pick for each mode. mode: 'light', 'dark' or
+     'auto', which follows the computer. season: 'switch' (the month's theme
+     stands in), 'offer' (it joins the lists) or 'off'. seasonLeft: the month in
+     which the player picked their own theme over the seasonal one.
+     drafts: per-preset edits you have not saved as a theme yet. */
+  const savedCore = load('core', null);
   const core = Object.assign(
-    { theme: 'preset:cypres', drafts: {}, custom: {}, enabled: {}, corner: 'br', button: 'full', buttonSize: 40, buttonPlate: false },
-    load('core', {})
+    { theme: 'preset:vellum', themeLight: 'preset:vellum', themeDark: 'preset:antlernight', mode: 'auto',
+      season: 'switch', seasonLeft: '', drafts: {}, custom: {}, enabled: {}, corner: 'br', button: 'full',
+      buttonSize: 40, buttonPlate: false, textSize: 100 },
+    savedCore || {}
   );
   const saveCore = () => save('core', core);
 
+  const MONTH_IDS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  const monthNow = () => new Date().getMonth();
+  const monthKey = () => new Date().getFullYear() + '-' + (monthNow() + 1);
+  const seasonId = (side) => MONTH_IDS[monthNow()] + (side === 'dark' ? '-d' : '-l');
+
+  function tokensFor(key) {
+    const [kind, id] = String(key).split(':');
+    if (kind === 'custom' && core.custom[id]) return { ...PRESETS.cypres, ...core.custom[id].tokens };
+    if (kind === 'season' && SEASONAL[id]) return { ...SEASONAL[id], ...(core.drafts[id] || {}) };
+    const pid = PRESETS[id] ? id : 'vellum';
+    return { ...PRESETS[pid], ...(core.drafts[pid] || {}) };
+  }
+  // The same test paintTheme uses for a dark panel, so a theme's list and its look agree.
+  const sideOf = (key) => lum(hexToC(tokensFor(key).panel)) < 0.5 ? 'dark' : 'light';
+
+  // Before 0.36 there was one theme. Keep exactly what the player had: it
+  // becomes their pick for its own mode, that mode is fixed rather than
+  // following the computer, and the seasons are offered rather than switched
+  // on, so nothing changes under them until they choose.
+  if (savedCore && !savedCore.themeLight && savedCore.theme) {
+    const side = sideOf(savedCore.theme);
+    core[side === 'dark' ? 'themeDark' : 'themeLight'] = savedCore.theme;
+    core.mode = side;
+    core.season = 'offer';
+    save('core', core);
+  }
+
+  const sysDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  const effMode = () => core.mode === 'light' || core.mode === 'dark' ? core.mode
+    : (sysDark && sysDark.matches ? 'dark' : 'light');
+  const seasonOn = () => core.season === 'switch' && core.seasonLeft !== monthKey();
+
+  // A seasonal pick left over from an earlier month falls back to the starting theme.
+  function pickFor(side) {
+    const key = side === 'dark' ? core.themeDark : core.themeLight;
+    const [kind, id] = String(key).split(':');
+    const stale = (kind === 'season' && (!SEASONAL[id] || id !== seasonId(side) || core.season === 'off'))
+      || (kind === 'custom' && !core.custom[id]) || (kind === 'preset' && !PRESETS[id]);
+    return stale ? (side === 'dark' ? 'preset:antlernight' : 'preset:vellum') : key;
+  }
+  const currentKey = () => seasonOn() ? 'season:' + seasonId(effMode()) : pickFor(effMode());
+
   function themeParts() {
-    const [kind, id] = String(core.theme).split(':');
-    if (kind === 'custom' && core.custom[id]) return { kind, id };
-    return { kind: 'preset', id: PRESETS[id] ? id : 'cypres' };
+    const [kind, id] = currentKey().split(':');
+    return { kind, id };
   }
 
-  function activeTokens() {
-    const { kind, id } = themeParts();
-    if (kind === 'custom') return { ...PRESETS.cypres, ...core.custom[id].tokens };
-    return { ...PRESETS[id], ...(core.drafts[id] || {}) };
-  }
+  function activeTokens() { return tokensFor(currentKey()); }
 
-  function themeLabel() {
-    const { kind, id } = themeParts();
-    if (kind === 'custom') return core.custom[id].name;
+  function themeName(key) {
+    const [kind, id] = String(key).split(':');
+    if (kind === 'custom') return core.custom[id] ? core.custom[id].name : 'Your theme';
+    const base = kind === 'season' ? SEASONAL[id] : PRESETS[id];
     const edited = core.drafts[id] && Object.keys(core.drafts[id]).length;
-    return PRESETS[id].name + (edited ? ' (edited)' : '');
+    return (base ? base.name : 'Theme') + (edited ? ' (edited)' : '');
+  }
+  const themeLabel = () => themeName(currentKey());
+
+  // Picking a theme files it under its own mode and switches to that mode.
+  // Picking your own over the month's seasonal one sets the season aside until
+  // the month is out; picking the seasonal one brings it back.
+  function chooseTheme(key) {
+    const side = sideOf(key);
+    if (key.startsWith('season:')) {
+      core.seasonLeft = '';
+      if (core.season !== 'switch') core[side === 'dark' ? 'themeDark' : 'themeLight'] = key;
+    } else {
+      core[side === 'dark' ? 'themeDark' : 'themeLight'] = key;
+      if (seasonOn()) core.seasonLeft = monthKey();
+    }
+    if (effMode() !== side) core.mode = side;
+    core.theme = currentKey();
+    saveCore();
+    paintTheme();
+  }
+
+  /* Theme codes. Everything in a pasted code is checked before it is used:
+     colours must be plain hex, fonts only letters, digits, spaces and a few
+     marks (so nothing can slip a url() into the page), numbers stay in range. */
+  const CODE_PREFIX = 'twill-theme:';
+  function themeCode(name, t) {
+    const out = { n: String(name).slice(0, 40), t: {} };
+    for (const [k] of COLOUR_FIELDS) if (t[k]) out.t[k] = t[k];
+    for (const k of ['titleFont', 'bodyFont', 'radius', 'glass']) if (t[k] != null) out.t[k] = t[k];
+    return CODE_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(out))));
+  }
+  function readThemeCode(code) {
+    try {
+      const raw = String(code).trim();
+      if (!raw.startsWith(CODE_PREFIX)) return null;
+      const o = JSON.parse(decodeURIComponent(escape(atob(raw.slice(CODE_PREFIX.length)))));
+      if (!o || typeof o !== 'object' || !o.t || typeof o.t !== 'object') return null;
+      const tokens = {};
+      for (const [k] of COLOUR_FIELDS) {
+        const v = o.t[k];
+        if (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) tokens[k] = v.toLowerCase();
+      }
+      if (Object.keys(tokens).length < 6) return null;
+      for (const k of ['titleFont', 'bodyFont']) {
+        const v = o.t[k];
+        if (typeof v === 'string' && /^[A-Za-z0-9 ,'"\-.]{1,120}$/.test(v)) tokens[k] = v;
+      }
+      const num = (v, lo, hi) => (Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : null);
+      if (num(o.t.radius, 0, 10) != null) tokens.radius = num(o.t.radius, 0, 10);
+      if (num(o.t.glass, 20, 100) != null) tokens.glass = num(o.t.glass, 20, 100);
+      const name = String(o.n || 'Shared theme').replace(/[<>]/g, '').trim().slice(0, 40) || 'Shared theme';
+      return { name, tokens };
+    } catch { return null; }
+  }
+
+  function setMode(mode) {
+    core.mode = mode;
+    core.theme = currentKey();
+    saveCore();
+    paintTheme();
   }
 
   function setToken(key, value, persist) {
@@ -389,6 +532,7 @@
          two, so switching theme re-fits every one of them without any JS. */
       --dk-gene-s: 72%; --dk-gene-l: ${dark ? '62%' : '40%'};
       --dk-glass: ${glass}%;
+      --dk-zoom: ${Math.min(130, Math.max(85, Number(core.textSize) || 100)) / 100};
       --dk-tip-title: ${t.tipTitle || t.accent};
       --dk-title-font: ${t.titleFont}; --dk-body-font: ${t.bodyFont};
       --dk-radius: ${Math.max(0, Math.min(10, Number(t.radius) || 0))}px;
@@ -594,6 +738,73 @@
     #dk-hub input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
     #dk-hub input[type=color]::-webkit-color-swatch { border: 0; border-radius: 2px; }
     .dk-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Text size. Phones leave it to the browser's own setting, because a
+       zoomed panel there would run off the edge of the screen. */
+    @media (min-width: 641px) {
+      #dk-hub, #dk-np, #dk-den, #dk-tc, #dk-ped, #dk-lore { zoom: var(--dk-zoom, 1); }
+      /* A zoomed hub is taller too, so its height limit shrinks to match and it
+         still never runs off the top of the screen. */
+      #dk-hub { max-height: calc(72vh / var(--dk-zoom, 1)); }
+    }
+    /* What's new: a dot on the corner button until the card has been seen. */
+    #dk-launch.dk-new::after {
+      content: ''; position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%;
+      background: #d47f25; box-shadow: 0 0 0 2px rgba(255,255,255,.9);
+    }
+    .dk-news { margin: 8px 0 4px; padding: 9px 11px; border: 1px solid var(--dk-accent); border-radius: var(--dk-radius); background: var(--dk-surface); }
+    .dk-news strong { display: block; color: var(--dk-tip-title); font: 700 13.5px/1.3 var(--dk-title-font); }
+    .dk-news ul { margin: 5px 0 7px; padding-left: 17px; font-size: 12px; }
+    .dk-news li { margin-bottom: 3px; }
+    /* Composer: how long the post is against the limit it is headed for. */
+    .dk-count { display: flex; justify-content: space-between; gap: 8px; margin-top: 5px; font-size: 11.5px; color: var(--dk-muted); }
+    .dk-count b { color: var(--dk-text); font-weight: 600; }
+    .dk-count.dk-over b { color: var(--dk-warn-text, #b0463a); }
+    .dk-cbar { height: 5px; margin-top: 3px; border-radius: 3px; background: var(--dk-line); overflow: hidden; }
+    .dk-cbar i { display: block; height: 100%; background: var(--dk-accent); }
+    .dk-cbar.dk-over i { background: #b0463a; }
+    #dk-hub .dk-count select { height: auto; padding: 1px 4px; font-size: 11px; width: auto; display: inline-block; }
+    /* Look: the mode switch, the two theme lists, and the font picker. */
+    .dk-seg { display: flex; border: 1px solid var(--dk-line); border-radius: var(--dk-radius); overflow: hidden; }
+    #dk-hub .dk-seg button {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; margin: 0; padding: 5px 4px;
+      font: 12px/1.3 var(--dk-body-font); color: var(--dk-text); background: transparent; border: 0; cursor: pointer;
+    }
+    #dk-hub .dk-seg button + button { border-left: 1px solid var(--dk-line); }
+    #dk-hub .dk-seg button[aria-pressed="true"] { color: var(--dk-on-accent); background: var(--dk-accent); font-weight: 700; }
+    .dk-seg svg, .dk-sunmoon svg { width: 14px; height: 14px; flex: none; }
+    .dk-tlist { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    #dk-hub .dk-tlist button {
+      display: flex; align-items: center; gap: 6px; margin: 0; padding: 5px 7px; text-align: left; cursor: pointer;
+      font: 12px/1.25 var(--dk-body-font); color: var(--dk-text); background: var(--dk-surface);
+      border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
+    }
+    #dk-hub .dk-tlist button:hover { background: var(--dk-hover); }
+    #dk-hub .dk-tlist button[aria-pressed="true"] {
+      border-color: var(--dk-accent); font-weight: 700;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--dk-accent) 35%, transparent);
+    }
+    .dk-tlist i { flex: none; width: 22px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,.2); }
+    .dk-tlist small { display: block; color: var(--dk-muted); font-size: 10px; font-weight: 400; }
+    .dk-fpick { margin-top: 6px; max-height: 220px; overflow: auto; border: 1px solid var(--dk-line); border-radius: var(--dk-radius); }
+    .dk-fpick .dk-fgrp {
+      position: sticky; top: 0; padding: 4px 8px 2px; background: var(--dk-surface); color: var(--dk-muted);
+      font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+    }
+    #dk-hub .dk-fpick button {
+      display: flex; width: 100%; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0; padding: 6px 8px;
+      color: var(--dk-text); background: transparent; border: 0; border-top: 1px solid var(--dk-line); text-align: left; cursor: pointer;
+    }
+    #dk-hub .dk-fpick button:hover { background: var(--dk-hover); }
+    #dk-hub .dk-fpick button[aria-pressed="true"] { background: color-mix(in srgb, var(--dk-accent) 18%, transparent); }
+    .dk-fpick button span { font-size: 15px; }
+    .dk-fpick button em { font: normal 10px var(--dk-body-font); color: var(--dk-muted); white-space: nowrap; }
+    .dk-fpick button.dk-fmiss span { opacity: .5; }
+    #dk-hub details.dk-guide { margin-top: 8px; color: var(--dk-text); font-size: 11.5px; }
+    #dk-hub details.dk-guide summary { cursor: pointer; color: var(--dk-accent); }
+    #dk-hub details.dk-guide ol { margin: 6px 0 0; padding-left: 18px; }
+    #dk-hub details.dk-guide li { margin-bottom: 4px; }
+    #dk-hub details.dk-guide code { padding: 0 4px; background: var(--dk-surface); border: 1px solid var(--dk-line); border-radius: 3px; }
 
     .dk-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
     .dk-btn {
@@ -1537,6 +1748,7 @@
   const fontList = h('datalist', { id: 'dk-fonts' }, ...FONT_SUGGESTIONS.map((f) => h('option', { value: f })));
   document.body.append(launch, hub, fontList);
 
+  let newsDot = false;           // the What's new dot on the corner button
   let screen = 'home';           // 'home' | 'look' | a module id
   let saveAsOpen = false;        // the inline "name your theme" row on Look
   let pairIds = [];              // the two wolves the tray sent to the Pairing screen
@@ -1570,6 +1782,7 @@
       }));
     }
     hub.className = 'dk-c-' + c;
+    if (newsDot) launch.classList.add('dk-new');
   }
 
   function toggleHub(force) {
@@ -1582,6 +1795,27 @@
   }
 
   launch.addEventListener('click', () => toggleHub());
+
+  /* What's new. Shown once per version to players who had Twill before it;
+     someone installing for the first time has nothing to catch up on. It is
+     written into the script, so nothing is fetched to show it. */
+  const WHATS_NEW = {
+    '0.36.0': {
+      title: 'Light and dark',
+      items: [
+        'A sun and moon in the header swaps between light and dark. Auto follows your computer.',
+        'Two new starting themes, Vellum and Antler Night, and the themes are now sorted into Light and Dark.',
+        '24 seasonal themes, a light and a dark one for every month, that turn up in their own month.',
+        'A font picker, and a guide to adding your own font.',
+        'Theme codes: copy a theme to share it, or paste one in.',
+        'Text size for every Twill panel, and a character count in the composer.'
+      ]
+    }
+  };
+  if (!savedCore) save('seenVersion', VERSION);
+  const newsPending = () => !!WHATS_NEW[VERSION] && load('seenVersion', null) !== VERSION;
+  function markNews() { newsDot = newsPending(); launch.classList.toggle('dk-new', newsDot); }
+  markNews();
 
   /* Rows that keep their tail on one line get cut with an ellipsis when the
      tail is long, which is most drop lists on the Battle map and a fair few
@@ -1710,6 +1944,7 @@
         onclick: () => { screen = 'about'; render(); }
       }, h('img', { src: TWILL_MARK_DARK, alt: '', width: 19, height: 22 })),
       h('span', { class: 'dk-title', text: title }),
+      sunMoonButton(),
       h('button', {
         type: 'button', class: 'dk-x', text: '×', title: 'Close (Alt+K)', 'aria-label': 'Close',
         onclick: () => toggleHub(false)
@@ -2333,6 +2568,16 @@
     });
     const results = h('div');
     const rest = h('div');
+    if (newsPending()) {
+      const n = WHATS_NEW[VERSION];
+      const done = () => { save('seenVersion', VERSION); markNews(); render(); };
+      sheet.append(h('div', { class: 'dk-news', role: 'status' },
+        h('strong', { text: 'New in ' + VERSION + ': ' + n.title }),
+        h('ul', {}, ...n.items.map((x) => h('li', { text: x }))),
+        h('div', { class: 'dk-btns', style: 'margin-top:0' },
+          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Have a look', onclick: () => { save('seenVersion', VERSION); markNews(); screen = 'look'; render(); } }),
+          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Got it', onclick: done }))));
+    }
     sheet.append(find, results, rest);
 
     const paint = () => {
@@ -2829,6 +3074,7 @@
   }
 
   let postDraft = load('post', '');
+  let postLimit = load('postLimit', 'guild');
 
   function renderCompose() {
     const box = h('textarea', {
@@ -2837,6 +3083,26 @@
     });
     const report = h('div');
     const preview = h('div', { class: 'dk-post-prev' });
+    // Where the post is headed decides the limit: a guild post or a Biography.
+    const LIMITS = [['guild', 'a guild post', 10000], ['bio', 'a Biography', 20000]];
+    const limitSel = h('select', { 'aria-label': 'Post is for',
+      onchange: (e) => { postLimit = e.target.value; save('postLimit', postLimit); count(); } },
+      ...LIMITS.map(([v, text]) => h('option', { value: v, text, selected: postLimit === v })));
+    const countLine = h('div', { class: 'dk-count' });
+    const countBar = h('div', { class: 'dk-cbar' }, h('i'));
+    const count = () => {
+      const [, , max] = LIMITS.find(([v]) => v === postLimit) || LIMITS[0];
+      const n = box.value.length;
+      const over = n > max;
+      countLine.className = 'dk-count' + (over ? ' dk-over' : '');
+      countBar.className = 'dk-cbar' + (over ? ' dk-over' : '');
+      countBar.firstChild.style.width = Math.min(100, n / max * 100) + '%';
+      countLine.replaceChildren(
+        h('span', {}, h('b', { text: n.toLocaleString('en-GB') }), ' of ' + max.toLocaleString('en-GB') + ' characters',
+          over ? ', ' + (n - max).toLocaleString('en-GB') + ' over' : ''),
+        h('span', {}, 'for ', limitSel));
+    };
+    box.addEventListener('input', count);
 
     const check = () => {
       postDraft = box.value;
@@ -2872,7 +3138,7 @@
     let t = null;
     box.addEventListener('input', () => { clearTimeout(t); t = setTimeout(check, 200); });
 
-    sheet.append(h('div', { class: 'dk-lb', text: 'Your post' }), box, report,
+    sheet.append(h('div', { class: 'dk-lb', text: 'Your post' }), box, countLine, countBar, report,
       h('div', { class: 'dk-btns' },
         h('button', {
           type: 'button', class: 'dk-btn dk-primary', text: 'Copy',
@@ -2884,11 +3150,12 @@
         }),
         h('button', {
           type: 'button', class: 'dk-btn dk-quiet', text: 'Clear',
-          onclick: () => { box.value = ''; check(); }
+          onclick: () => { box.value = ''; check(); count(); }
         })),
       h('div', { class: 'dk-lb', text: 'What survives' }), preview,
       h('div', { class: 'dk-note', text: 'The preview drops exactly what Wolvden drops, so what you see is what posts. It checks the quirks we have actually seen bite, not every rule Wolvden has.' }));
     check();
+    count();
   }
 
   /* The Collection is a checklist you keep yourself: tick what you have and the
@@ -3145,32 +3412,124 @@
     setTimeout(() => input.focus(), 0);
   }
 
+  // Static, trusted markup for the two icons; nothing from a page goes in here.
+  const SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>';
+  const MOON_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a.6.6 0 0 0-.8-.7A9.6 9.6 0 1 0 21.2 15.4a.6.6 0 0 0-.7-.8Z"/></svg>';
+  const icon = (svg) => { const s = h('span', { 'aria-hidden': 'true' }); s.innerHTML = svg; return s; };
+
+  // The sun and moon in the hub header: one press swaps light and dark.
+  function sunMoonButton() {
+    const dark = effMode() === 'dark';
+    return h('button', {
+      type: 'button', class: 'dk-sunmoon', title: dark ? 'Switch to light' : 'Switch to dark',
+      'aria-label': dark ? 'Switch to light' : 'Switch to dark',
+      onclick: () => { setMode(dark ? 'light' : 'dark'); render(); }
+    }, icon(dark ? SUN_SVG : MOON_SVG));
+  }
+
+  // The computer switching between light and dark repaints Twill when it follows it.
+  if (sysDark) {
+    const follow = () => { if (core.mode !== 'auto') return; paintTheme(); if (!hub.hidden) render(); };
+    if (sysDark.addEventListener) sysDark.addEventListener('change', follow);
+    else if (sysDark.addListener) sysDark.addListener(follow);
+  }
+
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Group the font suggestions by the family each one falls back to.
+  const FONT_GROUPS = (() => {
+    const g = { Serif: [], 'Slab and display': [], Sans: [], Handwritten: [], Typewriter: [] };
+    for (const f of FONT_SUGGESTIONS) {
+      if (/^(Rockwell|Copperplate|Impact)/.test(f)) g['Slab and display'].push(f);
+      else if (/monospace$/.test(f)) g.Typewriter.push(f);
+      else if (/cursive$/.test(f)) g.Handwritten.push(f);
+      else if (/sans-serif$/.test(f)) g.Sans.push(f);
+      else g.Serif.push(f);
+    }
+    return g;
+  })();
+  const fontName = (stack) => String(stack).split(',')[0].replace(/['"]/g, '').trim();
+
+  // Is any named font in this stack installed? Measured on a canvas against the
+  // plain fall-backs; nothing is downloaded or sent anywhere.
+  const fontSeen = new Map();
+  function fontInstalled(stack) {
+    if (fontSeen.has(stack)) return fontSeen.get(stack);
+    let ok = false;
+    try {
+      const ctx = document.createElement('canvas').getContext('2d');
+      const probe = 'mmmmmmmmmmlli WwQ 0123';
+      const names = String(stack).split(',').map((x) => x.trim())
+        .filter((x) => !/^(serif|sans-serif|monospace|cursive|system-ui)$/i.test(x));
+      ok = names.some((n) => ['monospace', 'serif', 'sans-serif'].some((fb) => {
+        ctx.font = '40px ' + fb;
+        const plain = ctx.measureText(probe).width;
+        ctx.font = '40px ' + n + ', ' + fb;
+        return ctx.measureText(probe).width !== plain;
+      }));
+    } catch { ok = true; }
+    fontSeen.set(stack, ok);
+    return ok;
+  }
+  let fontTarget = 'titleFont';
+
   function renderLook() {
     const t = activeTokens();
     const { kind, id } = themeParts();
+    const side = effMode();
 
-    // --- theme menu ---
-    const sel = h('select', {
-      'aria-label': 'Theme',
-      onchange: (e) => { core.theme = e.target.value; saveAsOpen = false; saveCore(); paintTheme(); render(); }
-    });
-    const presetGroup = h('optgroup', { label: 'Presets' });
-    for (const [pid, p] of Object.entries(PRESETS)) {
-      const edited = core.drafts[pid] && Object.keys(core.drafts[pid]).length;
-      presetGroup.append(h('option', {
-        value: 'preset:' + pid,
-        text: p.name + (edited ? ' (edited)' : ''),
-        selected: kind === 'preset' && id === pid
+    // --- mode ---
+    const modeBtn = (m, label, svg) => h('button', {
+      type: 'button', 'aria-pressed': String(core.mode === m),
+      onclick: () => { setMode(m); render(); }
+    }, svg ? icon(svg) : null, label);
+    sheet.append(h('div', { class: 'dk-lb', text: 'Mode' }),
+      h('div', { class: 'dk-seg' }, modeBtn('light', 'Light', SUN_SVG), modeBtn('dark', 'Dark', MOON_SVG), modeBtn('auto', 'Auto')),
+      h('div', { class: 'dk-note', style: 'margin-top:5px',
+        text: core.mode === 'auto' ? 'Following this computer, which is in ' + side + ' mode.'
+          : 'Set to ' + side + ' here, whatever the computer says. The sun and moon in the header swap it too.' }));
+
+    // --- the two lists ---
+    const current = currentKey();
+    const swatch = (tk) => h('i', { style: 'background:linear-gradient(90deg,' + tk.panel + ' 0 50%,' + tk.head + ' 50% 75%,' + tk.accent + ' 75%)' });
+    const listFor = (which) => {
+      const keys = [];
+      if (core.season !== 'off') keys.push('season:' + seasonId(which));
+      const order = ['vellum', 'antlernight', ...Object.keys(PRESETS).filter((x) => x !== 'vellum' && x !== 'antlernight')];
+      for (const pid of order) if (sideOf('preset:' + pid) === which) keys.push('preset:' + pid);
+      for (const cid of Object.keys(core.custom)) if (sideOf('custom:' + cid) === which) keys.push('custom:' + cid);
+      const pick = pickFor(which);
+      return h('div', { class: 'dk-tlist' }, ...keys.map((key) => {
+        const tk = tokensFor(key);
+        const [k] = key.split(':');
+        const on = key === (which === side ? current : seasonOn() ? 'season:' + seasonId(which) : pick);
+        const sub = k === 'season' ? MONTH_NAMES[monthNow()] + ' only'
+          : key === 'preset:vellum' || key === 'preset:antlernight' ? 'starting theme' : k === 'custom' ? 'yours' : null;
+        return h('button', {
+          type: 'button', 'aria-pressed': String(on), title: k === 'season' ? SEASONAL[key.slice(7)].mood : null,
+          onclick: () => { chooseTheme(key); saveAsOpen = false; render(); }
+        }, swatch(tk), h('span', {}, themeName(key), sub ? h('small', { text: sub }) : null));
       }));
-    }
-    sel.append(presetGroup);
-    const mine = Object.entries(core.custom);
-    if (mine.length) {
-      const g = h('optgroup', { label: 'Yours' });
-      for (const [cid, c] of mine) g.append(h('option', { value: 'custom:' + cid, text: c.name, selected: kind === 'custom' && id === cid }));
-      sel.append(g);
-    }
-    sheet.append(h('div', { class: 'dk-lb', text: 'Theme' }), sel);
+    };
+    sheet.append(h('div', { class: 'dk-lb', text: 'Light themes' }), listFor('light'),
+      h('div', { class: 'dk-lb', text: 'Dark themes' }), listFor('dark'));
+
+    // --- seasons ---
+    const seasonBtn = (v, label) => h('button', {
+      type: 'button', 'aria-pressed': String(core.season === v),
+      onclick: () => { core.season = v; core.seasonLeft = ''; core.theme = currentKey(); saveCore(); paintTheme(); render(); }
+    }, label);
+    const here = SEASONAL[seasonId(side)];
+    const own = themeName(pickFor(side));
+    sheet.append(h('div', { class: 'dk-lb', text: 'Seasonal themes' }),
+      h('div', { class: 'dk-seg' }, seasonBtn('switch', 'Switch for me'), seasonBtn('offer', 'Just offer it'), seasonBtn('off', 'Off')),
+      h('div', { class: 'dk-note', style: 'margin-top:5px',
+        text: core.season === 'off' ? 'Seasonal themes never appear.'
+          : core.season === 'offer' ? SEASONAL[seasonId('light')].name + ' and ' + SEASONAL[seasonId('dark')].name + ' are in the lists for ' + MONTH_NAMES[monthNow()] + ' only.'
+          : seasonOn() ? 'It is ' + MONTH_NAMES[monthNow()] + ', so ' + here.name + ' is standing in for ' + own + '. Pick any theme to leave it early.'
+          : 'You picked ' + own + ', so ' + here.name + ' has stepped aside until ' + MONTH_NAMES[monthNow()] + ' is over.' }));
+
+    sheet.append(h('div', { class: 'dk-lb', text: 'Editing  \u00b7  ' + themeLabel() }));
 
     // --- colours: 'input' repaints live while you drag, 'change' saves ---
     const sw = h('div', { class: 'dk-swatches' });
@@ -3198,6 +3557,41 @@
         h('div', {}, h('label', { text: 'Body' }), fontInput('bodyFont'))
       )
     );
+    const tgt = (key, label) => h('button', {
+      type: 'button', 'aria-pressed': String(fontTarget === key),
+      onclick: () => { fontTarget = key; render(); }
+    }, 'Pick for ' + label);
+    const pickList = h('div', { class: 'dk-fpick' });
+    for (const [grp, stacks] of Object.entries(FONT_GROUPS)) {
+      if (!stacks.length) continue;
+      pickList.append(h('div', { class: 'dk-fgrp', text: grp }));
+      for (const stack of stacks) {
+        const ok = fontInstalled(stack);
+        const sample = h('span', { text: fontName(stack) });
+        sample.style.fontFamily = stack;
+        pickList.append(h('button', {
+          type: 'button', class: ok ? null : 'dk-fmiss', 'aria-pressed': String(t[fontTarget] === stack),
+          onclick: () => { setToken(fontTarget, stack, true); render(); }
+        }, sample, h('em', { text: ok ? 'on this computer' : 'not on this computer' })));
+      }
+    }
+    sheet.append(
+      h('div', { class: 'dk-seg', style: 'margin-top:8px' }, tgt('titleFont', 'titles'), tgt('bodyFont', 'text')),
+      pickList,
+      h('div', { class: 'dk-note', style: 'margin-top:5px',
+        text: 'Greyed fonts are not on this computer. Twill never downloads fonts, so it uses the next one in line instead.' }),
+      h('details', { class: 'dk-guide' },
+        h('summary', { text: 'Add your own font' }),
+        h('div', { style: 'margin-top:6px', text: 'Twill can use any font installed on your computer.' }),
+        h('ol', {},
+          h('li', {}, 'Find a font you like. ',
+            h('a', { href: 'https://fonts.google.com/', target: '_blank', rel: 'noopener noreferrer', text: 'Google Fonts' }),
+            ' has hundreds that are free to use; check the licence on anything from elsewhere.'),
+          h('li', { text: 'Download it and install it. On Windows, open the font file and press Install. On a Mac, open it and press Install Font.' }),
+          h('li', { text: 'Restart your browser so it notices the new font.' }),
+          h('li', {}, 'Type its exact name into the Title or Body box above, for example ', h('code', { text: 'Fraunces' }), '.'),
+          h('li', {}, 'Add a back-up after a comma, like ', h('code', { text: 'Fraunces, Georgia, serif' }), ', so anyone without it still gets something tidy.')),
+        h('div', { class: 'dk-muted', text: 'A font installed this way only shows on that computer. On a phone, Twill uses the back-up.' })));
 
     // --- corners ---
     const cornerLabel = h('div', { class: 'dk-lb', text: 'Corners  ·  ' + t.radius + 'px' });
@@ -3227,11 +3621,9 @@
         if (!n) { name.focus(); return; }
         const cid = Date.now().toString(36);
         core.custom[cid] = { name: n, tokens: activeTokens() };
-        if (kind === 'preset') delete core.drafts[id];
-        core.theme = 'custom:' + cid;
+        if (kind !== 'custom') delete core.drafts[id];
         saveAsOpen = false;
-        saveCore();
-        paintTheme();
+        chooseTheme('custom:' + cid);
         render();
       };
       name.addEventListener('keydown', (e) => { if (e.key === 'Enter') commit(); });
@@ -3246,7 +3638,7 @@
         type: 'button', class: 'dk-btn dk-primary', text: 'Save as new',
         onclick: () => { saveAsOpen = true; render(); }
       }));
-      if (kind === 'preset') {
+      if (kind !== 'custom') {
         btns.append(h('button', {
           type: 'button', class: 'dk-btn', text: 'Reset to preset',
           onclick: () => { delete core.drafts[id]; saveCore(); paintTheme(); render(); }
@@ -3257,7 +3649,7 @@
           onclick: () => {
             if (!confirm('Delete the theme "' + core.custom[id].name + '"?')) return;
             delete core.custom[id];
-            core.theme = 'preset:cypres';
+            core.theme = currentKey();
             saveCore();
             paintTheme();
             render();
@@ -3266,6 +3658,43 @@
       }
     }
     sheet.append(btns);
+
+    // --- theme codes ---
+    const codeIn = h('input', { type: 'text', placeholder: 'Paste a theme code', 'aria-label': 'Theme code', spellcheck: false });
+    const codeMsg = h('div', { class: 'dk-note', style: 'margin-top:5px' });
+    const addCode = () => {
+      const got = readThemeCode(codeIn.value);
+      if (!got) { codeMsg.textContent = 'That does not look like a Twill theme code. Check it was copied whole.'; return; }
+      const cid = Date.now().toString(36);
+      core.custom[cid] = got;
+      chooseTheme('custom:' + cid);
+      render();
+    };
+    codeIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCode(); });
+    sheet.append(h('div', { class: 'dk-lb', text: 'Theme codes' }),
+      h('div', { class: 'dk-btns', style: 'margin-top:0' },
+        h('button', {
+          type: 'button', class: 'dk-btn', text: 'Copy this theme as a code',
+          onclick: async (e) => {
+            const code = themeCode(themeLabel().replace(/ \(edited\)$/, ''), activeTokens());
+            try { await navigator.clipboard.writeText(code); e.target.textContent = 'Copied'; }
+            catch { codeIn.value = code; codeIn.select(); e.target.textContent = 'Select and copy it'; }
+            setTimeout(() => { e.target.textContent = 'Copy this theme as a code'; }, 1600);
+          }
+        })),
+      h('div', { class: 'dk-two', style: 'margin-top:6px;grid-template-columns:1fr auto' }, codeIn,
+        h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Add', onclick: addCode })),
+      codeMsg,
+      h('div', { class: 'dk-note', style: 'margin-top:4px', text: 'Share a code in Discord and anyone with Twill can paste it in. A pasted theme is added to Yours and never changes your others.' }));
+
+    // --- text size ---
+    const sizeNowT = Math.min(130, Math.max(85, Number(core.textSize) || 100));
+    const textLab = h('div', { class: 'dk-lb', text: 'Text size  \u00b7  ' + sizeNowT + '%' });
+    sheet.append(textLab, h('input', {
+      type: 'range', min: '85', max: '130', step: '5', value: String(sizeNowT), 'aria-label': 'Text size',
+      oninput: (e) => { textLab.textContent = 'Text size  \u00b7  ' + e.target.value + '%'; core.textSize = Number(e.target.value); paintTheme(); },
+      onchange: () => saveCore()
+    }), h('div', { class: 'dk-note', style: 'margin-top:4px', text: 'Every Twill panel, on a computer. On a phone, use the browser\u2019s own text size.' }));
 
     // --- button position ---
     const cornerSel = h('select', {
@@ -3306,7 +3735,7 @@
 
     sheet.append(h('div', {
       class: 'dk-note',
-      text: kind === 'preset'
+      text: kind !== 'custom'
         ? 'Edits to a preset are kept as a draft until you save them as your own theme or reset.'
         : 'Edits to your own theme save as you make them.'
     }));
@@ -3315,13 +3744,8 @@
   // The theme menu label changes to "(edited)" after the first edit; update it
   // without rebuilding the screen, so a colour picker in use is not torn down.
   function refreshLookLabels() {
-    const sel = hub.querySelector('select[aria-label="Theme"]');
-    if (!sel) return;
-    for (const opt of sel.querySelectorAll('option')) {
-      const [k, pid] = opt.value.split(':');
-      if (k !== 'preset') continue;
-      const edited = core.drafts[pid] && Object.keys(core.drafts[pid]).length;
-      opt.textContent = PRESETS[pid].name + (edited ? ' (edited)' : '');
+    for (const lb of hub.querySelectorAll('.dk-lb')) {
+      if (lb.textContent.startsWith('Editing')) lb.textContent = 'Editing  \u00b7  ' + themeLabel();
     }
   }
 
