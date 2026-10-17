@@ -39,14 +39,17 @@ say yes.
 
 ## What is in it
 
-14 tools, each of which can be switched off on its own.
+19 tools, each of which can be switched off on its own.
 
 | | |
 |---|---|
-| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 251 bases, 194 eye colours, 2,370 markings, 28 mutations and 40 personalities |
+| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 253 bases, 196 eye colours, 2,386 markings, 28 mutations and 40 personalities |
 | **Lore** | Your own fields on your own wolves, in sections you name. Wolf-link fields cross reference both ways. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players can read it too |
 | **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet |
-| **Pedigree** | Keeps the family trees the pairing check needs, for the wolves in your tray |
+| **Breeding projects** | Up to 4 projects with 8 wolves each, `Alt+B`: a goal, planned pairings, matchmaking, a heat counter you type into, and sharing as a Wolvden post, Discord message or spreadsheet |
+| **Pair Lists order** | The pairs that can breed right now go to the top of Pair Lists |
+| **Puppy quest** | Keep Lillemor's Enclave quest on the hub, and a puppy's page says whether that pup could fit |
+| **Pedigree** | Keeps the family trees the pairing check needs, for the wolves in your tray and breeding projects |
 | **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
 | **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades. Every section folds on its own |
 | **Wardrobe** | Custom decor as extra layers, plus looks you can save and try on again in the preview |
@@ -56,14 +59,18 @@ say yes.
 | **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |
 | **Explore bars** | Your Energy and HP drawn just above the explore box, so a phone never has to scroll down for them. On by default on phones, with a switch for computers |
 | **Fishing colours** | An accessibility filter for red-blind and green-blind players. It does not point at the fish |
-| **Hide users** | Collapses posts from players you would rather not read |
+| **Hide users** | Collapses posts from players you would rather not read, and folds chatter topics with words you choose |
+| **Reminders** | A one-line reminder on a wolf, with a date if you like, shown on its page and in Den Manager |
+| **Custom layouts** | Switch a hard-to-read den layout off, for one page or everywhere. Only you see the change |
 
 Plus **9 reference guides kept offline**: herbs, scouting, illnesses, prey, battle enemies,
 befriending, roles, mutation pass rates and pair bonds. 28 herbs and 21 medicines, 18 illnesses,
 61 prey, 146 enemies, every befriending move against every disposition, and what each role runs
 on, joined up rather than sitting in separate tables.
 
-And **ten themes in light and dark** with a sun and moon to swap them, **24 seasonal themes**, a font picker and a live editor, a post composer that catches those pesky HTML breaks,
+**Comfort** in the hub adds a reading font (OpenDyslexic, Atkinson Hyperlegible or Lexend if you have them installed, or Verdana, Tahoma and others), letter, word and line spacing for Twill or the whole site, reduced motion, and a switch to turn off a hard-to-read den layout for just that page. There are also **High Contrast** Light and Dark themes.
+
+And **twelve themes in light and dark** with a sun and moon to swap them, **24 seasonal themes**, a font picker and a live editor, a post composer that catches those pesky HTML breaks,
 and **Backup** so you can carry everything with you to another computer.
 
 ## What it will not do
@@ -74,8 +81,9 @@ and **Backup** so you can carry everything with you to another computer.
 - It **never refreshes** anything on a timer. You still bump your own trades, raffles and
   chatter posts.
 - It **sends nothing anywhere**. No server, no account, no tracking, no analytics.
-- It **does not gather up the site**. Nothing is kept from Wolvden beyond the wolves you pin
-  to the tray, 8 at most, and they are forgotten when you take them out.
+- It **does not gather up the site**. Nothing is kept from Wolvden beyond the wolves you pick
+  yourself: up to 8 in the tray and 8 in each of up to 4 breeding projects, plus Lillemor's puppy
+  quest if you choose to keep it. They are forgotten when you take them out.
 
 These are facts about the source rather than promises. There is no `fetch`, `XMLHttpRequest`,
 `sendBeacon`, `WebSocket`, `setInterval`, `.submit()` or `location.href` anywhere in the file,
@@ -85,8 +93,9 @@ and the script runs with `@grant none`.
 
 Everything lives in your own browser's `localStorage`, under keys prefixed `denkit:`, and never
 leaves your machine. Almost all of it is what you wrote yourself: notes, lore, goals, lists, your
-Collection ticks and settings. The only thing taken from Wolvden's pages is the genes and family
-tree of each wolf you pin to the tray, 8 at most, and those are deleted when the wolf leaves it.
+Collection ticks and settings. The only things taken from Wolvden's pages are the genes and family
+tree of each wolf you pick (up to 8 in the tray, and 8 in each of up to 4 breeding projects), which
+are deleted when the wolf leaves them, and Lillemor's puppy quest if you press Show in Twill.
 Clearing site data removes all of it, so use **Backup** in the hub if you are moving computers.
 
 The file is around 600KB because every fact it explains is bundled inside it: bases, eye colours,
