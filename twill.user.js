@@ -1393,11 +1393,34 @@
 
   // Every recipe wanting an ingredient whose name contains the query. With
   // exact set, only that exact ingredient counts (used for item popovers).
+  /* Exact lookups are answered from an index built the first time it is
+     needed: a Hoard page asks once per item, and searching all 284 recipes
+     each time was most of the time Twill spent there. In recipe order, so the
+     results are the same as the full search. */
+  let recipeIdx = null;
+  function recipeIndex() {
+    if (recipeIdx) return recipeIdx;
+    const using = new Map(), made = new Map();
+    for (const r of RECIPE_BOOK.recipes) {
+      for (const [name] of r.i) {
+        const k = norm(name);
+        const list = using.get(k) || [];
+        if (!list.includes(r)) list.push(r);
+        using.set(k, list);
+      }
+      const p = norm(r.n);
+      if (!made.has(p)) made.set(p, r);
+    }
+    recipeIdx = { using, made };
+    return recipeIdx;
+  }
+
   function recipesUsing(query, exact) {
     const q = norm(query);
     if (!q) return [];
-    return RECIPE_BOOK.recipes.filter((r) =>
-      r.i.some(([name]) => (exact ? norm(name) === q : norm(name).includes(q))));
+    // A copy, since callers sort what they get back.
+    if (exact) return (recipeIndex().using.get(q) || []).slice();
+    return RECIPE_BOOK.recipes.filter((r) => r.i.some(([name]) => norm(name).includes(q)));
   }
 
   const recipeWiki = (r) => RECIPE_BOOK.wiki + '#' + encodeURIComponent(r.k);
@@ -5027,7 +5050,7 @@
   // opening its Item Catalogue search in a new tab, and (for items a recipe
   // uses or makes) a badge that opens the recipe list.
   defineModule((() => {
-    const madeBy = (name) => RECIPE_BOOK.recipes.find((r) => norm(r.n) === norm(name));
+    const madeBy = (name) => recipeIndex().made.get(norm(name));
     let observer = null;
 
     function openRecipesFor(name) {
@@ -9938,6 +9961,11 @@
       .dk-xb-track i { display: block; height: 100%; border-radius: 4px; transition: width .3s ease; }
     `);
 
+    /* Reading a bar's colour makes the browser work out the whole page's styles,
+       so on the first paint it waits for the next frame, when the browser does
+       that anyway, rather than holding up the page. */
+    let colourLater = false;
+
     // Copy one bar across: its number, its width, and Wolvden's own colour for it.
     function paint() {
       for (const [key, c] of Object.entries(cells)) {
@@ -9947,7 +9975,11 @@
         if (!bar) continue;
         const now = bar.getAttribute('aria-valuenow');
         c.fill.style.width = bar.style.width || (now != null ? now + '%' : '0%');
-        c.fill.style.background = getComputedStyle(bar).backgroundColor;
+        const look = bar.className + '|' + bar.style.background + bar.style.backgroundColor;
+        if (!colourLater && c.look !== look) {
+          c.look = look;
+          c.fill.style.background = getComputedStyle(bar).backgroundColor;
+        }
         c.num.textContent = num ? num.textContent.replace(/\s+/g, ' ').trim() : '';
       }
     }
@@ -9975,7 +10007,12 @@
       strip = h('div', { id: 'dk-xb', 'aria-hidden': 'true',
         class: (xst.narrow ? 'dk-xb-narrow' : '') + (xst.wide ? ' dk-xb-wide' : '') }, row);
       box.before(strip);
+      colourLater = true;
       paint();
+      // A hidden tab never draws a frame, so a short timer stands in for it.
+      const colours = () => { if (!colourLater) return; colourLater = false; if (strip) paint(); };
+      requestAnimationFrame(colours);
+      setTimeout(colours, 250);
       // Watch the sidebar rather than the card, in case the game swaps the card
       // whole. The observer already hands over every change made in one go as a
       // single batch, and nothing painted here sits inside the sidebar, so a
