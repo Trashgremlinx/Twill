@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.36.0
+// @version      0.37.0
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.36.0';
+  const VERSION = '0.37.0';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -2008,7 +2008,13 @@
         '24 seasonal themes, a light and a dark one for every month, that turn up in their own month.',
         'A font picker, and a guide to adding your own font.',
         'Theme codes: copy a theme to share it, or paste one in.',
-        'Text size for every Twill panel, and a character count in the composer.',
+        'Text size for every Twill panel, and a character count in the composer.'
+      ]
+    },
+    '0.37.0': {
+      title: 'Breeding projects and Comfort',
+      go: 'comfort',
+      items: [
         'Breeding projects (Alt+B): plan pairings toward a goal, with matchmaking, a heat counter and sharing.',
         'Keep Lillemor’s puppy quest on the hub, and see whether a pup could fit it from its own page.',
         'Pair Lists puts the pairs that can breed right now at the top.',
@@ -2020,6 +2026,14 @@
   };
   if (!savedCore) save('seenVersion', VERSION);
   const newsPending = () => !!WHATS_NEW[VERSION] && load('seenVersion', null) !== VERSION;
+  // Every card newer than the last one you saw, newest first, so jumping two
+  // versions at once still shows both.
+  const verNum = (v) => String(v || '0').split('.').reduce((n, x) => n * 1000 + (Number(x) || 0), 0);
+  const newsSince = () => {
+    const seen = verNum(load('seenVersion', '0'));
+    return Object.keys(WHATS_NEW).filter((v) => verNum(v) > seen && verNum(v) <= verNum(VERSION))
+      .sort((a, b) => verNum(b) - verNum(a));
+  };
   function markNews() { newsDot = newsPending(); launch.classList.toggle('dk-new', newsDot); }
   markNews();
 
@@ -2789,11 +2803,13 @@
     if (newsPending()) {
       const n = WHATS_NEW[VERSION];
       const done = () => { save('seenVersion', VERSION); markNews(); render(); };
+      const vers = newsSince();
       sheet.append(h('div', { class: 'dk-news', role: 'status' },
-        h('strong', { text: 'New in ' + VERSION + ': ' + n.title }),
-        h('ul', {}, ...n.items.map((x) => h('li', { text: x }))),
+        ...(vers.length ? vers : [VERSION]).flatMap((v) => [
+          h('strong', { text: 'New in ' + v + ': ' + WHATS_NEW[v].title }),
+          h('ul', {}, ...WHATS_NEW[v].items.map((x) => h('li', { text: x })))]),
         h('div', { class: 'dk-btns', style: 'margin-top:0' },
-          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Have a look', onclick: () => { save('seenVersion', VERSION); markNews(); screen = 'look'; render(); } }),
+          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Have a look', onclick: () => { save('seenVersion', VERSION); markNews(); screen = n.go || 'look'; render(); } }),
           h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Got it', onclick: done }))));
     }
     const nudge = backupNudge();
@@ -4438,10 +4454,42 @@
       }
     `;
 
+    /* Whether this den is yours: its Profile tab against the profile in your own
+       menu. null when Twill can't tell, and then it says nothing. */
+    function ownDen() {
+      const me = myProfileId();
+      const tab = document.querySelector('#main .nav-tabs a[href*="/profile/"]');
+      const m = tab && profileOf(tab);
+      return me && m ? m[1] === me : null;
+    }
+
+    /* Your own den, but no wolf cards Twill can read: say so, rather than
+       leaving players wondering where the card went. Collapsed caves are the
+       usual reason, so they are counted. */
+    function emptyCard() {
+      const caves = [...document.querySelectorAll('table[data-cave-key]')];
+      const shut = caves.filter((t) => (t.tBodies[0] && t.tBodies[0].style.display === 'none') ||
+        [...t.querySelectorAll('[data-collapse-id]')].some((b) => /expand/i.test(b.textContent))).length;
+      return h('section', { id: 'dk-den', 'aria-label': 'Den Manager' },
+        h('div', { class: 'dk-dm-head', style: 'cursor:default' }, h('span', { class: 'dk-dm-title', text: 'Den Manager' })),
+        h('div', { class: 'dk-dm-body' }, h('div', { class: 'dk-dm-none', text: shut
+          ? 'Den Manager can’t see any wolves here. ' + shut + (shut === 1 ? ' cave is' : ' caves are') + ' collapsed: expand one and reload the page.'
+          : 'Den Manager can’t see any wolves here. If your caves are collapsed, expand one and reload. If they aren’t, please tell us in Discord which browser you use.' })));
+    }
+
     function start() {
       if (card || !onDenPage()) return;
       const wolves = readWolves();
-      if (!wolves.length) return;           // not your den, or a view we don't read
+      if (!wolves.length) {
+        // Someone else's den, or a view we don't read. Only your own gets the note.
+        if (ownDen() !== true) return;
+        if (!styleEl.isConnected) document.head.appendChild(styleEl);
+        const first = document.querySelector('table[data-cave-key]');
+        const at = first.closest('form') || first;
+        card = emptyCard();
+        at.parentNode.insertBefore(card, at);
+        return;
+      }
       if (!styleEl.isConnected) document.head.appendChild(styleEl);
       const firstCave = document.querySelector('table[data-cave-key]');
       const anchor = firstCave.closest('form') || firstCave;
