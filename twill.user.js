@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.0
+// @version      0.37.2
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.0';
+  const VERSION = '0.37.2';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -956,6 +956,11 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .dk-herb-b { margin-top: 3px; color: var(--dk-muted); font-size: 10.5px; line-height: 1.45; }
+    .dk-wrapped { cursor: pointer; border-style: dashed !important; }
+    .dk-wrapped:hover, .dk-wrapped:focus-visible { border-color: var(--dk-accent) !important; }
+    .dk-gift-bar { height: 6px; margin-top: 5px; background: var(--dk-surface); border: 1px solid var(--dk-line); border-radius: 3px; overflow: hidden; }
+    .dk-gift-bar > div { height: 100%; background: var(--dk-accent); }
+    .dk-gift-btn { padding: 2px 10px !important; min-width: 0 !important; }
     /* A row whose tail does not fit is kept to one line so the list stays
        scannable, and the ellipsis says there is more. Click it and it opens
        out in place: nothing in a guide should be unreadable. */
@@ -1634,6 +1639,20 @@
     save('lore', lore);
   }
 
+  // The fields of one wolf's lore you switched to Public, in your field order.
+  function publicFields(rec) {
+    const pub = new Set((rec && rec._pub) || []);
+    const out = [];
+    for (const f of loreFields()) {
+      if (!pub.has(f.id) || !rec[f.id]) continue;
+      const ref = f.type === 'wolf' ? wolfRef(rec[f.id]) : null;
+      out.push(ref && ref.id
+        ? { label: f.label, text: wolfName(ref.id), wolf: ref.id }
+        : { label: f.label, text: String(rec[f.id]).trim() });
+    }
+    return out;
+  }
+
   // Mark one field of one wolf's lore as public or private.
   function setPublic(id, fieldId, on) {
     lore = load('lore', {});
@@ -1816,26 +1835,30 @@
     return head.textContent.replace(/\s+/g, ' ').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').trim();
   }
 
+  /* One labelled value from the wolf page in front of you ("Base", "Slot 3"). */
+  function wolfPageRow(label) {
+    const main = document.querySelector('#main');
+    if (!main) return '';
+    for (const lab of main.querySelectorAll('td.b')) {
+      if (lab.textContent.replace(/\s+/g, ' ').trim() !== label) continue;
+      const cell = lab.nextElementSibling;
+      if (!cell) return '';
+      // The value is the cell's first text. Genetics marks the cell itself and
+      // only appends after the value, so this holds whether it ran or not.
+      const node = [...cell.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+      if (node) return node.textContent.replace(/\s+/g, ' ').trim();
+      // Some values are links rather than plain text (Carrier Status).
+      const link = cell.querySelector('a');
+      return link ? link.textContent.replace(/\s+/g, ' ').trim() : '';
+    }
+    return '';
+  }
+
   /* What Pair and Compare need from a wolf's own page: its genes, sex and age.
      Only ever called for a wolf in the tray, on that wolf's page. */
   function readWolfPage() {
-    const main = document.querySelector('#main');
-    if (!main) return null;
-    const row = (label) => {
-      for (const lab of main.querySelectorAll('td.b')) {
-        if (lab.textContent.replace(/\s+/g, ' ').trim() !== label) continue;
-        const cell = lab.nextElementSibling;
-        if (!cell) return '';
-        // The value is the cell's first text. Genetics marks the cell itself and
-        // only appends after the value, so this holds whether it ran or not.
-        const node = [...cell.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
-        if (node) return node.textContent.replace(/\s+/g, ' ').trim();
-        // Some values are links rather than plain text (Carrier Status).
-        const link = cell.querySelector('a');
-        return link ? link.textContent.replace(/\s+/g, ' ').trim() : '';
-      }
-      return '';
-    };
+    if (!document.querySelector('#main')) return null;
+    const row = wolfPageRow;
     // Markings keep their slot, because a combo marking only happens when both
     // parents bring their colour in the same slot.
     const marks = [];
@@ -1950,7 +1973,7 @@
   // The backup nudge counts from your last backup, or from the first day Twill
   // ran here if you have never made one.
   if (!load('firstSeen', null)) save('firstSeen', Date.now());
-  const BACKUP_KEYS = ['lore', 'notes', 'proj', 'goals', 'have', 'wish', 'remind', 'hide', 'layoutsOff', 'post'];
+  const BACKUP_KEYS = ['lore', 'notes', 'proj', 'goals', 'have', 'wish', 'remind', 'hide', 'layoutsOff', 'post', 'gifts'];
   function backupNudge() {
     const every = Number(load('backupEvery', 14));
     if (!every) return null;
@@ -2044,6 +2067,26 @@
         'Fresh from the wiki: the Apparition and Meniscus bases, Crescent and Sprite eyes, 16 new markings, and the Scout map now shows the stat the Glacier and Rainforest need.',
         'Comfort: a reading font, spacing, reduced motion, and a switch for hard-to-read den layouts.',
         'High Contrast Light and Dark themes, reminders on your wolves, a backup reminder, and hiding chatter topics by keyword.'
+      ]
+    },
+    '0.37.1': {
+      title: 'Enclave Puppy Quest in the sidebar',
+      go: 'pupquest',
+      items: [
+        'A kept Enclave Puppy Quest now sits in the sidebar under Melvin’s Missions on every page, so it’s always in view.',
+        'Rather keep it in the hub only? Modules › Puppy quest has the switch.'
+      ]
+    },
+    '0.37.2': {
+      title: 'Every den listing, Copy for Discord, price notes',
+      items: [
+        'Den Manager now reads the Standard and Standard (no headshots) den listings as well as Card listing.',
+        'Collapsed caves are named under At a glance, since Wolvden leaves their wolves off the page and Den Manager can’t count them.',
+        'New guides: Fishing (what can bite in each biome, time and weather) and Events (Halloween Spectacle, Lunar Dreams, Coigreach, December Festivities and The Matchmaker), under Guides.',
+        'Start a breeding project from the Tray: New project on the tray strip, or + From the Tray in Breeding projects.',
+        'Hide users is now called Filter, since it folds topics and posts by keyword as well as by player. Your settings are unchanged.',
+        'Copy for Discord: a button beside + Tray on a wolf’s page. Tick what goes in, then paste a tidy message into Discord. Switch it off in Modules › Tray.',
+        'Price notes in the Shopping List: write Goldenseal = haggle first and the note shows on that item’s tag. Only you see them.'
       ]
     }
   };
@@ -2173,12 +2216,16 @@
       : screen === 'battle' ? 'Battle map'
       : screen === 'friend' ? 'Befriending'
       : screen === 'roles' ? 'Roles'
+      : screen === 'fish' ? 'Fishing'
+      : screen === 'events' ? 'Events'
+      : screen === 'event' ? ((EVENT_GUIDES.find((x) => x.id === eventId) || {}).n || 'Events')
       : (mod ? mod.name : 'Twill');
 
     hub.textContent = '';
     const head = h('div', { class: 'dk-head' });
     if (screen !== 'home') {
-      const upTo = ['herbs', 'scout', 'rates', 'ills', 'prey', 'bonds', 'battle', 'friend', 'roles'].includes(screen) ? 'guides' : 'home';
+      const upTo = screen === 'event' ? 'events'
+        : ['herbs', 'scout', 'rates', 'ills', 'prey', 'bonds', 'battle', 'friend', 'roles', 'fish', 'events'].includes(screen) ? 'guides' : 'home';
       head.append(h('button', {
         type: 'button', text: '‹', title: 'Back', 'aria-label': 'Back',
         onclick: () => { screen = upTo; saveAsOpen = false; render(); }
@@ -2222,6 +2269,9 @@
     else if (screen === 'battle') renderBattle();
     else if (screen === 'friend') renderFriend();
     else if (screen === 'roles') renderRoles();
+    else if (screen === 'fish') renderFish();
+    else if (screen === 'events') renderEvents();
+    else if (screen === 'event') renderEvent();
     else if (mod) mod.settings(sheet);
   }
 
@@ -2237,7 +2287,7 @@
 
   function renderGuides() {
     sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
-      text: '9 references drawn from the Grouse House Wiki and kept offline, so nothing is fetched and nothing watches your pack. They are joined up: search an illness in the herb map and it finds the herbs that cure it.' }));
+      text: '11 references drawn from the Grouse House Wiki and kept offline, so nothing is fetched and nothing watches your pack. They are joined up: search an illness in the herb map and it finds the herbs that cure it.' }));
     const row = (label, go, sub) => sheet.append(h('div', { class: 'dk-row dk-link', onclick: go },
       h('div', { class: 'dk-t' }, h('strong', { text: label }), h('span', { text: sub })),
       h('button', { type: 'button', class: 'dk-chev', text: '\u203a', 'aria-label': label })));
@@ -2260,6 +2310,11 @@
       'Every move against every disposition');
     row('Roles', () => { screen = 'roles'; render(); },
       'What each role runs on, and how it improves');
+    row('Fishing', () => { screen = 'fish'; render(); },
+      (GUIDES.fish || []).length + ' fish, and what can bite where and when');
+    const onNow = EVENT_GUIDES.filter((ev) => eventRun(ev).on).map((ev) => ev.n);
+    row('Events', () => { screen = 'events'; render(); },
+      onNow.length ? 'On now: ' + onNow.join(', ') : 'What’s next, and how each event works');
     sheet.append(h('div', { class: 'dk-note',
       text: 'Captured ' + (GUIDES.exported || '') + '. Re-run tools/export_guides.py to refresh.' }));
   }
@@ -2595,6 +2650,346 @@
       if (!shown) list.append(h('div', { class: 'dk-empty', text: 'Nothing hunts here.' }));
     };
     paint();
+  }
+
+  /* Fishing. Which fish can bite in a biome, at the time and weather you pick.
+     Twill doesn't read the game's clock or weather: you choose them. */
+  let fishBiome = '', fishTime = '', fishWet = false;
+  const FISH_RARITY = [['Common', '1 or 2 SC'], ['Regular', '3 or 4 SC'], ['Uncommon', '5 or 6 SC'], ['Rare', '7 or 8 SC'], ['Legendary', '10 SC and a Legendary Catch item']];
+  const FISH_WHEN = { day: 'day only', night: 'night only', twilight: 'dawn or dusk', wet: 'rain or sleet' };
+
+  function renderFish() {
+    const fish = GUIDES.fish || [];
+    const biomes = GUIDES.biomes || [];
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+      text: 'Submit up to 30 fish a day; the count resets at your rollover. Hold the rare ones and submit those. A fish in the heavier half for its species also gives 1 Delicate Meat.' }));
+    const chipsB = h('div', { class: 'dk-chips' });
+    const chipsT = h('div', { class: 'dk-chips' });
+    const count = h('div', { class: 'dk-note' });
+    const list = h('div');
+    sheet.append(h('div', { class: 'dk-lb', text: 'Biome' }), chipsB, h('div', { class: 'dk-lb', text: 'What it’s like right now' }), chipsT, count, list);
+
+    const paint = () => {
+      chipsB.textContent = '';
+      chipsT.textContent = '';
+      const chip = (box, label, on, go) => box.append(h('button', {
+        type: 'button', class: 'dk-chip' + (on ? ' dk-chip-on' : ''), text: label, 'aria-pressed': String(on), onclick: () => { go(); paint(); }
+      }));
+      chip(chipsB, 'Everywhere', !fishBiome, () => { fishBiome = ''; });
+      for (const b of biomes) chip(chipsB, b, fishBiome === b, () => { fishBiome = fishBiome === b ? '' : b; });
+      for (const [k, label] of [['', 'Any time'], ['day', 'Day'], ['twilight', 'Dawn or dusk'], ['night', 'Night']]) {
+        chip(chipsT, label, fishTime === k, () => { fishTime = k; });
+      }
+      chip(chipsT, 'Raining or sleeting', fishWet, () => { fishWet = !fishWet; });
+
+      const here = fish.filter((f) => !fishBiome || f[2].includes(fishBiome));
+      const bites = (f) => !f[3] || (f[3] === 'wet' ? fishWet : !fishTime || f[3] === fishTime);
+      const can = here.filter((f) => (fishTime || fishWet ? bites(f) : true));
+      count.textContent = (fishBiome || 'Every biome') + ': ' + (fishTime || fishWet
+        ? can.length + ' of ' + here.length + ' fish can bite. Hiding ' + (here.length - can.length) + ' that need another time or weather.'
+        : here.length + ' fish. Pick a time to see only what can bite.');
+
+      list.textContent = '';
+      for (let r = 4; r >= 0; r--) {
+        const inR = can.filter((f) => f[1] === r).sort((a, b) => a[0].localeCompare(b[0]));
+        if (!inR.length) continue;
+        list.append(h('div', { class: 'dk-lb', text: FISH_RARITY[r][0] + '  ·  ' + FISH_RARITY[r][1] }));
+        for (const f of inR) {
+          const where = fishBiome ? (f[2].length === 1 ? fishBiome + ' only' : 'also ' + f[2].filter((b) => b !== fishBiome).join(', ')) : f[2].join(', ');
+          list.append(h('div', { class: 'dk-find dk-find-card dk-herb' },
+            h('div', { class: 'dk-herb-h' }, h('strong', { text: f[0] }), h('span', { class: 'dk-herb-where', text: FISH_WHEN[f[3]] || 'any time' })),
+            h('div', { class: 'dk-herb-b', text: (f[4] ? f[4] + ' item, 18 uses. ' : '') + where })));
+        }
+      }
+      if (!can.length) list.append(h('div', { class: 'dk-empty', text: 'Nothing bites here then.' }));
+      list.append(h('div', { class: 'dk-note', text: 'Legendary Catch items have 18 uses, and food spoils 8 rollovers after the catch. Feeding or playing with one by hand (not FAPA) has a small chance of +1 to a random stat. They also sell well at Raccoon Wares.' }),
+        h('div', { class: 'dk-note', text: 'Leaderboards: the heaviest daily haul in each biome wins up to 50 SC at midnight, and the heaviest of each species in the week wins 50 SC on Monday.' }));
+    };
+    paint();
+  }
+
+  /* Event guides. Facts from the Grouse House Wiki, worded here. Every date is
+     worked out from your own clock; nothing is read from Wolvden. A timeline
+     row is [day, title, detail]. A card is [name, right-hand note, detail]. */
+  const EVENT_GUIDES = [
+    {
+      id: 'lunar', n: 'Lunar Dreams', lunar: true,
+      intro: 'One week every month, from 00:00 on the third Friday to 23:59 the Thursday after. Everything is open from the first day; there are no tiers.',
+      // Notes for particular weeks, from the wiki's calendar.
+      special: { '2026-11': 'Combo release: Antumbra × Penumbra combo base and markings, with Unfolded markings applicators.' },
+      sections: [
+        ['Lunar Essence  ·  your steps in the Dreamlands', null, [
+          ['Gather it by day', 'up to 100 a day', 'Exploring normally at dawn, day or dusk: each step has a half chance of 1 essence. Not at night.'],
+          ['Rollover bonus', '+25', 'On top of the daily 100, but it can’t take you past 100 held. Go into rollover under 75 to get all of it.'],
+          ['Spend it at night', '1 a step', 'The Dreamlands open only at Wolvden night, when the sidebar shows a moon. Battles cost no extra essence, only energy, and less than usual.'],
+          ['It keeps', '', 'Unused essence carries over between days and between events.']]],
+        ['Lunar Tears  ·  the shop currency', null, [
+          ['Fight everything', '1 or 2 each', 'Every Dreamlands enemy drops at least 1; level 15 and up always drops 2. Bosses are tougher but pay better.'],
+          ['Encounters', 'at least 1', 'Every Dreamlands encounter has a chance of a tear.'],
+          ['Most in a day', '250', 'In theory, with perfect luck.']]],
+        ['Applicators  ·  4 kinds', 'A set is sold for two months, then retires until a real-life lunar event.', [
+          ['New base set', '', 'A new base, skin, nose, claw and eye applicator.'],
+          ['Matching marking set', '', 'The month after: the same base set back, plus markings in its colour and a new eye.'],
+          ['Combo release', '', 'A combo base bred from two older lunar bases, matching markings, and Unfolded markings with 8 extra shapes.'],
+          ['Real-life lunar event', 'the catch-up', 'In a month with an eclipse or blue moon, nearly every retired applicator returns at its first price.']]],
+        ['Crafting', null, [
+          ['39 lunar recipes', '9 backgrounds, 30 decors', 'Blue glowing scrolls, from encounters (offering acorns to some animals, certain choices) and from winning or losing lunar battles.']]]
+      ]
+    },
+    {
+      id: 'matchmaker', n: 'The Matchmaker', month: 1,
+      intro: 'All of February. Earn Lovebugs (LB) by matchmaking other wolves and dating your own. The shop opens in tiers on set dates.',
+      timeline: [[1, 'Event starts', 'Meet the Matchmaker with Eranthis. Picking matchmaker or Match me only changes which you learn first.'],
+        [5, 'Boutique of Delights, Tier 1', '71 decor items, 7 to 60 LB.'],
+        [10, 'Tier 2', '51 items: decor 6 to 60 LB, and 8 backgrounds at 80.'],
+        [20, 'Tier 3, and dateable decors', 'Applicators and passes, and the decor from every dateable at 50 affection.']],
+      sections: [
+        ['Every day', null, [
+          ['Eranthis’s daily quest', '+5 LB', 'Tell 5 wolves you meet in explore about the agency (befriendable wolves or lone enemy wolves). Also 5 new applicants and 1 new dateable of your choice. It resets if unfinished at rollover.'],
+          ['Gift each dateable', '3 LB each', 'One gift a day on their page and one on a date. Liked: +3 affection. Okay: +1. Disliked: −3.'],
+          ['Check for applicants', 'once an hour', 'Adds one applicant. The agency holds 10 wolves; the waiting list has no limit.']]],
+        ['Matchmaking', null, [
+          ['Dates take 15 minutes', '', 'Pick two wolves with matching preferences, a biome and gifts. Their opinions of each other before the date hint at the score.'],
+          ['Scoring', 'points', 'Shared interests −2 to +5. Each opinion of the other’s eyes or base −2 to +2. Each gift −2 to +2.'],
+          ['Making the match', 'up to 3 LB', '6 points or more: 3 LB. 2 or more: 2 LB. 0: 1 LB. Below 0 they leave with nothing.']]],
+        ['Dating', null, [
+          ['Dates', '10 LB', '15 minutes, one at a time. Affection goes up or down with how it goes.'],
+          ['New dateables', '', '3 after Eranthis’s introduction, 2 more after 5 dates, 2 more after 15, one a day from the quest, and some met in explore.'],
+          ['50 affection', 'a decor', 'From February 20th, claim that wolf’s decor on their page: 20 uses, tradeable, one per dateable a year. It hides your own wolf.'],
+          ['−20 affection', 'careful', 'They stop going on dates with you, though they still take gifts.']]],
+        ['Tier 3 prices', null, [
+          ['Claw, eye, nose and skin passes', '120 LB', ''], ['Claw, nose and skin applicators', '150 LB', ''],
+          ['Eye applicators', '225 LB', ''], ['Markings applicators', '375 LB', ''],
+          ['Base applicators', '600 LB', 'Achilles, Amor, Hestia, Hydrangea, Leucippus, Sappho']]],
+        ['Finds for gifts', 'The wiki marks this event’s pages as still in progress.', [
+          ['12 flowers', 'one per biome', 'Found in event encounters in their own biome, and used in crafting.'],
+          ['10 gems', 'by time and weather', 'Amethyst dawn, Sunstone day, Tiger’s Eye dusk, Moonstone night, Citrine clear, Diamond snow, Emerald hail or sleet, Sapphire rain or sleet, Opal wind or fog, Ruby heatwave.'],
+          ['Finding a gift fast', 'tip', 'Type “Type:Food” in the gift list search. Also Amusement, Herb, Decoration or Other.']]]
+      ]
+    },
+    {
+      id: 'halloween', n: 'Halloween Spectacle', month: 9,
+      intro: 'All of October. Most of it opens later in the month, so a slow start is normal. The currency is Mysterious Effigies (ME).',
+      timeline: [[1, 'Event starts', 'Explore encounters give Mysterious Effigies.'],
+        [5, 'Ashen Oath storyline opens', 'From the banner on the Event page. Finishing chapters unlocks spells.'],
+        [24, 'The Pyre can be lit', '10 ME lights it: opens the Altar and trick-or-treating, and gives 10 Smouldering Effigies.']],
+      after: 'Mohkra’s shop opens in 3 tiers once the whole site has gathered 150,000, 650,000 and 1,100,000 ME. Twill can’t see that total: check the Event page.',
+      sections: [
+        ['Earning Mysterious Effigies', null, [
+          ['Exploring', 'all month', 'Event encounters, and winning against corrupted enemies once Tier 1 opens.'],
+          ['Mohkra’s daily request', '+5 ME', 'One carcass, herb or skull a day, any number of uses. Also lead wolf EXP: level × 10, give or take 20. Skipping costs 1 ME.'],
+          ['Trick-or-treat', '1 ME → 2 or 3', 'From the 24th, once you’ve lit the Pyre. Any wolf, every 5 minutes. The den you visit gets a Smouldering Effigy.'],
+          ['Storyline', 'bonus', 'Finishing Ashen Oath at the end of the month.']]],
+        ['Spellbook  ·  one cast of each a day', 'Spell Vigor comes from sacrificing small carcasses and herbs on their Hoard page: 1 vigor per use, up to 100 stored.', [
+          ['Manifest', 'free', 'Makes vigor'], ['Heal', '10 vigor', 'Your HP to full'], ['Energize', '10 vigor', 'Your energy to full'],
+          ['Cure', '20 vigor', 'Every illness in your pack'], ['Fuel', '20 vigor', 'Every wolf’s hunger'],
+          ['Happiness', '20 vigor', 'Every wolf’s mood'], ['Youth', '50 vigor', 'One wolf one day younger']]],
+        ['Shops', null, [
+          ['Mohkra, Tier 1', '40 items', 'Decor, 4 to 17 ME.'], ['Mohkra, Tier 2', '69 items', 'Decor 10 to 40 ME, and 18 backgrounds at 70 ME.'],
+          ['Mohkra, Tier 3', '21 items', 'Applicators 70 to 100 ME, and the 3 breeding items at 150 ME.'],
+          ['The Altar', '17 items', 'From the 24th. Decor 4 to 8 ME, marking set applicators 70 ME. One at a time, 5 minutes apart.']]],
+        ['Breeding items  ·  150 ME each, Tier 3', 'Bought only in October, usable all year.', [
+          ['Wolf Blood', 'female', 'Small chance of a recessive mutation in one pup, even with no carriers.'],
+          ['Wolf Meat', 'female', 'Higher chance of a random spontaneous mutation in the next litter.'],
+          ['Wolf Scrotum', 'mutated wolf', 'Higher chance one pup inherits that wolf’s own mutation.']]],
+        ['Good to know', null, [
+          ['Smouldering Effigy', 'a gamble', 'One random effect: energy, hunger, HP or mood fully restored, or fully drained. Lead wolves can’t get the mood ones.'],
+          ['Spiders in explore', 'can be hidden', 'Account Settings on your profile has a switch that swaps spider images in explore.']]]
+      ]
+    },
+    {
+      id: 'coigreach', n: 'Coigreach', month: 10,
+      intro: 'All of November. A storyline runs the month, and the Badger Cave shop opens in tiers on set dates. The currency is Smoky Quartz (SQ).',
+      timeline: [[1, 'Event starts', 'Event explore encounters, and Smoky Quartz from exploring.'],
+        [5, 'Badger Cave Tier 1, Chapter 3', '76 items: decor 2 to 25 SQ, backgrounds 30. Daily favours start.'],
+        [10, 'Chapter 4', ''],
+        [15, 'Tier 2, Chapter 5', '86 items, including claw, nose and skin applicators at 100 SQ.'],
+        [25, 'Tier 3', '71 items: eye, markings and base applicators, 150 to 250 SQ.']],
+      sections: [
+        ['The storyline', 'Choices that change your ending are marked with an asterisk in the story.', [
+          ['Needs 3 rollovers', 'start by the 23rd', 'It has three one-rollover waits, and chapters open on set dates. Leave about a week before the end.'],
+          ['Part 1 reward', '+100 SQ', 'And a base applicator from your choice in Chapter 5: Agree gives Clover, Refuse gives Moss.'],
+          ['Part 2 reward', '+100 SQ', 'Two Faelcu decorations, and a base applicator from your choice in Chapter 9: Split Up gives Gaelach, Stick Together gives Aotrom.']]],
+        ['Earning Smoky Quartz', null, [
+          ['Badger Cave favour', '+5 SQ', 'Once a day. Could ask for 5 herbs, one of each cave material, an amusement item, a critter carcass or a medicine. Part-used is fine.'],
+          ['Large Smoky Quartz Chunk', '3 to 5 SQ', 'A rare find at night, following a wisp through a chain of caves. Open it from your Hoard.'],
+          ['Exploring and the storyline', '', '']]],
+        ['Keep these', null, [
+          ['10 European herbs', 'from your herbalist', 'Elder, Elfwort, English Marigold, Evening Primrose, Meadowsweet, Nettle, Vervain, White Clover, Woad, Wood Betony. Only nesting materials and herb swaps for now, but hinted to matter later.'],
+          ['Wealden Amber, Sheep Skull', 'no use yet', 'Explore finds that may get a use in future.']]]
+      ]
+    },
+    {
+      id: 'december', n: 'December Festivities', month: 11, december: true,
+      intro: 'All of December: an advent calendar and gifting. No currency and no shop this month.',
+      timeline: [[25, 'Gifts open', 'Open them by the 31st. Unopened gifts wait until next December.']],
+      sections: [
+        ['Gifting', null, [
+          ['Up to 5 things a gift', '', 'Items or currency; Silver Cones and Gold Cones count as one each. Nothing account bound, and no wolves. Food in a gift doesn’t rot.'],
+          ['Who can get one', '', 'Only players who have rolled over since December 1st. You can leave it anonymously.'],
+          ['Your count', 'only you see it', 'Your den page shows how many are waiting for you.']]],
+        ['Achievements  ·  4', null, [
+          ['A Generous Benefactor', '', 'Leave 100 gifts'], ['It’s Not a Popularity Contest!', '', 'Receive 100 gifts'],
+          ['Last Minute Shopping', 'Dec 24', 'Leave a gift on Christmas Eve'], ['Happy Holidays!', 'Dec 25', 'Open a gift on Christmas Day']]]
+      ]
+    }
+  ];
+  const ADVENT = ['Flirting Cardinals', 'Piebald Donkey', 'Fur-Lined Cloak [Blue]', 'Piebald Raven', 'Piebald Fawn', 'Piebald Alligator Snapping Turtle', 'Lamb', 'Polar Bear Cub',
+    'Fur-Lined Cloak [Red]', 'Piebald Cougar', 'Piebald Raccoon', 'Poinsettia Accessory', 'Fallen Snow', 'Snowy Fir Tree', 'Red-Nosed Reindeer', 'Merry Winter Town (background)',
+    'Colorful Harness', 'Colorful Bridle', 'Poinsettia Flower', 'Partridge in a Pear Tree', 'Two Turtle Doves', 'Three French Hens', 'Four Calling Birds', 'Peaceful Barn (background)',
+    'Presents!', 'Cozy Knit Scarf [Green]', 'Cozy Knit Scarf [Red]', 'Cozy Warmers [Green]', 'Cozy Warmers [Red]', 'Lunar Firefly Display (background)', 'Happy New Year (background)'];
+
+  const dayOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const daysBetween = (a, b) => Math.round((dayOnly(b) - dayOnly(a)) / 864e5);
+  const shortDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  // Lunar Dreams: from the third Friday of a month to the Thursday after.
+  function lunarWeek(y, m) {
+    const first = new Date(y, m, 1);
+    const start = new Date(y, m, 1 + ((5 - first.getDay() + 7) % 7) + 14);
+    return { start, end: new Date(y, m, start.getDate() + 6) };
+  }
+
+  // This event's run that is on now, or the next one: { start, end, on }.
+  function eventRun(ev, now) {
+    now = dayOnly(now || new Date());
+    if (ev.lunar) {
+      for (let i = 0; i < 3; i++) {
+        const w = lunarWeek(now.getFullYear(), now.getMonth() + i);
+        if (now <= w.end) return Object.assign(w, { on: now >= w.start });
+      }
+    }
+    for (const y of [now.getFullYear(), now.getFullYear() + 1]) {
+      const start = new Date(y, ev.month, 1), end = new Date(y, ev.month + 1, 0);
+      if (now <= end) return { start, end, on: now >= start };
+    }
+    return null;
+  }
+
+  let eventId = '';
+
+  function renderEvents() {
+    const now = new Date();
+    const runs = EVENT_GUIDES.map((ev) => ({ ev, r: eventRun(ev, now) }))
+      .sort((a, b) => (b.r.on - a.r.on) || (a.r.start - b.r.start));
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0',
+      text: 'What’s on now comes first, then what’s next. Dates are worked out from your own clock.' }));
+    for (const { ev, r } of runs) {
+      const left = daysBetween(now, r.end), until = daysBetween(now, r.start);
+      const sub = r.on ? 'On now  ·  ' + (left === 0 ? 'ends today' : 'ends in ' + left + (left === 1 ? ' day' : ' days'))
+        : 'Starts ' + shortDate(r.start) + (until <= 60 ? ', in ' + until + (until === 1 ? ' day' : ' days') : '');
+      sheet.append(h('div', { class: 'dk-row dk-link', onclick: () => { eventId = ev.id; screen = 'event'; render(); } },
+        h('div', { class: 'dk-t' }, h('strong', { text: ev.n }), h('span', { text: sub })),
+        h('button', { type: 'button', class: 'dk-chev', text: '›', 'aria-label': ev.n })));
+    }
+    sheet.append(h('div', { class: 'dk-note', text: 'From the Grouse House Wiki, captured ' + (GUIDES.exported || '') + ', and kept offline.' }));
+  }
+
+  // Your own December gift count: two numbers, started again each year.
+  function giftCount() {
+    const y = new Date().getFullYear();
+    const g = load('gifts', null);
+    return g && g.y === y ? g : { y, give: 0, got: 0 };
+  }
+
+  function renderEvent() {
+    const ev = EVENT_GUIDES.find((x) => x.id === eventId);
+    if (!ev) { screen = 'events'; render(); return; }
+    const now = new Date();
+    const r = eventRun(ev, now);
+    const lb = (t) => sheet.append(h('div', { class: 'dk-lb', text: t }));
+    const note = (t) => sheet.append(h('div', { class: 'dk-note', text: t }));
+    const card = (name, right, body) => sheet.append(h('div', { class: 'dk-find dk-find-card dk-herb' },
+      h('div', { class: 'dk-herb-h' }, h('strong', { text: name }), right ? h('span', { class: 'dk-herb-where', text: right }) : null),
+      body ? h('div', { class: 'dk-herb-b', text: body }) : null));
+
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0', text: ev.intro }));
+    const len = daysBetween(r.start, r.end) + 1;
+    const day = r.on ? daysBetween(r.start, now) + 1 : 0;
+    const monthName = r.start.toLocaleDateString('en-GB', { month: 'long' });
+
+    if (ev.lunar) {
+      if (r.on) {
+        const left = daysBetween(now, r.end);
+        lb('On now  ·  day ' + day + ' of 7');
+        card('Ends ' + shortDate(r.end), left === 0 ? 'today' : 'in ' + left + (left === 1 ? ' day' : ' days'), 'At 23:59. The Lunar Shoppe closes with it; Lunar Tears you hold are kept for next month.');
+      }
+      lb('Coming up');
+      const y = r.start.getFullYear();
+      let m = r.start.getMonth() + (r.on ? 1 : 0);
+      for (let i = 0; i < 3; i++, m++) {
+        const w = lunarWeek(y, m);
+        const key = w.start.getFullYear() + '-' + String(w.start.getMonth() + 1).padStart(2, '0');
+        const mon = (x) => x.toLocaleDateString('en-GB', { month: 'long' });
+        const span = mon(w.start) === mon(w.end)
+          ? w.start.getDate() + ' to ' + w.end.getDate() + ' ' + mon(w.end)
+          : w.start.getDate() + ' ' + mon(w.start) + ' to ' + w.end.getDate() + ' ' + mon(w.end);
+        const until = daysBetween(now, w.start);
+        card(span, 'in ' + until + (until === 1 ? ' day' : ' days'), ev.special[key] || '');
+      }
+    } else {
+      lb(r.on ? 'Day ' + day + ' of ' + len : 'Starts ' + shortDate(r.start) + ', in ' + daysBetween(now, r.start) + ' days');
+      const rows = ev.timeline.concat([[len, 'Event ends at 23:59', '']]);
+      for (const [at, t, b] of rows) {
+        const status = !r.on ? '' : at < day ? 'done' : at === day ? 'today' : 'in ' + (at - day) + (at - day === 1 ? ' day' : ' days');
+        card((r.on && at < day ? '✓ ' : r.on && at === day ? '● ' : '') + t, status, monthName + ' ' + at + (b ? '. ' + b : ''));
+      }
+      if (ev.after) note(ev.after);
+    }
+
+    if (ev.december) renderAdvent(r.on ? day : 0);
+
+    for (const [title, intro, cards] of ev.sections) {
+      lb(title);
+      if (intro) sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0', text: intro }));
+      for (const c of cards) card(...c);
+    }
+    if (ev.december) renderGiftCount();
+    note('From the Grouse House Wiki, captured ' + (GUIDES.exported || '') + '. Twill words it and keeps it offline.');
+  }
+
+  // Today's and tomorrow's advent items show; later days stay wrapped until clicked.
+  function renderAdvent(day) {
+    sheet.append(h('div', { class: 'dk-lb', text: 'Advent calendar  ·  31 items' }),
+      h('div', { class: 'dk-note', style: 'margin-top:0', text: 'One item a day from the Event page, the same for everyone. Missed days can be claimed any time before the 31st ends, but never early. They aren’t account bound, so they trade freely.' }));
+    ADVENT.forEach((item, i) => {
+      const n = i + 1;
+      const shown = !day ? n <= 1 : n <= day + 1;
+      const right = n === day ? 'today' : n === day + 1 ? 'tomorrow' : 'Dec ' + n;
+      const name = h('strong', { text: shown ? (day && n < day ? '✓ ' : n === day ? '● ' : '') + item : '🎁 Wrapped' });
+      const body = shown ? null : h('div', { class: 'dk-herb-b', text: 'Click to unwrap' });
+      const c = h('div', { class: 'dk-find dk-find-card dk-herb' + (shown ? '' : ' dk-wrapped') },
+        h('div', { class: 'dk-herb-h' }, name, h('span', { class: 'dk-herb-where', text: right })), body);
+      if (!shown) {
+        c.tabIndex = 0;
+        c.setAttribute('role', 'button');
+        c.setAttribute('aria-label', 'Unwrap December ' + n);
+        const open = () => { name.textContent = item; if (body) body.remove(); c.classList.remove('dk-wrapped'); c.removeAttribute('role'); c.removeAttribute('tabindex'); };
+        c.addEventListener('click', open, { once: true });
+        c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+      }
+      sheet.append(c);
+    });
+    sheet.append(h('div', { class: 'dk-note', text: 'This is last year’s line-up. The wiki says it may change.' }));
+  }
+
+  function renderGiftCount() {
+    const g = giftCount();
+    sheet.append(h('div', { class: 'dk-lb', text: 'Your gift count  ·  December ' + g.y }),
+      h('div', { class: 'dk-note', style: 'margin-top:0', text: 'Twill can’t see your gifts, so you keep count here. It starts again at 0 each year, or press Reset.' }));
+    for (const [k, label] of [['give', 'Gifts I’ve left'], ['got', 'Gifts I’ve received']]) {
+      const v = Math.max(0, Number(g[k]) || 0);
+      const step = (n) => () => { const c = giftCount(); c[k] = Math.max(0, Math.min(9999, (Number(c[k]) || 0) + n)); save('gifts', c); render(); };
+      const btn = (t, n) => h('button', { type: 'button', class: 'dk-btn dk-quiet dk-gift-btn', text: t, onclick: step(n) });
+      sheet.append(h('div', { class: 'dk-find dk-find-card dk-herb' },
+        h('div', { class: 'dk-herb-h' }, h('strong', { text: label }), h('span', { class: 'dk-herb-where', text: v + ' of 100' + (v >= 100 ? '  ✓' : '') })),
+        h('div', { class: 'dk-gift-bar' }, h('div', { style: 'width:' + Math.min(100, v) + '%' })),
+        h('div', { class: 'dk-btns', style: 'margin-top:6px' }, btn('−1', -1), btn('+1', 1), btn('+5', 5))));
+    }
+    sheet.append(h('div', { class: 'dk-btns' }, h('button', {
+      type: 'button', class: 'dk-btn dk-quiet', text: 'Reset both',
+      onclick: () => { if (confirm('Set both gift counts back to 0?')) { save('gifts', { y: new Date().getFullYear(), give: 0, got: 0 }); render(); } }
+    })));
   }
 
   /* Pair bonds. Twenty-one rows of a table that is really one rule, so the rule
@@ -4144,15 +4539,21 @@
 
     // Everything the card knows comes from what Wolvden already drew:
     // tooltips on the bars and icons, and the text on each wolf card.
+    // Card listing draws one .card per wolf; the standard listings (with or
+    // without headshots) draw one table row per wolf instead.
     function readWolves() {
       const wolves = [];
-      for (const c of document.querySelectorAll('table[data-cave-key] .card')) {
+      const units = document.querySelectorAll('table[data-cave-key] .card, table[data-cave-key] tbody > tr');
+      for (const c of units) {
         if (!c.querySelector('.progress')) continue;
-        const link = c.querySelector('a[href*="/wolf/"]');
+        if (c.tagName === 'TR' && c.querySelector('.card')) continue;   // the row holding a card listing
+        const links = [...c.querySelectorAll('a[href*="/wolf/"]')];
+        const link = links[0];
         const id = link && (link.getAttribute('href').match(/\/wolf\/(\d+)/) || [])[1];
         if (!id) continue;
         const nameEl = c.querySelector('.bg-dark small, small.b');
-        const name = (nameEl ? nameEl.textContent : link.textContent).replace(/\s+/g, ' ').trim() || '#' + id;
+        const named = links.find((a) => a.textContent.trim()) || link;
+        const name = (nameEl ? nameEl.textContent : named.textContent).replace(/\s+/g, ' ').trim() || '#' + id;
 
         const tips = [];
         for (const el of c.querySelectorAll('[data-original-title], [title], img[alt]')) {
@@ -4330,13 +4731,20 @@
       }
 
       const total = sum.pups + sum.adolescents + sum.adults;
-      add(section('glance', 'At a glance', total + (total === 1 ? ' wolf' : ' wolves'),
+      // Wolvden leaves a collapsed cave's wolves off the page, so say which
+      // caves the counts leave out.
+      const shut = shutCaves();
+      const shutLine = shut.length ? h('div', { class: 'dk-dm-shut' }, 'Not counted, collapsed: ',
+        ...shut.flatMap((c, i) => [i ? ', ' : null,
+          c.href ? h('a', { href: c.href, text: c.name }) : h('span', { text: c.name })].filter(Boolean))) : null;
+      add(section('glance', 'At a glance', total + (total === 1 ? ' wolf' : ' wolves') +
+          (shut.length ? ' · ' + shut.length + (shut.length === 1 ? ' cave' : ' caves') + ' not counted' : ''),
         h('div', { class: 'dk-dm-tiles' },
           h('div', {}, h('b', { text: String(sum.pups) }), h('span', { text: 'Pups' + (sum.nursing ? ' · ' + sum.nursing + ' nursing' : '') })),
           h('div', {}, h('b', { text: String(sum.adolescents) }), h('span', { text: 'Adolescents' })),
           h('div', {}, h('b', { text: String(sum.adults) }), h('span', { text: 'Adults' })),
           h('div', {}, h('b', { text: String(sum.immortal) }), h('span', { text: 'Immortal' }))
-        )));
+        ), shutLine));
 
       add(section('care', 'Care',
         sum.foodNow || sum.funNow
@@ -4435,6 +4843,8 @@
       .dk-dm-title { flex: none; }
       .dk-dm-sum { margin-left: auto; font: 400 11px/1.3 var(--dk-body-font); opacity: .85; }
       .dk-dm-body { padding: 10px 12px 12px; }
+      .dk-dm-shut { margin-top: 8px; font-size: 12px; line-height: 1.5; color: var(--dk-muted); }
+      .dk-dm-shut a { color: var(--dk-accent); }
       .dk-dm-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
       .dk-dm-tiles > div, .dk-dm-two > div { background: var(--dk-surface); padding: 6px 8px; border-radius: var(--dk-radius); }
       .dk-dm-tiles b, .dk-dm-two b { font-size: 18px; font-weight: 600; color: var(--dk-text); }
@@ -4489,10 +4899,18 @@
     /* Your own den, but no wolf cards Twill can read: say so, rather than
        leaving players wondering where the card went. Collapsed caves are the
        usual reason, so they are counted. */
+    function shutCaves() {
+      return [...document.querySelectorAll('table[data-cave-key]')]
+        .filter((t) => (t.tBodies[0] && t.tBodies[0].style.display === 'none') ||
+          [...t.querySelectorAll('[data-collapse-id]')].some((b) => /expand/i.test(b.textContent)))
+        .map((t) => {
+          const a = t.querySelector('thead a[href*="/cave/"]');
+          return { name: (a ? a.textContent : 'A cave').replace(/\s+/g, ' ').trim(), href: a ? a.getAttribute('href') : null };
+        });
+    }
+
     function emptyCard() {
-      const caves = [...document.querySelectorAll('table[data-cave-key]')];
-      const shut = caves.filter((t) => (t.tBodies[0] && t.tBodies[0].style.display === 'none') ||
-        [...t.querySelectorAll('[data-collapse-id]')].some((b) => /expand/i.test(b.textContent))).length;
+      const shut = shutCaves().length;
       return h('section', { id: 'dk-den', 'aria-label': 'Den Manager' },
         h('div', { class: 'dk-dm-head', style: 'cursor:default' }, h('span', { class: 'dk-dm-title', text: 'Den Manager' })),
         h('div', { class: 'dk-dm-body' }, h('div', { class: 'dk-dm-none', text: shut
@@ -4648,7 +5066,7 @@
     );
   }
 
-  // ===================================================== module: hide users
+  // ================================================ module: filter (id 'hide')
 
   defineModule((() => {
     const PROFILE_RE = /^\/profile\/(\d+)/;
@@ -5041,7 +5459,7 @@
       );
     }
 
-    return { id: 'hide', name: 'Hide users', blurb: 'Collapse posts from chosen players or keywords', start, stop, reload, settings };
+    return { id: 'hide', name: 'Filter', blurb: 'Fold posts and topics by player or keyword', start, stop, reload, settings };
   })());
 
   // ================================================== module: item lookup
@@ -7063,19 +7481,6 @@
     const SIGNATURE = 'Kept with Twill';
     const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-    function publicFields(rec) {
-      const pub = new Set(rec._pub || []);
-      const out = [];
-      for (const f of loreFields()) {
-        if (!pub.has(f.id) || !rec[f.id]) continue;
-        const ref = f.type === 'wolf' ? wolfRef(rec[f.id]) : null;
-        out.push(ref && ref.id
-          ? { label: f.label, text: wolfName(ref.id), wolf: ref.id }
-          : { label: f.label, text: String(rec[f.id]).trim() });
-      }
-      return out;
-    }
-
     function publicBlock(rec) {
       const parts = publicFields(rec).map((x) => '<b>' + esc(x.label) + ':</b> ' + (x.wolf
         ? '<a href="/wolf/' + x.wolf + '"><span style="color:#734413;border-bottom:1px solid #734413;">' + esc(x.text) + '</span></a>'
@@ -7656,13 +8061,24 @@
        go. Twill marks anything on either list wherever it sees it, so you stop
        re-checking the same names. Nothing is fetched and no trade is ever acted
        on: it reads item names already on the page in front of you. */
-    let wish = Object.assign({ want: [], give: [] }, load('wish', {}));
+    /* Price notes: your own note on what an item is worth to you, written as
+       "Item = note" on any line. Yours only; Twill never shares them. */
+    const freshWish = () => Object.assign({ want: [], give: [], price: {} }, load('wish', {}));
+    let wish = freshWish();
     const saveWish = () => save('wish', wish);
     const listOf = (s) => String(s || '').split('\n').map((x) => x.trim()).filter(Boolean);
+    const splitLine = (line) => {
+      const i = line.indexOf('=');
+      return i < 0 ? [line.trim(), ''] : [line.slice(0, i).trim(), line.slice(i + 1).trim().slice(0, 40)];
+    };
+    const priceOf = (name) => { const p = (wish.price || {})[norm(name)]; return p ? p.p : ''; };
+    const withPrice = (name) => (priceOf(name) ? name + ' = ' + priceOf(name) : name);
+    const onLists = (n) => wish.want.some((w) => norm(w) === n) || wish.give.some((w) => norm(w) === n);
     const hit = (name) => {
       const n = norm(name);
       if (wish.want.some((w) => norm(w) === n)) return 'want';
       if (wish.give.some((w) => norm(w) === n)) return 'give';
+      if ((wish.price || {})[n]) return 'note';
       return null;
     };
 
@@ -7680,10 +8096,13 @@
         white-space: nowrap !important;
       }
       .dk-wish-want { color: var(--dk-on-accent) !important; background: var(--dk-accent) !important; }
-      .dk-wish-give {
+      .dk-wish-give, .dk-wish-note {
         color: var(--dk-text) !important; background: var(--dk-panel) !important;
         border: 1px solid var(--dk-line) !important;
       }
+      .dk-wish-note { text-transform: none; letter-spacing: 0; }
+      .dk-wish { max-width: calc(100% - 8px); overflow: hidden !important; text-overflow: ellipsis; }
+      .dk-wish i { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 600; }
       .dk-wish-row { display: flex; align-items: center; gap: 7px; padding: 3px 0; font-size: 12px; }
       .dk-wish-row span { flex: 1; min-width: 0; }
     `);
@@ -7704,11 +8123,12 @@
       // which is the same trap Item Lookup hit.
       const host = item.querySelector('.image') || item;
       host.classList.add('dk-wish-host');
-      host.append(h('div', {
-        class: 'dk-wish dk-wish-' + kind,
-        text: kind === 'want' ? 'buy' : 'in stock',
-        title: kind === 'want' ? name + ' is on your shopping list' : name + ' is in stock to trade away'
-      }));
+      const note = priceOf(name);
+      const say = kind === 'want' ? name + ' is on your shopping list'
+        : kind === 'give' ? name + ' is in stock to trade away' : 'Your price note on ' + name;
+      host.append(h('div', { class: 'dk-wish dk-wish-' + kind, title: say + (note ? ': ' + note : '') },
+        kind === 'note' ? note : kind === 'want' ? 'buy' : 'in stock',
+        kind !== 'note' && note ? h('i', { text: ' · ' + note }) : null));
     }
 
     const scan = () => document.querySelectorAll('.item').forEach(mark);
@@ -7735,22 +8155,42 @@
 
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0' },
-        'One item name per line. Twill tags them wherever it sees them, so a look through your own hoard or someone’s trade answers itself.'));
+        'One item name per line. Twill tags them wherever it sees them, so a look through your own hoard or someone’s trade answers itself. Add a price note after an equals sign: Goldenseal = haggle first.'));
 
+      const redraw = () => { saveWish(); stop(); start(); render(); };
+      wish.price = wish.price || {};
       for (const [key, label, hintText] of [['want', 'Buy', 'Items you are looking for'],
         ['give', 'In Stock', 'Items you have spare and would trade away']]) {
         box.append(h('div', { class: 'dk-lb', text: label + '  ·  ' + wish[key].length }));
-        const ta = h('textarea', { rows: 5, spellcheck: false, value: wish[key].join('\n'), 'aria-label': label });
-        ta.addEventListener('change', () => { wish[key] = listOf(ta.value); saveWish(); stop(); start(); render(); });
+        const ta = h('textarea', { rows: 5, spellcheck: false, value: wish[key].map(withPrice).join('\n'), 'aria-label': label });
+        ta.addEventListener('change', () => {
+          const lines = listOf(ta.value).map(splitLine).filter(([n]) => n);
+          for (const old of wish[key]) delete wish.price[norm(old)];
+          wish[key] = lines.map(([n]) => n);
+          for (const [n, p] of lines) if (p) wish.price[norm(n)] = { n, p };
+          redraw();
+        });
         box.append(ta, h('div', { class: 'dk-note', style: 'margin-top:4px', text: hintText }));
       }
+
+      // Price notes on items that are on neither list.
+      const others = Object.entries(wish.price).filter(([k]) => !onLists(k)).map(([, v]) => v);
+      box.append(h('div', { class: 'dk-lb', text: 'Other price notes  ·  ' + others.length }));
+      const pta = h('textarea', { rows: 4, spellcheck: false, value: others.map((v) => v.n + ' = ' + v.p).join('\n'),
+        'aria-label': 'Other price notes', placeholder: 'Yarrow = check the guild board' });
+      pta.addEventListener('change', () => {
+        for (const [k] of Object.entries(wish.price)) if (!onLists(k)) delete wish.price[k];
+        for (const [n, p] of listOf(pta.value).map(splitLine)) if (n && p && !onLists(norm(n))) wish.price[norm(n)] = { n, p };
+        redraw();
+      });
+      box.append(pta, h('div', { class: 'dk-note', style: 'margin-top:4px', text: 'Items you only want a price note on. They get a small tag with your note, and only you see it.' }));
 
       // Anything on the want list you already hold is worth knowing about.
       const owned = [];
       for (const name of wish.want) {
         const uses = recipesUsing(name, true).length;
         owned.push(h('div', { class: 'dk-wish-row' },
-          h('span', { text: name }),
+          h('span', { text: withPrice(name) }),
           h('span', { class: 'dk-muted', style: 'flex:none;font-size:11px',
             text: uses ? uses + (uses === 1 ? ' recipe uses it' : ' recipes use it') : '' })));
       }
@@ -7762,8 +8202,8 @@
     }
 
     return {
-      id: 'wish', name: 'Shopping List', blurb: 'Tags what to buy and what you have in stock',
-      start, stop, reload: () => { wish = Object.assign({ want: [], give: [] }, load('wish', {})); }, settings
+      id: 'wish', name: 'Shopping List', blurb: 'Tags what to buy, what you have in stock, and your price notes',
+      start, stop, reload: () => { wish = freshWish(); }, settings
     };
   })());
 
@@ -7776,6 +8216,130 @@
     let strip = null;
     let pin = null;
     let refreshPin = null;      // redraws the pin's label when the tray changes elsewhere
+    let dcBtn = null, dcSlip = null;
+
+    /* Copy for Discord: a tidy message about the wolf on this page, put on
+       your clipboard when you press Copy. Read from the page at that moment and
+       never kept; only your ticks are remembered. Nothing is sent anywhere. */
+    const DC_DEFAULTS = { on: true, sa: true, b: true, look: true, m: true, mu: true, pe: false, st: false, lore: false };
+    const DC_TICKS = [['sa', 'Sex and age'], ['b', 'Base'], ['look', 'Eyes, skin, nose, claws'], ['m', 'Markings'],
+      ['mu', 'Mutations'], ['pe', 'Personality'], ['st', 'Stats total'], ['lore', 'Public lore (only fields you made public)']];
+    const DC_LIMIT = 2000;      // Discord's limit for one message
+    const dcPrefs = () => Object.assign({}, DC_DEFAULTS, load('dc', {}));
+    const dcClean = (v) => String(v || '').replace(/[?★●◆]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const dcEsc = (v) => String(v).replace(/([*_~`|\\>])/g, '\\$1');
+
+    // A cell's whole text, small print included ("Deira Socks (65% : T6)"),
+    // without the marks Twill's Genetics adds to it.
+    function dcCell(label) {
+      for (const lab of document.querySelectorAll('#main td.b')) {
+        if (lab.textContent.replace(/\s+/g, ' ').trim() !== label || !lab.nextElementSibling) continue;
+        const c = lab.nextElementSibling.cloneNode(true);
+        c.querySelectorAll('.dk-gene-q, .dk-gene-pips, [aria-hidden="true"]').forEach((x) => x.remove());
+        return dcClean(c.textContent);
+      }
+      return '';
+    }
+
+    function dcText(id, o, skip) {
+      const rec = readWolfPage() || {};
+      const out = [];
+      const sex = dcClean(rec.sx).replace(/\s*\(.*\)$/, '');
+      const age = dcClean(rec.ag).replace(/\s*\(.*\)$/, '');
+      out.push('**' + dcEsc(wolfPageName() || '#' + id) + '**' + (o.sa ? [sex, age].filter(Boolean).map((x) => ' · ' + x).join('') : ''));
+      out.push('https://www.wolvden.com/wolf/' + id);
+      if (o.b && rec.b) {
+        const g = dcClean(rec.g);
+        out.push('**Base:** ' + dcEsc(dcClean(rec.b).replace(/\s*\([\d.]+%\)/, '')) + (g ? ' (' + dcEsc(g) + ')' : ''));
+      }
+      if (o.look) {
+        const bits = [['Eyes', rec.e], ['Skin', rec.s], ['Nose', rec.no], ['Claws', rec.c]]
+          .filter(([, v]) => dcClean(v)).map(([k, v]) => '**' + k + '** ' + dcEsc(dcClean(v)));
+        if (bits.length) out.push(bits.join(' · '));
+      }
+      if (o.m) {
+        const ms = (rec.m || []).filter(([slot]) => !skip.has(slot)).map(([slot, v]) => {
+          const m = (dcCell('Slot ' + slot) || dcClean(v)).match(/^(.*?)\s*\((\d+)%/);
+          return dcEsc(m ? m[1] : dcClean(v)) + ' (' + (m ? m[2] + '%, ' : '') + 'slot ' + slot + ')';
+        });
+        if (ms.length) out.push('**Markings:** ' + ms.join(' · '));
+      }
+      if (o.mu) {
+        const mu = (rec.mu || []).map(dcClean).filter(Boolean);
+        if (mu.length) out.push('**Mutation' + (mu.length > 1 ? 's' : '') + ':** ' + mu.map(dcEsc).join(' · '));
+      }
+      const pe = dcCell('Personality') || dcClean(rec.pe);
+      if (o.pe && pe) out.push('**Personality:** ' + dcEsc(pe.replace(/([a-z])([A-Z])/g, '$1, $2')));
+      if (o.st) { const t = dcClean(wolfPageRow('Total')); if (t) out.push('**Stats:** ' + dcEsc(t)); }
+      if (o.lore) {
+        for (const f of publicFields(load('lore', {})[id])) {
+          out.push('> **' + dcEsc(f.label) + ':** ' + dcEsc(f.text).replace(/\r?\n/g, '\n> '));
+        }
+      }
+      return out.join('\n');
+    }
+
+    function dcOpen(id) {
+      if (dcSlip) { dcSlip.remove(); dcSlip = null; return; }
+      const head = document.querySelector('#main h1');
+      if (!head) return;
+      const o = dcPrefs();
+      const skip = new Set();
+      const rec = readWolfPage() || {};
+      const hasLore = publicFields(load('lore', {})[id]).length > 0;
+      const pre = h('pre', { class: 'dk-dc-pre' });
+      const count = h('div', { class: 'dk-dc-n' });
+      const copy = h('button', { type: 'button', class: 'dk-btn', text: 'Copy' });
+      const redraw = () => {
+        const text = dcText(id, o, skip);
+        pre.textContent = text;
+        const over = text.length > DC_LIMIT;
+        count.textContent = text.length.toLocaleString('en-GB') + ' of Discord’s 2,000 characters' + (over ? ': too long for one message' : '');
+        count.classList.toggle('dk-dc-over', over);
+        copy.textContent = over ? 'Copy anyway' : 'Copy';
+      };
+      const tick = (checked, label, on, sub) => {
+        const box = h('input', { type: 'checkbox' });
+        box.checked = checked;
+        box.addEventListener('change', () => { on(box.checked); redraw(); });
+        return h('label', { class: sub ? 'dk-dc-sub' : '' }, box, ' ' + label);
+      };
+      const ticks = h('div', { class: 'dk-dc-ticks' },
+        h('label', {}, Object.assign(h('input', { type: 'checkbox', disabled: true }), { checked: true }), ' Name and link (always)'));
+      for (const [k, label] of DC_TICKS) {
+        if (k === 'lore' && !hasLore) continue;
+        ticks.append(tick(o[k], label, (v) => { o[k] = v; save('dc', o); }));
+        if (k === 'm') {
+          for (const [slot, v] of rec.m || []) {
+            ticks.append(tick(true, 'Slot ' + slot + ' · ' + dcClean(v).replace(/\s*\(.*$/, ''),
+              (on) => { if (on) skip.delete(slot); else skip.add(slot); }, true));
+          }
+        }
+      }
+      copy.addEventListener('click', async () => {
+        const text = pre.textContent;
+        try { await navigator.clipboard.writeText(text); } catch {
+          const ta = h('textarea', { value: text, style: 'position:fixed;left:-9999px' });
+          document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+        }
+        copy.textContent = 'Copied. Paste it into Discord.';
+        setTimeout(redraw, 2000);
+      });
+      dcSlip = h('div', { class: 'dk-dc-slip', role: 'dialog', 'aria-label': 'Copy for Discord' },
+        h('div', { class: 'dk-dc-t', text: 'Copy for Discord' }),
+        h('div', { class: 'dk-dc-grid' }, ticks,
+          h('div', {}, pre, count, h('div', { class: 'dk-btns' }, copy,
+            h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Close', onclick: () => { dcSlip.remove(); dcSlip = null; } })))));
+      head.insertAdjacentElement('afterend', dcSlip);
+      redraw();
+    }
+
+    function addCopy(id, host) {
+      if (!dcPrefs().on) return;
+      dcBtn = h('button', { type: 'button', class: 'dk-pin', 'aria-pressed': 'false', text: 'Copy for Discord',
+        title: 'Copy a tidy message about this wolf, to paste into Discord', onclick: () => dcOpen(id) });
+      host.append(dcBtn);
+    }
 
     const styleEl = h('style', {}, `
       #dk-tray {
@@ -7811,6 +8375,25 @@
         margin-top: 9px; padding-top: 7px; border-top: 1px solid var(--dk-line);
       }
       .dk-pair-sec:first-of-type { border-top: 0; }
+      .dk-dc-slip {
+        margin: 8px 0 10px; padding: 10px 13px; text-align: left;
+        background: var(--dk-panel); color: var(--dk-text); border: 1px solid var(--dk-line);
+        border-left: 2px solid var(--dk-accent); border-radius: var(--dk-radius);
+        font: 13px/1.5 var(--dk-body-font);
+      }
+      .dk-dc-t { font: 700 10.5px/1.4 var(--dk-title-font); letter-spacing: .07em; text-transform: uppercase; color: var(--dk-tip-title); }
+      .dk-dc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 14px; margin-top: 6px; }
+      @media (max-width: 700px) { .dk-dc-grid { grid-template-columns: 1fr; } }
+      .dk-dc-ticks label { display: flex; gap: 6px; align-items: baseline; margin: 2px 0; font: 13px/1.4 var(--dk-body-font); color: var(--dk-text); }
+      .dk-dc-ticks label.dk-dc-sub { margin-left: 20px; font-size: 12px; color: var(--dk-muted); }
+      .dk-dc-ticks input { accent-color: var(--dk-accent); }
+      .dk-dc-pre {
+        margin: 0; padding: 8px 10px; white-space: pre-wrap; word-break: break-word;
+        background: var(--dk-surface); color: var(--dk-text); border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
+        font: 12px/1.5 Consolas, 'Courier New', monospace; max-height: 260px; overflow: auto;
+      }
+      .dk-dc-n { margin-top: 3px; font-size: 11px; color: var(--dk-muted); }
+      .dk-dc-n.dk-dc-over { color: var(--dk-warn-text); font-weight: 600; }
     `);
 
     const nameFor = (id) => (coll[id] && coll[id].n) || (ped[id] && ped[id].n) || ('#' + id);
@@ -7863,6 +8446,17 @@
           type: 'button', class: 'dk-pin', style: 'color:var(--dk-text);background:var(--dk-surface)',
           text: picked.length > 1 ? 'Compare ' + picked.length : 'Compare all ' + tray.length,
           onclick: () => go('compare', picked.length > 1 ? picked.slice() : tray.slice())
+        }));
+      }
+      const bp = modules.find((x) => x.id === 'breed');
+      if (bp && isOn(bp) && bp.fromTray) {
+        const projFull = (Array.isArray(proj.list) ? proj.list : []).length >= PROJ_MAX;
+        strip.append(h('button', {
+          type: 'button', class: 'dk-pin', style: 'color:var(--dk-text);background:var(--dk-surface)',
+          text: 'New project', disabled: projFull,
+          title: projFull ? 'Twill keeps up to ' + PROJ_MAX + ' projects. Finish or delete one first.'
+            : 'Start a breeding project with ' + (tray.length === 1 ? 'this wolf' : 'these ' + tray.length + ' wolves'),
+          onclick: () => bp.fromTray()
         }));
       }
     }
@@ -7920,6 +8514,7 @@
       if (page.kind === 'wolf' || page.kind === 'family') {
         const head = document.querySelector('#main h1');
         if (head) addPin(page.id, head);
+        if (head && page.kind === 'wolf' && readWolfPage()) addCopy(page.id, head);
       }
       keepThis(true);   // refresh a pinned wolf's age and genes while on its page
     }
@@ -7927,7 +8522,9 @@
     function stop() {
       if (strip) strip.remove();
       if (pin) pin.remove();
-      strip = pin = refreshPin = null;
+      if (dcBtn) dcBtn.remove();
+      if (dcSlip) dcSlip.remove();
+      strip = pin = refreshPin = dcBtn = dcSlip = null;
       styleEl.remove();
     }
 
@@ -7948,10 +8545,18 @@
           tray = []; saveTray(); trayChanged(); screen = 'tray'; render();
         }
       })));
+
+      const dc = dcPrefs();
+      const dcSet = (v) => { save('dc', Object.assign(dcPrefs(), { on: v })); stop(); start(); render(); };
+      box.append(h('div', { class: 'dk-lb', text: 'Copy for Discord' }),
+        h('div', { class: 'dk-seg' },
+          h('button', { type: 'button', 'aria-pressed': String(dc.on), onclick: () => dcSet(true) }, 'On'),
+          h('button', { type: 'button', 'aria-pressed': String(!dc.on), onclick: () => dcSet(false) }, 'Off')),
+        h('div', { class: 'dk-note', style: 'margin-top:5px', text: 'A button beside + Tray on any wolf’s page. Tick what goes in, see exactly what will be copied, then paste it into Discord yourself. Twill only puts text on your clipboard; it sends nothing.' }));
     }
 
     return {
-      id: 'tray', name: 'Tray', blurb: 'Pin two wolves, then pair them',
+      id: 'tray', name: 'Tray', blurb: 'Pin two wolves, then pair them, and Copy for Discord',
       start, stop, reload: () => { tray = load('tray', []); }, settings,
       // The tray changed, here or in another tab, or a wolf in it was read: redraw,
       // and read this page's wolf if it has just been pinned.
@@ -8226,7 +8831,32 @@
           if (refs.title) refs.title.select();
         }
       }));
+      const inTray = load('tray', []).length;
+      if (inTray && !full) {
+        L.append(h('button', {
+          type: 'button', class: 'dk-btn dk-quiet dk-bp-new', text: '+ From the Tray (' + inTray + ')',
+          title: 'A new project with the ' + plural(inTray, 'wolf', 'wolves') + ' in your tray', onclick: fromTray
+        }));
+      }
       L.append(h('div', { class: 'dk-bp-cap', text: st.list.length + ' of ' + PROJ_MAX + ' projects' }));
+    }
+
+    /* A new project holding the wolves already in the tray. They are kept
+       already, so nothing new is read or kept. */
+    function fromTray() {
+      reload();
+      const ids = load('tray', []).slice(0, PROJ_WOLVES);
+      if (!ids.length || st.list.length >= PROJ_MAX) { openWindow(); return; }
+      const name = (id) => String((coll[id] && coll[id].n) || (ped[id] && ped[id].n) || '').replace(/[<>]/g, '').slice(0, 60);
+      const p = { id: uid(), n: 'From the Tray', t: Date.now(), goals: [], coi: 10,
+        wolves: ids.map((id) => ({ id: String(id), n: name(id) })), steps: [], notes: '' };
+      st.list.push(p);
+      st.active = p.id;
+      st.tab = 'plan';
+      persist();
+      openWindow();
+      if (refs.title) refs.title.select();
+      resync();   // the tray's New project button notices the projects are full
     }
 
     function paintEditor() {
@@ -8966,7 +9596,7 @@
 
     return {
       id: 'breed', name: 'Breeding projects', blurb: 'Plan pairings toward a goal (Alt+B)',
-      start, stop, open: openWindow,
+      start, stop, open: openWindow, fromTray,
       reload: () => { reload(); paint(); },
       // The tray or a kept wolf changed, here or in another tab: redraw.
       sync: () => { if (running) readHere(); paint(); },
@@ -8983,9 +9613,24 @@
        it, and a puppy's own page says whether that pup could fit, read from the
        page you are on and kept nowhere. The next time you are on the Enclave
        and the quest has gone, Twill lets its copy go too. */
-    let slip = null, fitCard = null;
+    let slip = null, fitCard = null, sideCard = null;
 
     const styleEl = h('style', {}, `
+      #sidebar .card.dk-pq-side {
+        background: var(--dk-panel) !important; color: var(--dk-text) !important;
+        border: 1px solid var(--dk-line) !important; border-left: 2px solid var(--dk-accent) !important;
+        border-radius: var(--dk-radius); text-align: left;
+      }
+      #sidebar .dk-pq-side .card-body { padding: 9px 11px !important; font: 12px/1.5 var(--dk-body-font) !important; color: var(--dk-text) !important; }
+      #sidebar .dk-pq-side .dk-pq-t {
+        display: block; color: var(--dk-tip-title) !important; text-decoration: none !important;
+        font: 700 10.5px/1.4 var(--dk-title-font) !important; letter-spacing: .07em; text-transform: uppercase;
+      }
+      #sidebar .dk-pq-side ul { margin: 4px 0 4px !important; padding-left: 16px !important; list-style: disc !important; }
+      #sidebar .dk-pq-side li { margin: 1px 0 !important; color: var(--dk-text) !important; }
+      #sidebar .dk-pq-side .dk-pq-x { color: var(--dk-muted) !important; font-size: 11px; }
+      #sidebar .dk-pq-side .dk-pq-x.dk-soon { color: var(--dk-warn-text) !important; font-weight: 600; }
+      #sidebar .dk-pq-side a { color: var(--dk-accent) !important; }
       .dk-pq-slip {
         display: flex; gap: 10px; align-items: flex-start; margin: 0 0 12px; padding: 8px 10px;
         background: var(--dk-surface); color: var(--dk-text); border: 1px solid var(--dk-line);
@@ -9029,7 +9674,7 @@
             : 'It shows on Twill’s hub, and a puppy’s page tells you whether that pup could fit, so you don’t have to keep coming back here.'),
         h('button', {
           type: 'button', class: 'dk-btn' + (on ? '' : ' dk-primary'), text: on ? 'Stop showing' : 'Show in Twill',
-          onclick: () => { if (on) del('pupquest'); else save('pupquest', Object.assign({ t: Date.now() }, q)); paintSlip(q); }
+          onclick: () => { if (on) del('pupquest'); else save('pupquest', Object.assign({ t: Date.now() }, q)); paintSlip(q); paintSide(); }
         }));
       anchor.parentNode.insertBefore(slip, anchor);
     }
@@ -9089,7 +9734,7 @@
       if (!hits.length) return;
       const pup = /\bpup(py)?\b/i.test(age);
       fitCard = h('div', { class: 'dk-pq-fit', role: 'note' },
-        h('strong', { text: 'Could fit Lillemor’s quest' }),
+        h('strong', { text: 'Could fit the Enclave Puppy Quest' }),
         ...hits.map(([text, c]) => h('div', { text: text + ':  ' + c.ticks.concat(pup ? ['a puppy'] : []).map((x) => '✓ ' + x).join('  ') +
           (c.unsure.length ? '  ·  check yourself: ' + c.unsure.join(', ') : '') })),
         h('div', { style: 'opacity:.85;margin-top:2px', text: 'She also wants it weaned, and not an adolescent, secured, sick, training or immortal. Check those before you take it to her.' }));
@@ -9097,8 +9742,34 @@
       if (head) head.insertAdjacentElement('afterend', fitCard);
     }
 
+    /* Under Melvin's Missions when Wolvden draws that card, and at the top of
+       the sidebar once his missions are done and his card is gone. */
+    function paintSide() {
+      if (sideCard) sideCard.remove();
+      sideCard = null;
+      const q = load('pupquest', null);
+      if (!q || !Array.isArray(q.req) || !q.req.length || load('pqWhere', 'both') === 'hub') return;
+      if (currentPage().kind === 'enclave') return;   // the quest is on that page already
+      const side = document.querySelector('#sidebar');
+      if (!side) return;
+      const host = side.querySelector('.multi-column') || side;
+      const melvin = [...host.querySelectorAll('.card')].find((c) => c.querySelector('a[href*="/melvin"]'));
+      const when = questWhen(q);
+      sideCard = h('div', { class: 'card dk-pq-side', role: 'note' },
+        h('div', { class: 'card-body' },
+          h('a', { href: '/enclave', class: 'dk-pq-t', text: 'Enclave Puppy Quest' }),
+          h('ul', {}, ...q.req.map((r) => h('li', { text: r }))),
+          h('div', { class: 'dk-pq-x' + (when.days != null && when.days <= 0 ? ' dk-soon' : '') },
+            'Find one' + (when.short ? '  ·  ' + when.short : '') + '  ·  ',
+            h('a', { href: '/enclave', text: 'Enclave ›' }))));
+      if (melvin) melvin.insertAdjacentElement('afterend', sideCard);
+      else host.prepend(sideCard);
+    }
+
     function start() {
       const page = currentPage();
+      if (!styleEl.isConnected && document.querySelector('#sidebar')) document.head.append(styleEl);
+      paintSide();
       if (page.kind === 'enclave') {
         document.head.append(styleEl);
         const q = readQuest();
@@ -9115,45 +9786,64 @@
     function stop() {
       if (slip) slip.remove();
       if (fitCard) fitCard.remove();
-      slip = fitCard = null;
+      if (sideCard) sideCard.remove();
+      slip = fitCard = sideCard = null;
       styleEl.remove();
     }
 
     function settings(box) {
       const q = load('pupquest', null);
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0', text: 'On the Enclave, press Show in Twill and Lillemor’s current puppy quest stays on the hub. A puppy’s page then says whether that pup could fit. Only the one quest is kept, and only after you press the button. Twill lets it go the next time you are on the Enclave and the quest is gone.' }));
+      const where = load('pqWhere', 'both');
+      const wBtn = (v, label) => h('button', { type: 'button', 'aria-pressed': String(where === v),
+        onclick: () => { save('pqWhere', v); paintSide(); render(); } }, label);
+      box.append(h('div', { class: 'dk-lb', text: 'Show it in' }),
+        h('div', { class: 'dk-seg' }, wBtn('both', 'Sidebar and hub'), wBtn('hub', 'Hub only')),
+        h('div', { class: 'dk-note', style: 'margin-top:5px', text: 'The sidebar card sits under Melvin’s Missions on every page, or at the top of the sidebar once his missions are done. On a phone the sidebar is below the page, so the hub keeps it too.' }));
       if (q) {
         box.append(h('div', { class: 'dk-btns' }, h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Forget the kept quest',
-          onclick: () => { del('pupquest'); render(); } })));
+          onclick: () => { del('pupquest'); paintSide(); render(); } })));
       }
     }
 
-    return { id: 'pupquest', name: 'Puppy quest', blurb: 'Lillemor’s Enclave quest on the hub', start, stop, settings };
+    return { id: 'pupquest', name: 'Puppy quest', blurb: 'The Enclave Puppy Quest in the sidebar and hub', start, stop, settings,
+      reload: () => paintSide() };
   })());
 
   /* The puppy quest card on the hub's home screen. Wolvden's expiry is in the
      site's own time, so it is shown as written, with a rough count of days. */
+  function questWhen(q) {
+    const d = String((q && q.exp) || '').match(/^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/);
+    if (!d) return { text: '', short: '', days: null };
+    const at = new Date(Number(d[1]), Number(d[2]) - 1, Number(d[3]));
+    const today = new Date();
+    const days = Math.round((at - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 864e5);
+    const rel = days < 0 ? 'may have expired' : days === 0 ? 'today, ' + d[4] : days === 1 ? 'tomorrow' : 'in ' + days + ' days';
+    return {
+      days,
+      text: 'Expires ' + at.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' + d[4] + ' Wolvden time' +
+        (days < 0 ? '  ·  may have expired' : days === 0 ? '  ·  today' : days === 1 ? '  ·  tomorrow' : '  ·  in ' + days + ' days'),
+      short: days < 0 ? rel : days === 0 ? 'expires ' + rel : rel
+    };
+  }
+
   function renderPupQuest(box) {
     const q = load('pupquest', null);
     const m = modules.find((x) => x.id === 'pupquest');
     if (!q || !Array.isArray(q.req) || !q.req.length || (m && !isOn(m))) return;
-    let when = '';
-    const d = String(q.exp || '').match(/^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d)/);
-    if (d) {
-      const at = new Date(Number(d[1]), Number(d[2]) - 1, Number(d[3]));
-      const today = new Date();
-      const days = Math.round((at - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 864e5);
-      when = 'Expires ' + at.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' + d[4] + ' Wolvden time' +
-        (days < 0 ? '  ·  may have expired' : days === 0 ? '  ·  today' : days === 1 ? '  ·  tomorrow' : '  ·  in ' + days + ' days');
-    }
-    box.append(h('div', { class: 'dk-lb', text: 'Lillemor’s puppy quest' }),
+    const when = questWhen(q).text;
+    box.append(h('div', { class: 'dk-lb', text: 'Enclave Puppy Quest' }),
       h('div', { class: 'dk-pq-card' },
         h('div', {}, 'Find ', h('b', { text: 'one' }), ' of these:'),
         h('ul', {}, ...q.req.map((r) => h('li', { text: r }))),
         h('div', { class: 'dk-pq-foot' },
           h('span', { class: 'dk-muted', text: when }),
           h('a', { href: '/enclave', class: 'dk-btn', text: 'Open the Enclave ›' }),
-          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Remove', onclick: () => { del('pupquest'); render(); } }))));
+          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Remove', onclick: () => {
+            del('pupquest');
+            if (m && m.reload) safely(m, 'reload');
+            render();
+          } }))));
   }
 
   // ================================================= module: pair lists order
@@ -10291,7 +10981,7 @@
 
   // The guides' facts from the Grouse House Wiki snapshot. Regenerate with: python tools/export_guides.py
   /* @guides-begin: generated by tools/export_guides.py, do not edit by hand */
-  const GUIDES = {"exported":"2026-10-12","wiki":"https://grousehouse.wiki/","biomes":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"starters":["Deciduous Forest","Grasslands","Mountains"],"herbs":{"Aloe":{"m":[["Ringworm Salve",1],["Cure-for-All",1],["Rich Healing Salve",3]],"b":["Desert","Swamp","Rainforest"],"all":0},"Arnica":{"m":[["Mange Salve",1],["Cure-for-All",1]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1},"Bearberry":{"m":[["Constipation Cure",1],["Tapeworm Remedy",1]],"b":["Deciduous Forest","Mountains","Coniferous Forest","Taiga","Tundra"],"all":0},"Boneset":{"m":[["Hepatitis Cure",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Coniferous Forest","Prairie","Riparian Woodland","Taiga","Swamp"],"all":0},"Buffaloberry":{"m":[["Constipation Cure",1],["Rich Healing Salve",3]],"b":["Mountains","Coniferous Forest","Prairie","Riparian Woodland","Taiga"],"all":0},"Burning Bush":{"m":[["Constipation Cure",1],["Rich Healing Salve",3]],"b":["Deciduous Forest","Grasslands","Coniferous Forest","Prairie","Riparian Woodland"],"all":0},"Carrionflower":{"m":[["Ear Mites Ointment",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Riparian Woodland","Taiga"],"all":0},"Cedar Bark":{"m":[["Tick Remedy",1],["Cure-for-All",1]],"b":["Coniferous Forest","Mountains","Grasslands","Deciduous Forest","Riparian Woodland","Prairie","Desert","Swamp","Rainforest"],"all":0},"Chaparral":{"m":[["Antidote",3],["Rich Healing Salve",3]],"b":["Desert"],"all":0},"Charcoal":{"m":[["Diarrhea Cure",3],["Healing Salves",1],["Rich Healing Salve",3]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1},"Dandelion":{"m":[["Cystitis Cure",1],["Healing Salves",1],["Hepatitis Cure",1]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1},"Feverfew":{"m":[["Heatstroke Remedy",1],["Infection Balm",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Rainforest"],"all":0},"Garlic":{"m":[["Tapeworm Remedy",1],["Tick Remedy",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Swamp"],"all":0},"Ginger":{"m":[["Heatstroke Remedy",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Taiga"],"all":0},"Goldenseal":{"m":[["Cough Cure",1],["Distemper Cure",1]],"b":["Deciduous Forest","Grasslands","Coniferous Forest","Riparian Woodland"],"all":0},"Guaiacum":{"m":[["Distemper Cure",1],["Influenza Cure",2]],"b":["Swamp","Rainforest"],"all":0},"Kava":{"m":[["Cough Cure",1],["Cystitis Cure",1]],"b":["Rainforest"],"all":0},"Mullein":{"m":[["Distemper Cure",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Desert"],"all":0},"Oregano":{"m":[["Infection Balm",1],["Pox Balm",1],["Ringworm Salve",1]],"b":["Mountains","Prairie","Desert","Swamp","Rainforest"],"all":0},"Pineapple Leaf":{"m":[["Cough Cure",1],["Influenza Cure",2]],"b":["Rainforest"],"all":0},"Redwood Sorrel":{"m":[["Cystitis Cure",1],["Pox Balm",1]],"b":["Mountains","Coniferous Forest","Swamp"],"all":0},"Spoonwood":{"m":[["Hepatitis Cure",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Riparian Woodland","Swamp"],"all":0},"St. John's Wort":{"m":[["Infection Balm",1],["Open Wound Salve",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Swamp"],"all":0},"Tansy":{"m":[["Tapeworm Remedy",1],["Cure-for-All",1]],"b":["Grasslands","Deciduous Forest","Mountains","Prairie","Riparian Woodland","Coniferous Forest","Desert"],"all":0},"Tobacco":{"m":[["Ear Mites Ointment",1],["Fleas Remedy",3],["Mange Salve",1],["Tick Remedy",1]],"b":["Mountains","Prairie","Desert"],"all":0},"Turmeric":{"m":[["Ringworm Salve",1],["Cure-for-All",1]],"b":["Swamp","Rainforest"],"all":0},"Winterfat":{"m":[["Ear Mites Ointment",1],["Heatstroke Remedy",1],["Open Wound Salve",1]],"b":["Mountains","Prairie","Desert"],"all":0},"Yarrow":{"m":[["Mange Salve",1],["Open Wound Salve",1],["Pox Balm",1]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1}},"meds":{"Antidote":{"u":"Cures Poison","r":[["Chaparral",3]]},"Constipation Cure":{"u":"Cures Constipation","r":[["Bearberry",1],["Buffaloberry",1],["Burning Bush",1]]},"Cough Cure":{"u":"Cures Cough","r":[["Goldenseal",1],["Kava",1],["Pineapple Leaf",1]]},"Cure-for-All":{"u":"Cures any illness and gives illness immunity for three rollovers.","r":[["Aloe",1],["Arnica",1],["Boneset",1],["Carrionflower",1],["Cedar Bark",1],["Ginger",1],["Mullein",1],["Spoonwood",1],["Tansy",1],["Turmeric",1]]},"Cystitis Cure":{"u":"Cures Cystitis","r":[["Dandelion",1],["Kava",1],["Redwood Sorrel",1]]},"Diarrhea Cure":{"u":"Cures Diarrhea","r":[["Charcoal",3]]},"Distemper Cure":{"u":"Cures Distemper","r":[["Goldenseal",1],["Guaiacum",1],["Mullein",1]]},"Ear Mites Ointment":{"u":"Cures Ear Mites","r":[["Carrionflower",1],["Tobacco",1],["Winterfat",1]]},"Fleas Remedy":{"u":"Cures Fleas","r":[["Tobacco",3]]},"Healing Salves":{"u":"Restores 20 HP","r":[["Charcoal",1],["Dandelion",1]]},"Heatstroke Remedy":{"u":"Cures Heatstroke","r":[["Feverfew",1],["Ginger",1],["Winterfat",1]]},"Hepatitis Cure":{"u":"Cures Hepatitis","r":[["Boneset",1],["Dandelion",1],["Spoonwood",1]]},"Infection Balm":{"u":"Cures Infection","r":[["Feverfew",1],["Oregano",1],["St. John's Wort",1]]},"Influenza Cure":{"u":"Cures Influenza","r":[["Guaiacum",2],["Pineapple Leaf",2]]},"Mange Salve":{"u":"Cures Mange","r":[["Arnica",1],["Tobacco",1],["Yarrow",1]]},"Open Wound Salve":{"u":"Cures Open Wound","r":[["St. John's Owrt",1],["Winterfat",1],["Yarrow",1]]},"Pox Balm":{"u":"Cures Pox","r":[["Oregano",1],["Redwood Sorrel",1],["Yarrow",1]]},"Rich Healing Salve":{"u":"Restores 50 HP and gives illness immunity for three rollovers.","r":[["Aloe",1],["Buffaloberry",1],["Burning Bush",1],["Chaparral",1],["Charcoal",1]]},"Ringworm Salve":{"u":"Cures Ringworm","r":[["Aloe",1],["Oregano",1],["Turmeric",1]]},"Tapeworm Remedy":{"u":"Cures Tapeworm","r":[["Bearberry",1],["Garlic",1],["Tansy",1]]},"Tick Remedy":{"u":"Cures Ticks","r":[["Cedar Bark",1],["Garlic",1],["Tobacco",1]]}},"renamed":13,"scout":{"Grasslands":"Speed","Deciduous Forest":"Speed","Mountains":"Speed","Riparian Woodland":"Wisdom","Prairie":"Speed","Coniferous Forest":"Smarts","Desert":"Strength","Taiga":"Agility","Swamp":"Agility","Tundra":"Smarts","Rainforest":"Strength","Glacier":"Wisdom"},"scoutMin":{"Glacier":[101,"Wisdom"],"Rainforest":[101,"Strength"]},"difficulty":{"Grasslands":"Easy","Deciduous Forest":"Easy","Mountains":"Easy","Riparian Woodland":"Medium","Prairie":"Medium","Coniferous Forest":"Medium","Desert":"Difficult","Taiga":"Difficult","Swamp":"Challenging","Tundra":"Challenging","Rainforest":"Challenging","Glacier":"Challenging"},"diffOrder":["Easy","Medium","Difficult","Challenging"],"rates":[{"p":["Non-carrier","Non-carrier"],"o":[["Non-carrier",100]]},{"p":["Carrier","Non-carrier"],"o":[["Non-carrier",90],["Carrier",10]]},{"p":["Mutation","Non-carrier"],"o":[["Non-carrier",85],["Carrier",15],["Mutation",0]]},{"p":["Carrier","Carrier"],"o":[["Non-carrier",80],["Carrier",10],["Mutation",10]]},{"p":["Mutation","Carrier"],"o":[["Non-carrier",70],["Carrier",15],["Mutation",15]]},{"p":["Mutation","Mutation"],"o":[["Non-carrier",70],["Mutation",20],["Carrier",10]]}],"genetic":{"Albinism":"Secondary Mutation","Brachycephaly":"Mutation","Hereditary Cataracts":"Secondary Mutation","Melanism":"Secondary Mutation"},"ills":[{"n":"Constipation","hp":"None","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Won't eat, Low chance to cure on rollover","cure":"Constipation Cure"},{"n":"Cough","hp":"−2 HP","en":"None","br":"Contagious","sp":"21%","o":"Low chance to cure on rollover","cure":"Cough Cure"},{"n":"Cystitis","hp":"−2 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Low chance to cure on rollover","cure":"Cystitis Cure"},{"n":"Diarrhea","hp":"−4 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Low chance to cure on rollover","cure":"Diarrhea Cure"},{"n":"Distemper","hp":"−6 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"18%","o":"Lethal","cure":"Distemper Cure"},{"n":"Ear Mites","hp":"None","en":"None","br":"Contagious","sp":"60%","o":"Can't hunt or scout","cure":"Ear Mites Ointment"},{"n":"Fleas","hp":"None","en":"None","br":"Contagious","sp":"36%","o":"−3 HP on contraction unless from breeding","cure":"Fleas Remedy"},{"n":"Heatstroke","hp":"−4 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Lethal","cure":"Heatstroke Remedy"},{"n":"Hepatitis","hp":"−6 HP","en":"None","br":"Contagious","sp":"18%","o":"None","cure":"Hepatitis Cure"},{"n":"Infection","hp":"−4 HP","en":"None","br":"Can't Breed","sp":"Not Contagious","o":"Lethal","cure":"Infection Balm"},{"n":"Influenza","hp":"−6 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"90%","o":"Energy set to zero on contraction","cure":"Influenza Cure"},{"n":"Mange","hp":"−6 HP","en":"None","br":"Can't Breed","sp":"18%","o":"None","cure":"Mange Salve"},{"n":"Open Wound","hp":"−6 HP","en":"None","br":"Can't Breed","sp":"Not Contagious","o":"HP set to zero on contraction","cure":"Open Wound Salve"},{"n":"Poison","hp":"−10 HP","en":"None","br":"Can't Breed","sp":"Not Contagious","o":"Lethal","cure":"Antidote"},{"n":"Pox","hp":"−6 HP","en":"None","br":"Contagious","sp":"18%","o":"Lethal to pups after one rollover","cure":"Pox Balm"},{"n":"Ringworm","hp":"−2 HP","en":"None","br":"Contagious","sp":"18%","o":"None","cure":"Ringworm Salve"},{"n":"Tapeworms","hp":"None","en":"None","br":"None","sp":"Not Contagious","o":"Additional -10% hunger at rollover","cure":"Tapeworm Remedy"},{"n":"Ticks","hp":"Keeps HP max at −3 from full","en":"None","br":"None","sp":"Not Contagious","o":"None","cure":"Tick Remedy"}],"pairs":[[10,2,true],[10,3,false],[20,4,false],[30,5,false],[40,6,false],[50,7,false],[60,8,false],[70,9,false],[80,10,false],[90,11,false],[100,12,false],[110,13,false],[120,14,false],[130,15,false],[140,16,false],[150,17,false],[160,18,false],[170,19,false],[180,20,false],[190,21,false],[200,22,false]],"prey":[{"n":"Bat Carcass","c":"Critter Prey","u":1,"w":[["Grasslands","All trails"]]},{"n":"Ground Squirrel Carcass","c":"Critter Prey","u":1,"w":[["Tundra","All trails"]]},{"n":"Lemming Carcass","c":"Critter Prey","u":1,"w":[["Glacier","All trails"]]},{"n":"Woodpecker Carcass","c":"Critter Prey","u":1,"w":[["Mountains","All trails"]]},{"n":"Jacana Carcass","c":"Critter Prey","u":2,"w":[["Swamp","All trails"]]},{"n":"Merlin Carcass","c":"Critter Prey","u":2,"w":[["Coniferous Forest","All trails"]]},{"n":"Milk Snake Carcass","c":"Critter Prey","u":2,"w":[["Prairie","All trails"]]},{"n":"Mink Carcass","c":"Critter Prey","u":2,"w":[["Taiga","All trails"]]},{"n":"Woodcock Carcass","c":"Critter Prey","u":2,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Rocky Waterfall"],["Deciduous Forest","Overgrown Valley"]]},{"n":"Jackrabbit Carcass","c":"Critter Prey","u":3,"w":[["Desert","All trails"]]},{"n":"Raccoon Carcass","c":"Critter Prey","u":3,"w":[["Riparian Woodland","All trails"]]},{"n":"Stoat Carcass","c":"Critter Prey","u":3,"w":[["Coniferous Forest","Northwoods"],["Coniferous Forest","Rapids"],["Coniferous Forest","Redwood Forest"],["Taiga","All trails"],["Tundra","Timberline"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"],["Glacier","Coast"]]},{"n":"Agouti Carcass","c":"Critter Prey","u":4,"w":[["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Highlands"]]},{"n":"Grouse Carcass","c":"Critter Prey","u":4,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Rocky Waterfall"],["Deciduous Forest","Overgrown Valley"],["Mountains","All trails"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Coniferous Forest","Redwood Forest"]]},{"n":"Gull Carcass","c":"Critter Prey","u":4,"w":[["Tundra","Highlands"],["Tundra","Heathlands"],["Tundra","Coast"],["Glacier","All trails"]]},{"n":"Hare Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Hills"],["Deciduous Forest","Meadows"],["Deciduous Forest","Rocky Waterfall"],["Mountains","All trails"],["Prairie","All trails"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Coniferous Forest","Redwood Forest"],["Desert","All trails"],["Tundra","Timberline"],["Tundra","Heathlands"]]},{"n":"Muskrat Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Deciduous Forest","All trails"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Taiga","Lichen Woodland"],["Taiga","Creek"],["Taiga","Larch Forest"]]},{"n":"Opossum Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Giant River"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Pheasant Hen Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Prairie","All trails"],["Coniferous Forest","All trails"]]},{"n":"Pheasant Rooster Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Prairie","All trails"],["Coniferous Forest","All trails"]]},{"n":"Quail Carcass","c":"Critter Prey","u":4,"w":[["Mountains","All trails"],["Desert","All trails"]]},{"n":"Rabbit Carcass","c":"Critter Prey","u":4,"w":[["Prairie","Pothole Wetlands"],["Prairie","Shrub Steppe"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Silky Anteater Carcass","c":"Critter Prey","u":4,"w":[["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Porcupine Carcass","c":"Small Prey","u":8,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Overgrown Valley"],["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Coniferous Forest","All trails"],["Desert","All trails"],["Taiga","All trails"],["Tundra","Timberline"],["Tundra","Highlands"],["Tundra","Heathlands"],["Rainforest","Tropical Coast"],["Rainforest","Highlands"]]},{"n":"Beaver Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Deciduous Forest","Overgrown Valley"],["Mountains","Lakes"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Bosque"],["Riparian Woodland","Giant River"],["Coniferous Forest","All trails"],["Taiga","Lichen Woodland"],["Taiga","Creek"],["Taiga","Larch Forest"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Boar Carcass","c":"Small Prey","u":8,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Rocky Waterfall"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Muskox Calf Carcass","c":"Small Prey","u":8,"w":[["Tundra","All trails"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Peccary Carcass","c":"Small Prey","u":8,"w":[["Desert","All trails"],["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"]]},{"n":"Turkey Hen Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Swamp","Temperate Swamp"]]},{"n":"Turkey Tom Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Swamp","Temperate Swamp"]]},{"n":"Small Doe Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Hills"],["Deciduous Forest","Ancient Woodland"],["Mountains","Forest"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Prairie","Great Plains Prairie (Pothole Wetlands"],["Prairie","Shrub Steppe"],["Coniferous Forest","All trails"],["Desert","Shrubland"],["Desert","Canyons"],["Desert","Desert"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Temperate Swamp"],["Rainforest","Tropical Coast"]]},{"n":"Swine Carcass","c":"Small Prey","u":9,"w":[["Grasslands","Oak Savanna"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Desert","Mesa"],["Desert","Canyons"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"]]},{"n":"Seal Pup Carcass","c":"Small Prey","u":9,"w":[["Tundra","Highlands"],["Tundra","Heathlands"],["Tundra","Coast"],["Glacier","Coast"],["Glacier","Sea Ice"]]},{"n":"Pronghorn Buck Carcass","c":"Medium Prey","u":10,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Desert","Shrubland"],["Desert","Mesa"]]},{"n":"Pronghorn Doe Carcass","c":"Medium Prey","u":10,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Desert","Shrubland"],["Desert","Mesa"]]},{"n":"Whitetail Carcass","c":"Medium Prey","u":10,"w":[["Grasslands","Fields"],["Grasslands","Oak Savanna"],["Deciduous Forest","All trails"],["Mountains","Mountains"],["Mountains","Forest"],["Mountains","Lakes"],["Riparian Woodland","All trails"],["Prairie","Pine Barrens"],["Prairie","Pothole Wetlands"],["Coniferous Forest","Northwoods"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Desert","Shrubland"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Creek"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"],["Rainforest","Highlands"]]},{"n":"Bighorn Sheep Ewe Carcass","c":"Medium Prey","u":12,"w":[["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Desert","Mesa"],["Desert","Canyons"],["Desert","Desert"],["Taiga","Mossy Cliffs"],["Taiga","Creek"],["Taiga","Larch Forest"]]},{"n":"Bighorn Sheep Ram Carcass","c":"Medium Prey","u":12,"w":[["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Desert","Mesa"],["Desert","Canyons"],["Desert","Desert"],["Taiga","Mossy Cliffs"],["Taiga","Creek"],["Taiga","Larch Forest"]]},{"n":"Blacktail Carcass","c":"Medium Prey","u":12,"w":[["Grasslands","Fields"],["Grasslands","Oak Savanna"],["Deciduous Forest","All trails"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Bosque"],["Riparian Woodland","Giant River"],["Coniferous Forest","All trails"]]},{"n":"Doe Carcass","c":"Medium Prey","u":12,"w":[["Grasslands","Fields"],["Grasslands","Hills"],["Deciduous Forest","All trails"],["Mountains","Lakes"],["Riparian Woodland","All trails"],["Prairie","Pothole Wetlands"],["Prairie","Shrub Steppe"],["Coniferous Forest","All trails"],["Desert","Canyons"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"]]},{"n":"Mule Deer Carcass","c":"Medium Prey","u":12,"w":[["Mountains","Forest"],["Mountains","High Plains"],["Desert","Shrubland"],["Desert","Canyons"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"]]},{"n":"Caribou Calf Carcass","c":"Medium Prey","u":12,"w":[["Tundra","Timberline"],["Tundra","Highlands"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Seal Carcass","c":"Medium Prey","u":15,"w":[["Tundra","Coast"],["Glacier","Coast"],["Glacier","Sea Ice"]]},{"n":"Donkey Carcass","c":"Medium Prey","u":16,"w":[["Desert","Shrubland"],["Desert","Canyons"],["Desert","Desert"]]},{"n":"Mountain Goat Carcass","c":"Medium Prey","u":16,"w":[["Mountains","Mountains"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"]]},{"n":"Tapir Carcass","c":"Medium Prey","u":16,"w":[["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Walrus Pup Carcass","c":"Medium Prey","u":16,"w":[["Glacier","Coast"],["Glacier","Sea Ice"]]},{"n":"Dall Sheep Carcass","c":"Large Prey","u":17,"w":[["Tundra","Highlands"]]},{"n":"Elk Cow Carcass","c":"Large Prey","u":17,"w":[["Deciduous Forest","All trails"],["Mountains","All trails"],["Riparian Woodland","All trails"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Coniferous Forest","All trails"],["Desert","Shrubland"],["Desert","Mesa"],["Taiga","Creek"],["Taiga","Larch Forest"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Horse Carcass","c":"Large Prey","u":18,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Prairie","Shrub Steppe"]]},{"n":"Alligator Carcass","c":"Large Prey","u":20,"w":[["Riparian Woodland","Great Lakes"],["Riparian Woodland","Bosque"],["Riparian Woodland","Giant River"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"]]},{"n":"Caribou Bull Carcass","c":"Large Prey","u":20,"w":[["Taiga","Lichen Woodland"],["Taiga","Large Forest"],["Tundra","Highlands"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Caribou Cow Carcass","c":"Large Prey","u":20,"w":[["Taiga","Lichen Woodland"],["Taiga","Large Forest"],["Tundra","Highlands"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Bovine Carcass","c":"Large Prey","u":20,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Riparian Woodland","All trails"],["Desert","All trails"],["Rainforest","Broadleaf Forest"],["Rainforest","Highlands"]]},{"n":"Elk Bull Carcass","c":"Large Prey","u":20,"w":[["Deciduous Forest","All trails"],["Mountains","All trails"],["Riparian Woodland","All trails"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Coniferous Forest","All trails"],["Desert","Shrubland"],["Desert","Mesa"],["Taiga","Creek"],["Taiga","Larch Forest"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Crocodile Carcass","c":"Large Prey","u":20,"w":[["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"]]},{"n":"Moose Bull Carcass","c":"Large Prey","u":24,"w":[["Coniferous Forest","Northwoods"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"],["Tundra","All trails"]]},{"n":"Moose Cow Carcass","c":"Large Prey","u":24,"w":[["Coniferous Forest","Northwoods"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"],["Tundra","All trails"]]},{"n":"Muskox Carcass","c":"Large Prey","u":24,"w":[["Tundra","Heathlands"],["Tundra","Coast"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Bison Carcass","c":"Large Prey","u":28,"w":[["Prairie","Pine Barrens, Great Plains"],["Coniferous Forest","Aspen Parkland"]]},{"n":"Walrus Carcass","c":"Large Prey","u":30,"w":[["Glacier","Coast"],["Glacier","Sea Ice"]]}],"preyUnknownBiomes":[],"enemies":[{"n":"African Rock Python","e":0,"lv":[14,19],"st":["Strength","Wisdom","Smarts"],"mo":["Fearless","Slow","Thick skin"],"b":["Swamp"],"d":["Python Eggs","Python Skin","Python Skull","Snake Meat","Scar: Throat"]},{"n":"Agitated Bull","e":0,"lv":[1,20],"st":["Strength","Speed","Wisdom"],"mo":["Fearless","Large prey","Prey"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Bovine Carcass","Large Hoof","Odd Teeth","Scar: Abdomen"]},{"n":"Alaskan Brown Bear","e":0,"lv":[12,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Tundra"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Face"]},{"n":"Alaskan Malamute","e":0,"lv":[7,16],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Tundra","Glacier"],"d":["Canine Claw","Canine Fang","Dog Pelt","Dog Skull","Scar: Ear Notch [Left]","Scar: Ear Notch [Right]"]},{"n":"Alaskan Tundra Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Alaskan Tundra Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom","Smarts"],"mo":["Group"],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Alligator","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Riparian Woodland","Swamp","Rainforest"],"d":["Alligator Carcass","Alligator Leg","Alligator Skin","Alligator Skull","Alligator Tail","Scar: Wrist [Left]","Scar: Wrist [Right]"]},{"n":"American Badger","e":0,"lv":[5,15],"st":["Strength","Agility","Wisdom"],"mo":["Fearless"],"b":["Grasslands","Deciduous Forest","Mountains","Prairie","Coniferous Forest","Desert","Taiga"],"d":["Badger Pelt","Badger Skull","Mustelid Claws","Mustelid Fangs","Scar: Bite"]},{"n":"Anaconda","e":0,"lv":[15,20],"st":["Agility","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Anaconda Eggs","Anaconda Skin","Anaconda Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Angry Farmer","e":0,"lv":[10,15],"st":["Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands"],"d":["Chicken Roast","Odd Teeth","Old Horseshoe","Shoe"]},{"n":"Arctic Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Tundra","Glacier"],"d":["Canine Claw","Canine Fang","Fox Pelt [Arctic]","Fox Skull","Fox Tail [Arctic]","Scar: Foot"]},{"n":"Arctic Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Arctic Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom","Smarts"],"mo":["Group"],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Bald Eagle","e":0,"lv":[5,14],"st":["Wisdom","Smarts"],"mo":["Fearless","Soft skin"],"b":["Mountains","Riparian Woodland","Coniferous Forest","Taiga","Swamp","Tundra"],"d":["Eagle Beak","Eagle Skull","Eagle Talon","Large Bird Meat","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Barren Ground Caribou","e":0,"lv":[3,15],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Barren Ground Caribou Herd","e":0,"lv":[6,15],"st":["Speed","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Bighorn Sheep Ram","e":0,"lv":[3,12],"st":["Agility","Wisdom"],"mo":["Large prey","Prey","Thick skin"],"b":["Mountains","Taiga"],"d":["Bighorn Horns","Bighorn Skull","Cracked Bighorn Horn","Gnawing Hoof","Scar: Cheek"]},{"n":"Black Bear","e":0,"lv":[10,18],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Deciduous Forest","Mountains","Riparian Woodland","Coniferous Forest","Taiga","Tundra"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Scratched Face"]},{"n":"Black Vulture Group","e":0,"lv":[5,15],"st":["Agility","Wisdom","Smarts"],"mo":["Group","Soft skin"],"b":["Desert","Swamp","Rainforest"],"d":["Large Bird Meat","Vulture Eggs","Vulture Skull","Vulture Talon","Scar: Dorsal Scratch"]},{"n":"Blacktail Buck","e":0,"lv":[1,11],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Coniferous Forest"],"d":["Blacktail Antlers","Broken Antler","Deer Ear","Gnawing Hoof","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Bobcat","e":0,"lv":[2,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Swamp"],"d":["Big Cat Claw","Bobcat Pelt","Bobcat Skull","Bobcat Tail","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"British Columbia Wolf","e":0,"lv":[1,20],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Black]","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"British Columbia Wolf Pack","e":0,"lv":[1,20],"st":["Strength","Agility","Wisdom","Smarts"],"mo":["Group"],"b":["Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Black]","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"Burro","e":0,"lv":[1,15],"st":["Strength","Wisdom","Smarts"],"mo":["Large prey","Prey"],"b":["Desert"],"d":["Donkey Carcass","Donkey Skull","Large Hoof","Odd Teeth"]},{"n":"Bush Dog","e":0,"lv":[1,12],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Rainforest"],"d":["Bush Dog Pelt","Bush Dog Skull","Canine Claw","Canine Fang","Scar: Foot"]},{"n":"California Condor","e":0,"lv":[14,19],"st":["Strength","Speed","Wisdom"],"mo":["Soft skin"],"b":["Desert","Rainforest"],"d":["Condor Egg","Condor Feather","Condor Skull","Large Bird Meat","Scar: Ear Notch [Left]","Scar: Ear Notch [Right]"]},{"n":"Canadian Lynx","e":0,"lv":[1,12],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Mountains","Taiga","Tundra"],"d":["Big Cat Claw","Lynx Pelt","Lynx Skull","Lynx Tail","Scar: Nose Bridge","Scar: Nose Bridge [Low]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"Cinnamon Bear","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Deciduous Forest","Coniferous Forest","Taiga"],"d":["Bear Fangs","Bear Paw [Cinnamon]","Bear Pelt [Cinnamon]","Bear Skull","Scar: Scratched Back"]},{"n":"Coastal Jaguar","e":0,"lv":[16,20],"st":["Agility","Wisdom"],"mo":[],"b":["Desert"],"d":["Big Cat Claw","Jaguar Pelt","Jaguar Skull","Jaguar Tail","Scar: Dorsal Scratch","Scar: Scratched Back"]},{"n":"Cougar","e":0,"lv":[9,17],"st":["Speed","Agility","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Rainforest"],"d":["Big Cat Claw","Cougar Pelt","Cougar Skull","Cougar Tail","Scar: Eye - Large [Left]","Scar: Eye - Large [Right]","Scar: Scratched Front Leg [Left]","Scar: Scratched Front Leg [Right]","Scar: Scratched Side","Scar: Scratched Upper Leg [Left]","Scar: Scratched Upper Leg [Right]"]},{"n":"Cowboy","e":0,"lv":[10,15],"st":["Strength","Speed","Wisdom"],"mo":["Soft skin"],"b":["Prairie"],"d":["Odd Teeth","Old Horseshoe","Sausage","Shoe","Scar: Triceps Scratch [Left]","Scar: Triceps Scratch [Right]"]},{"n":"Coyote","e":0,"lv":[1,11],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail","Scar: Foot"]},{"n":"Coyote Pack","e":0,"lv":[1,13],"st":["Smarts","Wisdom"],"mo":["Group","Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail"]},{"n":"Death Rattler","e":0,"lv":[12,19],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Swamp"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Desert Bighorn Ram","e":0,"lv":[4,12],"st":["Agility","Wisdom"],"mo":["Large prey","Prey"],"b":["Desert"],"d":["Bighorn Horns","Bighorn Skull","Cracked Bighorn Horns","Gnawing Hoof"]},{"n":"Desert Mule Deer Buck","e":0,"lv":[2,13],"st":["Wisdom"],"mo":["Large prey","Prey"],"b":["Desert"],"d":["Deer Ear","Gnawing Hoof","Mule Deer Carcass","Venison Liver","Scar: Eye - Large [Left]","Scar: Eye - Large [Right]"]},{"n":"Eastern Copperhead","e":0,"lv":[15,20],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Grasslands"],"d":["Light Viper Skin","Snake Meat","Venom Gland","Viper Skull","Scar: Foot"]},{"n":"Eastern Diamondback","e":0,"lv":[8,16],"st":["Speed","Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Swamp"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Venom Gland"]},{"n":"Eastern Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Brown]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Eastern Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Brown]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Elephant Seal","e":0,"lv":[7,16],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Tundra"],"d":["Blubber","Rugged Flipper","Seal Skull","Seal Teeth","Scar: Muzzle","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Elk Bull","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Deciduous Forest","Mountains","Riparian Woodland","Coniferous Forest","Taiga","Swamp"],"d":["Broken Antler","Elk Antlers","Elk Ear","Gnawing Hoof","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Enraged Canada Goose","e":0,"lv":[10,16],"st":["Smarts","Wisdom"],"mo":["Fearless","Soft skin"],"b":["Grasslands"],"d":["Goose Beak","Goose Leg","Goose Skull","Large Bird Meat","Scar: Front Paw [Left]","Scar: Front Paw [Right]"]},{"n":"Feral Dog Pack","e":0,"lv":[7,18],"st":["Speed","Agility","Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest","Prairie","Riparian Woodland","Swamp"],"d":["Canine Claw","Canine Fang","Dog Pelt","Dog Skull","Scar: Lip","Scar: Nose"]},{"n":"Florida Black Bear","e":0,"lv":[11,18],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Swamp"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Scratched Face"]},{"n":"Frenzied Razorback","e":0,"lv":[4,15],"st":["Strength","Wisdom"],"mo":["Fearless","Prey","Small prey"],"b":["Grasslands","Riparian Woodland","Desert","Swamp","Rainforest"],"d":["Boar Pelt","Boar Skull","Boar Tusks","Gnawing Hoof","Scar: Nose Bridge","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]"]},{"n":"Ghillie Hunter","e":0,"lv":[10,15],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Deciduous Forest","Coniferous Forest","Taiga"],"d":["Nesting Material","Odd Teeth","Sausage","Shoe","Scar: Hock [Left]","Scar: Hock [Right]"]},{"n":"Glacier Bear","e":0,"lv":[10,18],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Face"]},{"n":"Golden Eagle","e":0,"lv":[4,14],"st":["Smarts","Wisdom"],"mo":["Fearless","Soft skin"],"b":["Coniferous Forest","Desert","Taiga"],"d":["Eagle Beak","Eagle Skull","Eagle Talon","Large Bird Meat","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Gray Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Prairie","Desert","Swamp","Rainforest"],"d":["Canine Claw","Canine Fang","Fox Pelt [Gray]","Fox Skull","Fox Tail [Gray]","Scar: Foot"]},{"n":"Greater Grison","e":0,"lv":[5,14],"st":["Strength","Agility","Wisdom"],"mo":[],"b":["Rainforest"],"d":["Grison Pelt","Grison Skull","Mustelid Claws","Mustelid Fangs","Scar: Scratched Hind Leg [Left]","Scar: Scratched Hind Leg [Right]"]},{"n":"Greenland Wolf","e":0,"lv":[1,20],"st":["Agility","Wisdom"],"mo":[],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Light]","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Greenland Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Light]","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Grizzly Bear","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Mountains","Riparian Woodland","Coniferous Forest","Taiga","Tundra"],"d":["Bear Fangs","Bear Paw [Grizzly]","Bear Pelt [Grizzly]","Bear Skull","Scar: Face"]},{"n":"Guarding Sled Dogs","e":0,"lv":[1,14],"st":["Speed","Wisdom","Smarts"],"mo":["Group"],"b":["Tundra","Glacier"],"d":["Canine Claw","Canine Fang","Dog Pelt","Dog Skull","Scar: Lip"]},{"n":"Hooded Seal","e":0,"lv":[4,15],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Crab Leg","Rattling Spine","Rugged Flipper","Seal Carcass","Seal Skull","Seal Teeth","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Horned Rattlesnake","e":0,"lv":[12,19],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Hunter","e":0,"lv":[10,15],"st":["Strength","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Mountains","Desert","Tundra","Glacier"],"d":["Carrot","Chicken Roast","Odd Teeth","Shoe","Scar: Cheekbone [Left]","Scar: Cheekbone [Right]","Scar: Scratched Hind Leg [Left]","Scar: Scratched Hind Leg [Right]"]},{"n":"Jaguar","e":0,"lv":[12,19],"st":["Agility","Wisdom"],"mo":[],"b":["Desert","Rainforest"],"d":["Big Cat Claw","Jaguar Pelt","Jaguar Skull","Jaguar Tail","Scar: Eye - Large [Left]","Scar: Eye - Large [Right]","Scar: Scratched Front Leg [Left]","Scar: Scratched Front Leg [Right]","Scar: Scratched Side","Scar: Scratched Upper Leg [Left]","Scar: Scratched Upper Leg [Right]"]},{"n":"Jaguarundi","e":0,"lv":[10,18],"st":["Speed","Agility","Wisdom"],"mo":["Soft skin"],"b":["Rainforest"],"d":["Big Cat Claw","Jaguarundi Pelt","Jaguarundi Skull","Jaguarundi Tail","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]","Scar: Nose Bridge","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"Kermode Bear","e":0,"lv":[11,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Coniferous Forest","Taiga"],"d":["Bear Fangs","Bear Paw [Kermode]","Bear Pelt [Kermode]","Bear Skull","Scar: Face"]},{"n":"Killer Whale","e":0,"lv":[15,20],"st":["Strength","Smarts","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Rattling Spine","Whale Meat","Whale Rib Bone","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Kodiak Brown Bear","e":0,"lv":[14,20],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Tundra"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Scratched Shoulder [Left]","Scar: Scratched Shoulder [Right]"]},{"n":"Leucistic Wolf","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":[],"b":["Desert","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Leucistic Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Desert","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Lone Vicious Black Wolf","e":0,"lv":[1,20],"st":["Strength","Speed","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Black]","Wolf Skull","Wolf Tail"]},{"n":"Lone Vicious Gray Wolf","e":0,"lv":[1,20],"st":["Strength","Speed","Agility","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Light]","Wolf Skull","Wolf Tail"]},{"n":"Louisiana Black Bear","e":0,"lv":[9,17],"st":["Strength","Wisdom"],"mo":["Slow","Thick skin"],"b":["Swamp"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Stop"]},{"n":"Manitoban Elk Bull","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Prairie"],"d":["Broken Antler","Elk Antlers","Elk Ear","Gnawing Hoof","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Mearns Coyote","e":0,"lv":[1,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Desert"],"d":["Canine Fang"]},{"n":"Mearns Coyote Pack","e":0,"lv":[3,13],"st":["Agility","Smarts","Wisdom"],"mo":["Group","Soft skin"],"b":["Desert"],"d":["Canine Claw","Canine Fang"]},{"n":"Melanistic Jaguar","e":0,"lv":[7,19],"st":["Agility","Wisdom"],"mo":[],"b":["Rainforest"],"d":["Big Cat Claw","Jaguar Pelt [Melanistic]","Jaguar Skull","Jaguar Tail [Melanistic]","Scar: Thigh Swipe [Left]","Scar: Thigh Swipe [Right]"]},{"n":"Mexican Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Desert"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Mexican Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Desert"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Mojave Rattlesnake","e":0,"lv":[15,20],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Moose Bull","e":0,"lv":[7,17],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Mountains","Coniferous Forest","Taiga","Tundra"],"d":["Broken Moose Antler","Gnawing Hoof","Moose Antler","Moose Ear","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Moose Cow","e":0,"lv":[5,13],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Deciduous Forest"],"d":["Gnawing Hoof","Moose Cow Carcass","Thick Fur Tuft","Scar: Cheek"]},{"n":"Morelets Crocodile","e":0,"lv":[13,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Crocodile Leg","Crocodile Skin","Crocodile Skull","Crocodile Tail","Scar: Shoulder [Left]","Scar: Shoulder [Right]"]},{"n":"Mountain Goat","e":0,"lv":[8,16],"st":["Agility","Smarts","Wisdom"],"mo":["Small prey","Prey"],"b":["Mountains"],"d":["Mountain Goat Carcass","Odd Teeth","Thick Fur Tuft","Scar: Cheekbone [Left]","Scar: Cheekbone [Right]"]},{"n":"Muskox","e":0,"lv":[6,16],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Gnawing Hoof","Muskox Horns","Muskox Skull","Thick Fur Tuft","Scar: Cheek","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Muskox Herd","e":0,"lv":[9,18],"st":["Strength","Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Gnawing Hoof","Muskox Horns","Muskox Skull","Thick Fur Tuft","Scar: Forehead"]},{"n":"Mustang Herd","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Grasslands","Prairie"],"d":["Horse Carcass","Horse Skull","Large Hoof","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Mustang Stallion","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Grasslands","Prairie"],"d":["Horse Skull","Horse Tail","Large Hoof","Odd Teeth","Scar: Nose"]},{"n":"Narwhal","e":0,"lv":[15,20],"st":["Strength","Smarts","Wisdom"],"mo":["Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Narwhal Tooth","Rattling Spine","Whale Meat","Whale Rib Bone","Scar: Abdomen"]},{"n":"Northeastern Coyote","e":0,"lv":[2,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Taiga"],"d":["Canine Claw","Canine Fang","Coyote Pelt"]},{"n":"Northeastern Coyote Pack","e":0,"lv":[1,13],"st":["Speed","Agility","Wisdom"],"mo":["Group","Soft skin"],"b":["Taiga"],"d":["Canine Fang","Coyote Pelt"]},{"n":"Ocelot","e":0,"lv":[7,16],"st":["Speed","Agility","Wisdom"],"mo":["Soft skin"],"b":["Desert","Rainforest"],"d":["Big Cat Claw","Ocelot Pelt","Ocelot Skull","Ocelot Tail","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"Peary Caribou","e":0,"lv":[3,10],"st":["Agility","Smarts","Wisdom"],"mo":["Large prey","Prey"],"b":["Glacier"],"d":["Caribou Antlers","Caribou Bull Carcass","Caribou Cow Carcass","Gnawing Hoof","Thick Fur Tuft","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]"]},{"n":"Peary Caribou Herd","e":0,"lv":[4,12],"st":["Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Glacier"],"d":["Caribou Antlers","Caribou Bull Carcass","Caribou Cow Carcass","Gnawing Hoof","Thick Fur Tuft"]},{"n":"Piebald Wolf","e":0,"lv":[1,20],"st":["Strength","Wisdom"],"mo":[],"b":["Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Piebald]","Wolf Skull","Wolf Tail"]},{"n":"Piebald Wolf Pack","e":0,"lv":[1,20],"st":["Strength","Smarts","Agility","Wisdom"],"mo":["Group"],"b":["Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Piebald]","Wolf Skull","Wolf Tail"]},{"n":"Plains Bison","e":0,"lv":[10,18],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Prairie"],"d":["Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Plains Bison Herd","e":0,"lv":[15,20],"st":["Strength","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Prairie"],"d":["Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Plains Coyote","e":0,"lv":[1,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Prairie"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail","Scar: Ripped Mouth"]},{"n":"Plains Coyote Pack","e":0,"lv":[1,13],"st":["Smarts","Wisdom"],"mo":["Group","Soft skin"],"b":["Prairie"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail"]},{"n":"Poacher","e":0,"lv":[10,15],"st":["Speed","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Rainforest"],"d":["Chicken Roast","Hiker's Rope","Shoe","Scar: Eye - Long: Left","Scar: Eye - Long: Right"]},{"n":"Polar Bear","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Bear Fangs","Bear Paw [Polar]","Bear Pelt [Polar]","Polar Bear Skull","Scar: Face"]},{"n":"Porcupine Caribou","e":0,"lv":[2,12],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Tundra"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Porcupine Caribou Herd","e":0,"lv":[4,14],"st":["Speed","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Tundra"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Prairie Rattlesnake","e":0,"lv":[16,20],"st":["Speed","Agility","Wisdom"],"mo":["Soft skin"],"b":["Prairie"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Venom Gland","Scar: Wrist [Left]","Scar: Wrist [Right]"]},{"n":"Pronghorn Herd","e":0,"lv":[3,12],"st":["Speed","Wisdom"],"mo":["Group","Prey","Small prey"],"b":["Grasslands","Mountains","Prairie"],"d":["Gnawing Hoof","Pronghorn Horns","Pronghorn Pelt","Pronghorn Skull","Scar: Forehead"]},{"n":"Red Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Taiga","Swamp","Tundra","Rainforest"],"d":["Canine Claw","Canine Fang","Fox Pelt [Red]","Fox Skull","Fox Tail [Red]","Scar: Foot"]},{"n":"Red Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Swamp","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Red Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Swamp","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Rock Rattlesnake","e":0,"lv":[8,16],"st":["Speed","Smarts","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Hock [Left]","Scar: Hock [Right]"]},{"n":"Rocky Mountain Elk Bull","e":0,"lv":[4,13],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Mountains"],"d":["Elk Antlers","Elk Bull Carcass","Elk Ear","Gnawing Hoof"]},{"n":"Rocky Mountain Mule Deer Buck","e":0,"lv":[2,12],"st":["Speed","Agility","Wisdom"],"mo":["Large prey","Prey"],"b":["Mountains"],"d":["Mule Deer Carcass","Venison Liver"]},{"n":"Rocky Mountains Wolf","e":0,"lv":[1,20],"st":["Wisdom"],"mo":[],"b":["Mountains"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Tawny]","Wolf Tail"]},{"n":"Rocky Mountains Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Mountains"],"d":["Canine Fang","Wolf Pelt [Light]","Wolf Pelt [Tawny]","Wolf Skull"]},{"n":"Shiras Moose Bull","e":0,"lv":[6,17],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Riparian Woodland"],"d":["Broken Moose Antler","Gnawing Hoof","Moose Antler","Moose Bull Carcass","Moose Ear"]},{"n":"Sitka Brown Bear","e":0,"lv":[16,19],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Tundra"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Triceps Scratch [Left]","Scar: Triceps Scratch [Right]"]},{"n":"Snowy Owl","e":0,"lv":[1,11],"st":["Smarts","Wisdom"],"mo":["Soft skin"],"b":["Tundra","Glacier"],"d":["Large Bird Meat","Owl Skull","Owl Talon","Snowy Owl Feathers","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Spectacled Bear","e":0,"lv":[6,16],"st":["Strength","Smarts","Wisdom"],"mo":["Slow","Thick skin"],"b":["Rainforest"],"d":["Bear Fangs","Bear Paw [Spectacled]","Bear Pelt [Spectacled]","Bear Skull","Scar: Scratched Shoulder [Left]","Scar: Scratched Shoulder [Right]"]},{"n":"Spectacled Caiman","e":0,"lv":[8,17],"st":["Strength","Agility","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Delicate Meat","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]"]},{"n":"Starving Wolf","e":0,"lv":[1,20],"st":["Strength","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest"],"d":["Canine Fang","Wolf Pelt [Brown]","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"Starving Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest"],"d":["Canine Claw","Wolf Skull","Wolf Tail"]},{"n":"Steller Sea Lion","e":0,"lv":[3,13],"st":["Strength","Smarts","Wisdom"],"mo":["Slow","Thick skin"],"b":["Tundra"],"d":["Rattling Spine","Seal Skull"]},{"n":"Stickeen Brown Bear","e":0,"lv":[9,16],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Coniferous Forest"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Forehead"]},{"n":"Survivalist","e":0,"lv":[10,15],"st":["Agility","Wisdom"],"mo":["Soft skin"],"b":["Riparian Woodland"],"d":["Hiker's Rope","Odd Teeth","Venison Liver","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Swamp Wolf","e":0,"lv":[1,20],"st":["Speed","Wisdom"],"mo":[],"b":["Swamp"],"d":["Canine Fang","Wolf Pelt [Dark]","Wolf Pelt [Red]","Wolf Skull","Wolf Tail"]},{"n":"Swamp Wolf Pack","e":0,"lv":[1,20],"st":["Agility","Wisdom"],"mo":["Group"],"b":["Swamp"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Dark]","Wolf Pelt [Red]","Wolf Skull"]},{"n":"Swift Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Prairie"],"d":["Canine Claw","Canine Fang","Fox Pelt [Swift]","Fox Skull","Fox Tail [Swift]","Scar: Foot"]},{"n":"Tayra","e":0,"lv":[7,16],"st":["Agility","Wisdom","Smarts"],"mo":[],"b":["Rainforest"],"d":["Mustelid Claws","Mustelid Fangs","Tayra Pelt","Tayra Skull","Scar: Bite","Scar: Lip"]},{"n":"Timber Rattlesnake","e":0,"lv":[10,16],"st":["Speed","Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Mountains","Riparian Woodland"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Venom Gland","Scar: Bite"]},{"n":"Timber Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Deciduous Forest","Mountains","Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Timber Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Deciduous Forest","Mountains","Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Trapper","e":0,"lv":[10,15],"st":["Smarts","Wisdom"],"mo":["Soft skin"],"b":["Swamp"],"d":["Carrot","Chicken Roast","Odd Teeth","Shoe"]},{"n":"Tule Elk","e":0,"lv":[8,15],"st":["Strength","Agility","Wisdom"],"mo":["Large prey","Prey"],"b":["Prairie"],"d":["Broken Antler","Elk Bull Carcass","Gnawing Hoof"]},{"n":"Turkey Vulture","e":0,"lv":[3,13],"st":["Smarts","Wisdom"],"mo":["Soft skin"],"b":["Grasslands","Riparian Woodland","Desert","Swamp","Rainforest"],"d":["Large Bird Meat","Vulture Eggs","Vulture Skull","Vulture Talon","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Walrus","e":0,"lv":[12,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Rugged Flipper","Walrus Skull","Walrus Tusk","Scar: Muzzle","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Walrus Group","e":0,"lv":[13,19],"st":["Strength","Wisdom"],"mo":["Fearless","Group","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Rugged Flipper","Walrus Skull","Walrus Tusk","Scar: Muzzle","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Wandering Tala","e":0,"lv":[15,20],"st":["Strength","Wisdom","Smarts"],"mo":["Fearless"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Medicine: Cure-For-All","Medicine: Rich Healing Salve"]},{"n":"Wandering Wolf Pack","e":0,"lv":[4,16],"st":["Speed","Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Brown]","Wolf Pelt [Dark]","Wolf Pelt [Light]","Wolf Pelt [Tawny]","Wolf Skull","Wolf Tail"]},{"n":"Water Moccasin","e":0,"lv":[15,19],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Swamp"],"d":["Cottonmouth Skull","Dark Viper Skin","Snake Meat","Venom Gland","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Western Rattlesnake","e":0,"lv":[10,16],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Whitetail Buck","e":0,"lv":[1,10],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Rainforest"],"d":["Broken Antler","Deer Ear","Gnawing Hoof","Whitetail Antlers","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Wild Boar","e":0,"lv":[4,15],"st":["Strength","Wisdom"],"mo":["Fearless","Prey","Small prey"],"b":["Deciduous Forest","Riparian Woodland","Swamp"],"d":["Boar Pelt","Boar Skull","Boar Tusks","Gnawing Hoof","Scar: Nose Bridge","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]"]},{"n":"Wolverine","e":0,"lv":[8,17],"st":["Strength","Wisdom","Smarts"],"mo":[],"b":["Coniferous Forest","Taiga","Tundra","Glacier"],"d":["Mustelid Claws","Mustelid Fangs","Wolverine Pelt","Wolverine Skull","Scar: Ripped Mouth"]},{"n":"Wood Bison","e":0,"lv":[10,16],"st":["Strength","Smarts","Wisdom"],"mo":["Large prey","Prey"],"b":["Coniferous Forest","Taiga"],"d":["Bison Carcass","Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Snout"]},{"n":"Wood Bison Herd","e":0,"lv":[12,18],"st":["Strength","Smarts","Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Coniferous Forest","Taiga"],"d":["Bison Carcass","Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Snout"]},{"n":"Woodland Caribou","e":0,"lv":[2,12],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Taiga"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Woodland Caribou Herd","e":0,"lv":[4,14],"st":["Speed","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Taiga"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Yukon Wolf","e":0,"lv":[1,20],"st":["Wisdom"],"mo":[],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"Yukon Wolf Pack","e":0,"lv":[1,20],"st":["Strength","Speed","Wisdom"],"mo":["Group"],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Dark]","Wolf Pelt [Tawny]","Wolf Skull","Wolf Tail"]},{"n":"American Crocodile","e":1,"lv":[24,25],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Crocodile Carcass","Crocodile Leg","Crocodile Skin","Crocodile Skull","Crocodile Tail","Scar: Throat"]},{"n":"Nanulak","e":1,"lv":[24,25],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Bear Fangs","Bear Paw [Polar]","Bear Pelt [Polar]","Nanulak Skull","Thick Fur Tuft","Scar: Thigh Swipe [Left]","Scar: Thigh Swipe [Right]"]}],"enemyUnknownBiomes":[],"disp":["Aggressive","Friendly","Romantic","Stoic"],"moves":[{"n":"Bare Teeth","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Bark","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Bristle Fur","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Groom","v":["Very Negative","Very Positive","Positive","Negative"]},{"n":"Growl","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Huff","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Lick Mouth","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Nuzzle","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Play Bow","v":["Very Negative","Very Positive","Positive","Negative"]},{"n":"Raise Tail","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Relax Tail","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Sing","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Sniff","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Sniff Glands","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Snarl","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Stare Down","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Touch Nose","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Wag Tail","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Whine","v":["Very Negative","Very Positive","Positive","Negative"]},{"n":"Zoomies","v":["Very Negative","Very Positive","Positive","Negative"]}],"roles":[{"n":"Hunter: Stalker","uses":["Smarts","Wisdom"],"how":"Proficiency rises by 1 for every hunt in this position and decays by 1 each rollover, so it only climbs on more than one hunt a day."},{"n":"Hunter: Chaser","uses":["Agility","Speed"],"how":"A wolf only gains proficiency for the first position it is assigned, checked stalker, then chaser, then finisher."},{"n":"Hunter: Finisher","uses":["Strength"],"how":"Stats matter more than proficiency or synergy, so levelling changes hunting success faster than anything else."},{"n":"Forager","uses":["Speed"],"how":"Brings back one or two herbs, plus one more at every 25 proficiency up to 75, so five at most. Winter takes one off. Speed divided by ten is minutes off the trip, up to ten."},{"n":"Scout","uses":["the biome's own stat"],"how":"How much of the bar one scout fills comes from the biome's difficulty, the scout's stats in that biome's stat, and their scouting proficiency."}]};
+  const GUIDES = {"exported":"2026-10-18","wiki":"https://grousehouse.wiki/","biomes":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"starters":["Deciduous Forest","Grasslands","Mountains"],"herbs":{"Aloe":{"m":[["Ringworm Salve",1],["Cure-for-All",1],["Rich Healing Salve",3]],"b":["Desert","Swamp","Rainforest"],"all":0},"Arnica":{"m":[["Mange Salve",1],["Cure-for-All",1]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1},"Bearberry":{"m":[["Constipation Cure",1],["Tapeworm Remedy",1]],"b":["Deciduous Forest","Mountains","Coniferous Forest","Taiga","Tundra"],"all":0},"Boneset":{"m":[["Hepatitis Cure",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Coniferous Forest","Prairie","Riparian Woodland","Taiga","Swamp"],"all":0},"Buffaloberry":{"m":[["Constipation Cure",1],["Rich Healing Salve",3]],"b":["Mountains","Coniferous Forest","Prairie","Riparian Woodland","Taiga"],"all":0},"Burning Bush":{"m":[["Constipation Cure",1],["Rich Healing Salve",3]],"b":["Deciduous Forest","Grasslands","Coniferous Forest","Prairie","Riparian Woodland"],"all":0},"Carrionflower":{"m":[["Ear Mites Ointment",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Riparian Woodland","Taiga"],"all":0},"Cedar Bark":{"m":[["Tick Remedy",1],["Cure-for-All",1]],"b":["Coniferous Forest","Mountains","Grasslands","Deciduous Forest","Riparian Woodland","Prairie","Desert","Swamp","Rainforest"],"all":0},"Chaparral":{"m":[["Antidote",3],["Rich Healing Salve",3]],"b":["Desert"],"all":0},"Charcoal":{"m":[["Diarrhea Cure",3],["Healing Salves",1],["Rich Healing Salve",3]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1},"Dandelion":{"m":[["Cystitis Cure",1],["Healing Salves",1],["Hepatitis Cure",1]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1},"Feverfew":{"m":[["Heatstroke Remedy",1],["Infection Balm",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Rainforest"],"all":0},"Garlic":{"m":[["Tapeworm Remedy",1],["Tick Remedy",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Swamp"],"all":0},"Ginger":{"m":[["Heatstroke Remedy",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Taiga"],"all":0},"Goldenseal":{"m":[["Cough Cure",1],["Distemper Cure",1]],"b":["Deciduous Forest","Grasslands","Coniferous Forest","Riparian Woodland"],"all":0},"Guaiacum":{"m":[["Distemper Cure",1],["Influenza Cure",2]],"b":["Swamp","Rainforest"],"all":0},"Kava":{"m":[["Cough Cure",1],["Cystitis Cure",1]],"b":["Rainforest"],"all":0},"Mullein":{"m":[["Distemper Cure",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Desert"],"all":0},"Oregano":{"m":[["Infection Balm",1],["Pox Balm",1],["Ringworm Salve",1]],"b":["Mountains","Prairie","Desert","Swamp","Rainforest"],"all":0},"Pineapple Leaf":{"m":[["Cough Cure",1],["Influenza Cure",2]],"b":["Rainforest"],"all":0},"Redwood Sorrel":{"m":[["Cystitis Cure",1],["Pox Balm",1]],"b":["Mountains","Coniferous Forest","Swamp"],"all":0},"Spoonwood":{"m":[["Hepatitis Cure",1],["Cure-for-All",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Riparian Woodland","Swamp"],"all":0},"St. John's Wort":{"m":[["Infection Balm",1],["Open Wound Salve",1]],"b":["Deciduous Forest","Grasslands","Mountains","Coniferous Forest","Prairie","Riparian Woodland","Swamp"],"all":0},"Tansy":{"m":[["Tapeworm Remedy",1],["Cure-for-All",1]],"b":["Grasslands","Deciduous Forest","Mountains","Prairie","Riparian Woodland","Coniferous Forest","Desert"],"all":0},"Tobacco":{"m":[["Ear Mites Ointment",1],["Fleas Remedy",3],["Mange Salve",1],["Tick Remedy",1]],"b":["Mountains","Prairie","Desert"],"all":0},"Turmeric":{"m":[["Ringworm Salve",1],["Cure-for-All",1]],"b":["Swamp","Rainforest"],"all":0},"Winterfat":{"m":[["Ear Mites Ointment",1],["Heatstroke Remedy",1],["Open Wound Salve",1]],"b":["Mountains","Prairie","Desert"],"all":0},"Yarrow":{"m":[["Mange Salve",1],["Open Wound Salve",1],["Pox Balm",1]],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"all":1}},"meds":{"Antidote":{"u":"Cures Poison","r":[["Chaparral",3]]},"Constipation Cure":{"u":"Cures Constipation","r":[["Bearberry",1],["Buffaloberry",1],["Burning Bush",1]]},"Cough Cure":{"u":"Cures Cough","r":[["Goldenseal",1],["Kava",1],["Pineapple Leaf",1]]},"Cure-for-All":{"u":"Cures any illness and gives illness immunity for three rollovers.","r":[["Aloe",1],["Arnica",1],["Boneset",1],["Carrionflower",1],["Cedar Bark",1],["Ginger",1],["Mullein",1],["Spoonwood",1],["Tansy",1],["Turmeric",1]]},"Cystitis Cure":{"u":"Cures Cystitis","r":[["Dandelion",1],["Kava",1],["Redwood Sorrel",1]]},"Diarrhea Cure":{"u":"Cures Diarrhea","r":[["Charcoal",3]]},"Distemper Cure":{"u":"Cures Distemper","r":[["Goldenseal",1],["Guaiacum",1],["Mullein",1]]},"Ear Mites Ointment":{"u":"Cures Ear Mites","r":[["Carrionflower",1],["Tobacco",1],["Winterfat",1]]},"Fleas Remedy":{"u":"Cures Fleas","r":[["Tobacco",3]]},"Healing Salves":{"u":"Restores 20 HP","r":[["Charcoal",1],["Dandelion",1]]},"Heatstroke Remedy":{"u":"Cures Heatstroke","r":[["Feverfew",1],["Ginger",1],["Winterfat",1]]},"Hepatitis Cure":{"u":"Cures Hepatitis","r":[["Boneset",1],["Dandelion",1],["Spoonwood",1]]},"Infection Balm":{"u":"Cures Infection","r":[["Feverfew",1],["Oregano",1],["St. John's Wort",1]]},"Influenza Cure":{"u":"Cures Influenza","r":[["Guaiacum",2],["Pineapple Leaf",2]]},"Mange Salve":{"u":"Cures Mange","r":[["Arnica",1],["Tobacco",1],["Yarrow",1]]},"Open Wound Salve":{"u":"Cures Open Wound","r":[["St. John's Owrt",1],["Winterfat",1],["Yarrow",1]]},"Pox Balm":{"u":"Cures Pox","r":[["Oregano",1],["Redwood Sorrel",1],["Yarrow",1]]},"Rich Healing Salve":{"u":"Restores 50 HP and gives illness immunity for three rollovers.","r":[["Aloe",1],["Buffaloberry",1],["Burning Bush",1],["Chaparral",1],["Charcoal",1]]},"Ringworm Salve":{"u":"Cures Ringworm","r":[["Aloe",1],["Oregano",1],["Turmeric",1]]},"Tapeworm Remedy":{"u":"Cures Tapeworm","r":[["Bearberry",1],["Garlic",1],["Tansy",1]]},"Tick Remedy":{"u":"Cures Ticks","r":[["Cedar Bark",1],["Garlic",1],["Tobacco",1]]}},"renamed":13,"scout":{"Grasslands":"Speed","Deciduous Forest":"Speed","Mountains":"Speed","Riparian Woodland":"Wisdom","Prairie":"Speed","Coniferous Forest":"Smarts","Desert":"Strength","Taiga":"Agility","Swamp":"Agility","Tundra":"Smarts","Rainforest":"Strength","Glacier":"Wisdom"},"scoutMin":{"Glacier":[101,"Wisdom"],"Rainforest":[101,"Strength"]},"difficulty":{"Grasslands":"Easy","Deciduous Forest":"Easy","Mountains":"Easy","Riparian Woodland":"Medium","Prairie":"Medium","Coniferous Forest":"Medium","Desert":"Difficult","Taiga":"Difficult","Swamp":"Challenging","Tundra":"Challenging","Rainforest":"Challenging","Glacier":"Challenging"},"diffOrder":["Easy","Medium","Difficult","Challenging"],"rates":[{"p":["Non-carrier","Non-carrier"],"o":[["Non-carrier",100]]},{"p":["Carrier","Non-carrier"],"o":[["Non-carrier",90],["Carrier",10]]},{"p":["Mutation","Non-carrier"],"o":[["Non-carrier",85],["Carrier",15],["Mutation",0]]},{"p":["Carrier","Carrier"],"o":[["Non-carrier",80],["Carrier",10],["Mutation",10]]},{"p":["Mutation","Carrier"],"o":[["Non-carrier",70],["Carrier",15],["Mutation",15]]},{"p":["Mutation","Mutation"],"o":[["Non-carrier",70],["Mutation",20],["Carrier",10]]}],"genetic":{"Albinism":"Secondary Mutation","Brachycephaly":"Mutation","Hereditary Cataracts":"Secondary Mutation","Melanism":"Secondary Mutation"},"ills":[{"n":"Constipation","hp":"None","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Won't eat, Low chance to cure on rollover","cure":"Constipation Cure"},{"n":"Cough","hp":"−2 HP","en":"None","br":"Contagious","sp":"21%","o":"Low chance to cure on rollover","cure":"Cough Cure"},{"n":"Cystitis","hp":"−2 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Low chance to cure on rollover","cure":"Cystitis Cure"},{"n":"Diarrhea","hp":"−4 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Low chance to cure on rollover","cure":"Diarrhea Cure"},{"n":"Distemper","hp":"−6 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"18%","o":"Lethal","cure":"Distemper Cure"},{"n":"Ear Mites","hp":"None","en":"None","br":"Contagious","sp":"60%","o":"Can't hunt or scout","cure":"Ear Mites Ointment"},{"n":"Fleas","hp":"None","en":"None","br":"Contagious","sp":"36%","o":"−3 HP on contraction unless from breeding","cure":"Fleas Remedy"},{"n":"Heatstroke","hp":"−4 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"Not Contagious","o":"Lethal","cure":"Heatstroke Remedy"},{"n":"Hepatitis","hp":"−6 HP","en":"None","br":"Contagious","sp":"18%","o":"None","cure":"Hepatitis Cure"},{"n":"Infection","hp":"−4 HP","en":"None","br":"Can't Breed","sp":"Not Contagious","o":"Lethal","cure":"Infection Balm"},{"n":"Influenza","hp":"−6 HP","en":"Slows Regeneration","br":"Can't Breed","sp":"90%","o":"Energy set to zero on contraction","cure":"Influenza Cure"},{"n":"Mange","hp":"−6 HP","en":"None","br":"Can't Breed","sp":"18%","o":"None","cure":"Mange Salve"},{"n":"Open Wound","hp":"−6 HP","en":"None","br":"Can't Breed","sp":"Not Contagious","o":"HP set to zero on contraction","cure":"Open Wound Salve"},{"n":"Poison","hp":"−10 HP","en":"None","br":"Can't Breed","sp":"Not Contagious","o":"Lethal","cure":"Antidote"},{"n":"Pox","hp":"−6 HP","en":"None","br":"Contagious","sp":"18%","o":"Lethal to pups after one rollover","cure":"Pox Balm"},{"n":"Ringworm","hp":"−2 HP","en":"None","br":"Contagious","sp":"18%","o":"None","cure":"Ringworm Salve"},{"n":"Tapeworms","hp":"None","en":"None","br":"None","sp":"Not Contagious","o":"Additional -10% hunger at rollover","cure":"Tapeworm Remedy"},{"n":"Ticks","hp":"Keeps HP max at −3 from full","en":"None","br":"None","sp":"Not Contagious","o":"None","cure":"Tick Remedy"}],"pairs":[[10,2,true],[10,3,false],[20,4,false],[30,5,false],[40,6,false],[50,7,false],[60,8,false],[70,9,false],[80,10,false],[90,11,false],[100,12,false],[110,13,false],[120,14,false],[130,15,false],[140,16,false],[150,17,false],[160,18,false],[170,19,false],[180,20,false],[190,21,false],[200,22,false]],"prey":[{"n":"Bat Carcass","c":"Critter Prey","u":1,"w":[["Grasslands","All trails"]]},{"n":"Ground Squirrel Carcass","c":"Critter Prey","u":1,"w":[["Tundra","All trails"]]},{"n":"Lemming Carcass","c":"Critter Prey","u":1,"w":[["Glacier","All trails"]]},{"n":"Woodpecker Carcass","c":"Critter Prey","u":1,"w":[["Mountains","All trails"]]},{"n":"Jacana Carcass","c":"Critter Prey","u":2,"w":[["Swamp","All trails"]]},{"n":"Merlin Carcass","c":"Critter Prey","u":2,"w":[["Coniferous Forest","All trails"]]},{"n":"Milk Snake Carcass","c":"Critter Prey","u":2,"w":[["Prairie","All trails"]]},{"n":"Mink Carcass","c":"Critter Prey","u":2,"w":[["Taiga","All trails"]]},{"n":"Woodcock Carcass","c":"Critter Prey","u":2,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Rocky Waterfall"],["Deciduous Forest","Overgrown Valley"]]},{"n":"Jackrabbit Carcass","c":"Critter Prey","u":3,"w":[["Desert","All trails"]]},{"n":"Raccoon Carcass","c":"Critter Prey","u":3,"w":[["Riparian Woodland","All trails"]]},{"n":"Stoat Carcass","c":"Critter Prey","u":3,"w":[["Coniferous Forest","Northwoods"],["Coniferous Forest","Rapids"],["Coniferous Forest","Redwood Forest"],["Taiga","All trails"],["Tundra","Timberline"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"],["Glacier","Coast"]]},{"n":"Agouti Carcass","c":"Critter Prey","u":4,"w":[["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Highlands"]]},{"n":"Grouse Carcass","c":"Critter Prey","u":4,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Rocky Waterfall"],["Deciduous Forest","Overgrown Valley"],["Mountains","All trails"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Coniferous Forest","Redwood Forest"]]},{"n":"Gull Carcass","c":"Critter Prey","u":4,"w":[["Tundra","Highlands"],["Tundra","Heathlands"],["Tundra","Coast"],["Glacier","All trails"]]},{"n":"Hare Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Hills"],["Deciduous Forest","Meadows"],["Deciduous Forest","Rocky Waterfall"],["Mountains","All trails"],["Prairie","All trails"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Coniferous Forest","Redwood Forest"],["Desert","All trails"],["Tundra","Timberline"],["Tundra","Heathlands"]]},{"n":"Muskrat Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Deciduous Forest","All trails"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Taiga","Lichen Woodland"],["Taiga","Creek"],["Taiga","Larch Forest"]]},{"n":"Opossum Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Giant River"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Pheasant Hen Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Prairie","All trails"],["Coniferous Forest","All trails"]]},{"n":"Pheasant Rooster Carcass","c":"Critter Prey","u":4,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Prairie","All trails"],["Coniferous Forest","All trails"]]},{"n":"Quail Carcass","c":"Critter Prey","u":4,"w":[["Mountains","All trails"],["Desert","All trails"]]},{"n":"Rabbit Carcass","c":"Critter Prey","u":4,"w":[["Prairie","Pothole Wetlands"],["Prairie","Shrub Steppe"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Silky Anteater Carcass","c":"Critter Prey","u":4,"w":[["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Porcupine Carcass","c":"Small Prey","u":8,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Overgrown Valley"],["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Coniferous Forest","All trails"],["Desert","All trails"],["Taiga","All trails"],["Tundra","Timberline"],["Tundra","Highlands"],["Tundra","Heathlands"],["Rainforest","Tropical Coast"],["Rainforest","Highlands"]]},{"n":"Beaver Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Deciduous Forest","Overgrown Valley"],["Mountains","Lakes"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Bosque"],["Riparian Woodland","Giant River"],["Coniferous Forest","All trails"],["Taiga","Lichen Woodland"],["Taiga","Creek"],["Taiga","Larch Forest"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Boar Carcass","c":"Small Prey","u":8,"w":[["Deciduous Forest","Ancient Woodland"],["Deciduous Forest","Rocky Waterfall"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Muskox Calf Carcass","c":"Small Prey","u":8,"w":[["Tundra","All trails"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Peccary Carcass","c":"Small Prey","u":8,"w":[["Desert","All trails"],["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"]]},{"n":"Turkey Hen Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Swamp","Temperate Swamp"]]},{"n":"Turkey Tom Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Deciduous Forest","Meadows"],["Deciduous Forest","Overgrown Valley"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Swamp","Temperate Swamp"]]},{"n":"Small Doe Carcass","c":"Small Prey","u":8,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Hills"],["Deciduous Forest","Ancient Woodland"],["Mountains","Forest"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Prairie","Great Plains Prairie (Pothole Wetlands"],["Prairie","Shrub Steppe"],["Coniferous Forest","All trails"],["Desert","Shrubland"],["Desert","Canyons"],["Desert","Desert"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Temperate Swamp"],["Rainforest","Tropical Coast"]]},{"n":"Swine Carcass","c":"Small Prey","u":9,"w":[["Grasslands","Oak Savanna"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Flood-Meadow"],["Riparian Woodland","Bosque"],["Desert","Mesa"],["Desert","Canyons"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"]]},{"n":"Seal Pup Carcass","c":"Small Prey","u":9,"w":[["Tundra","Highlands"],["Tundra","Heathlands"],["Tundra","Coast"],["Glacier","Coast"],["Glacier","Sea Ice"]]},{"n":"Pronghorn Buck Carcass","c":"Medium Prey","u":10,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Desert","Shrubland"],["Desert","Mesa"]]},{"n":"Pronghorn Doe Carcass","c":"Medium Prey","u":10,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Desert","Shrubland"],["Desert","Mesa"]]},{"n":"Whitetail Carcass","c":"Medium Prey","u":10,"w":[["Grasslands","Fields"],["Grasslands","Oak Savanna"],["Deciduous Forest","All trails"],["Mountains","Mountains"],["Mountains","Forest"],["Mountains","Lakes"],["Riparian Woodland","All trails"],["Prairie","Pine Barrens"],["Prairie","Pothole Wetlands"],["Coniferous Forest","Northwoods"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Desert","Shrubland"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Creek"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"],["Rainforest","Highlands"]]},{"n":"Bighorn Sheep Ewe Carcass","c":"Medium Prey","u":12,"w":[["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Desert","Mesa"],["Desert","Canyons"],["Desert","Desert"],["Taiga","Mossy Cliffs"],["Taiga","Creek"],["Taiga","Larch Forest"]]},{"n":"Bighorn Sheep Ram Carcass","c":"Medium Prey","u":12,"w":[["Mountains","Mountains"],["Mountains","Lakes"],["Mountains","High Plains"],["Desert","Mesa"],["Desert","Canyons"],["Desert","Desert"],["Taiga","Mossy Cliffs"],["Taiga","Creek"],["Taiga","Larch Forest"]]},{"n":"Blacktail Carcass","c":"Medium Prey","u":12,"w":[["Grasslands","Fields"],["Grasslands","Oak Savanna"],["Deciduous Forest","All trails"],["Riparian Woodland","Great Lakes"],["Riparian Woodland","Bosque"],["Riparian Woodland","Giant River"],["Coniferous Forest","All trails"]]},{"n":"Doe Carcass","c":"Medium Prey","u":12,"w":[["Grasslands","Fields"],["Grasslands","Hills"],["Deciduous Forest","All trails"],["Mountains","Lakes"],["Riparian Woodland","All trails"],["Prairie","Pothole Wetlands"],["Prairie","Shrub Steppe"],["Coniferous Forest","All trails"],["Desert","Canyons"],["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"]]},{"n":"Mule Deer Carcass","c":"Medium Prey","u":12,"w":[["Mountains","Forest"],["Mountains","High Plains"],["Desert","Shrubland"],["Desert","Canyons"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"]]},{"n":"Caribou Calf Carcass","c":"Medium Prey","u":12,"w":[["Tundra","Timberline"],["Tundra","Highlands"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Seal Carcass","c":"Medium Prey","u":15,"w":[["Tundra","Coast"],["Glacier","Coast"],["Glacier","Sea Ice"]]},{"n":"Donkey Carcass","c":"Medium Prey","u":16,"w":[["Desert","Shrubland"],["Desert","Canyons"],["Desert","Desert"]]},{"n":"Mountain Goat Carcass","c":"Medium Prey","u":16,"w":[["Mountains","Mountains"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"]]},{"n":"Tapir Carcass","c":"Medium Prey","u":16,"w":[["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"],["Rainforest","Highlands"]]},{"n":"Walrus Pup Carcass","c":"Medium Prey","u":16,"w":[["Glacier","Coast"],["Glacier","Sea Ice"]]},{"n":"Dall Sheep Carcass","c":"Large Prey","u":17,"w":[["Tundra","Highlands"]]},{"n":"Elk Cow Carcass","c":"Large Prey","u":17,"w":[["Deciduous Forest","All trails"],["Mountains","All trails"],["Riparian Woodland","All trails"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Coniferous Forest","All trails"],["Desert","Shrubland"],["Desert","Mesa"],["Taiga","Creek"],["Taiga","Larch Forest"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Horse Carcass","c":"Large Prey","u":18,"w":[["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Grasslands","Hills"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Prairie","Shrub Steppe"]]},{"n":"Alligator Carcass","c":"Large Prey","u":20,"w":[["Riparian Woodland","Great Lakes"],["Riparian Woodland","Bosque"],["Riparian Woodland","Giant River"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"]]},{"n":"Caribou Bull Carcass","c":"Large Prey","u":20,"w":[["Taiga","Lichen Woodland"],["Taiga","Large Forest"],["Tundra","Highlands"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Caribou Cow Carcass","c":"Large Prey","u":20,"w":[["Taiga","Lichen Woodland"],["Taiga","Large Forest"],["Tundra","Highlands"],["Tundra","Heathlands"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Bovine Carcass","c":"Large Prey","u":20,"w":[["Grasslands","Fields"],["Grasslands","Rangelands"],["Grasslands","Oak Savanna"],["Riparian Woodland","All trails"],["Desert","All trails"],["Rainforest","Broadleaf Forest"],["Rainforest","Highlands"]]},{"n":"Elk Bull Carcass","c":"Large Prey","u":20,"w":[["Deciduous Forest","All trails"],["Mountains","All trails"],["Riparian Woodland","All trails"],["Prairie","Pine Barrens"],["Prairie","Great Plains"],["Prairie","Pothole Wetlands"],["Coniferous Forest","All trails"],["Desert","Shrubland"],["Desert","Mesa"],["Taiga","Creek"],["Taiga","Larch Forest"],["Swamp","Cypress Basin"],["Swamp","Temperate Swamp"]]},{"n":"Crocodile Carcass","c":"Large Prey","u":20,"w":[["Swamp","Mangrove Forest"],["Swamp","Salt Marsh"],["Swamp","Cypress Basin"],["Rainforest","Tropical Coast"],["Rainforest","Broadleaf Forest"],["Rainforest","Jungle River"]]},{"n":"Moose Bull Carcass","c":"Large Prey","u":24,"w":[["Coniferous Forest","Northwoods"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"],["Tundra","All trails"]]},{"n":"Moose Cow Carcass","c":"Large Prey","u":24,"w":[["Coniferous Forest","Northwoods"],["Coniferous Forest","Aspen Parkland"],["Coniferous Forest","Rapids"],["Taiga","Mossy Cliffs"],["Taiga","Lichen Woodland"],["Taiga","Larch Forest"],["Tundra","All trails"]]},{"n":"Muskox Carcass","c":"Large Prey","u":24,"w":[["Tundra","Heathlands"],["Tundra","Coast"],["Glacier","Moraine"],["Glacier","Fjord"]]},{"n":"Bison Carcass","c":"Large Prey","u":28,"w":[["Prairie","Pine Barrens, Great Plains"],["Coniferous Forest","Aspen Parkland"]]},{"n":"Walrus Carcass","c":"Large Prey","u":30,"w":[["Glacier","Coast"],["Glacier","Sea Ice"]]}],"preyUnknownBiomes":[],"enemies":[{"n":"African Rock Python","e":0,"lv":[14,19],"st":["Strength","Wisdom","Smarts"],"mo":["Fearless","Slow","Thick skin"],"b":["Swamp"],"d":["Python Eggs","Python Skin","Python Skull","Snake Meat","Scar: Throat"]},{"n":"Agitated Bull","e":0,"lv":[1,20],"st":["Strength","Speed","Wisdom"],"mo":["Fearless","Large prey","Prey"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Bovine Carcass","Large Hoof","Odd Teeth","Scar: Abdomen"]},{"n":"Alaskan Brown Bear","e":0,"lv":[12,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Tundra"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Face"]},{"n":"Alaskan Malamute","e":0,"lv":[7,16],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Tundra","Glacier"],"d":["Canine Claw","Canine Fang","Dog Pelt","Dog Skull","Scar: Ear Notch [Left]","Scar: Ear Notch [Right]"]},{"n":"Alaskan Tundra Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Alaskan Tundra Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom","Smarts"],"mo":["Group"],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Alligator","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Riparian Woodland","Swamp","Rainforest"],"d":["Alligator Carcass","Alligator Leg","Alligator Skin","Alligator Skull","Alligator Tail","Scar: Wrist [Left]","Scar: Wrist [Right]"]},{"n":"American Badger","e":0,"lv":[5,15],"st":["Strength","Agility","Wisdom"],"mo":["Fearless"],"b":["Grasslands","Deciduous Forest","Mountains","Prairie","Coniferous Forest","Desert","Taiga"],"d":["Badger Pelt","Badger Skull","Mustelid Claws","Mustelid Fangs","Scar: Bite"]},{"n":"Anaconda","e":0,"lv":[15,20],"st":["Agility","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Anaconda Eggs","Anaconda Skin","Anaconda Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Angry Farmer","e":0,"lv":[10,15],"st":["Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands"],"d":["Chicken Roast","Odd Teeth","Old Horseshoe","Shoe"]},{"n":"Arctic Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Tundra","Glacier"],"d":["Canine Claw","Canine Fang","Fox Pelt [Arctic]","Fox Skull","Fox Tail [Arctic]","Scar: Foot"]},{"n":"Arctic Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Arctic Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom","Smarts"],"mo":["Group"],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Bald Eagle","e":0,"lv":[5,14],"st":["Wisdom","Smarts"],"mo":["Fearless","Soft skin"],"b":["Mountains","Riparian Woodland","Coniferous Forest","Taiga","Swamp","Tundra"],"d":["Eagle Beak","Eagle Skull","Eagle Talon","Large Bird Meat","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Barren Ground Caribou","e":0,"lv":[3,15],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Barren Ground Caribou Herd","e":0,"lv":[6,15],"st":["Speed","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Bighorn Sheep Ram","e":0,"lv":[3,12],"st":["Agility","Wisdom"],"mo":["Large prey","Prey","Thick skin"],"b":["Mountains","Taiga"],"d":["Bighorn Horns","Bighorn Skull","Cracked Bighorn Horn","Gnawing Hoof","Scar: Cheek"]},{"n":"Black Bear","e":0,"lv":[10,18],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Deciduous Forest","Mountains","Riparian Woodland","Coniferous Forest","Taiga","Tundra"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Scratched Face"]},{"n":"Black Vulture Group","e":0,"lv":[5,15],"st":["Agility","Wisdom","Smarts"],"mo":["Group","Soft skin"],"b":["Desert","Swamp","Rainforest"],"d":["Large Bird Meat","Vulture Eggs","Vulture Skull","Vulture Talon","Scar: Dorsal Scratch"]},{"n":"Blacktail Buck","e":0,"lv":[1,11],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Coniferous Forest"],"d":["Blacktail Antlers","Broken Antler","Deer Ear","Gnawing Hoof","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Bobcat","e":0,"lv":[2,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Swamp"],"d":["Big Cat Claw","Bobcat Pelt","Bobcat Skull","Bobcat Tail","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"British Columbia Wolf","e":0,"lv":[1,20],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Black]","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"British Columbia Wolf Pack","e":0,"lv":[1,20],"st":["Strength","Agility","Wisdom","Smarts"],"mo":["Group"],"b":["Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Black]","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"Burro","e":0,"lv":[1,15],"st":["Strength","Wisdom","Smarts"],"mo":["Large prey","Prey"],"b":["Desert"],"d":["Donkey Carcass","Donkey Skull","Large Hoof","Odd Teeth"]},{"n":"Bush Dog","e":0,"lv":[1,12],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Rainforest"],"d":["Bush Dog Pelt","Bush Dog Skull","Canine Claw","Canine Fang","Scar: Foot"]},{"n":"California Condor","e":0,"lv":[14,19],"st":["Strength","Speed","Wisdom"],"mo":["Soft skin"],"b":["Desert","Rainforest"],"d":["Condor Egg","Condor Feather","Condor Skull","Large Bird Meat","Scar: Ear Notch [Left]","Scar: Ear Notch [Right]"]},{"n":"Canadian Lynx","e":0,"lv":[1,12],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Mountains","Taiga","Tundra"],"d":["Big Cat Claw","Lynx Pelt","Lynx Skull","Lynx Tail","Scar: Nose Bridge","Scar: Nose Bridge [Low]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"Cinnamon Bear","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Deciduous Forest","Coniferous Forest","Taiga"],"d":["Bear Fangs","Bear Paw [Cinnamon]","Bear Pelt [Cinnamon]","Bear Skull","Scar: Scratched Back"]},{"n":"Coastal Jaguar","e":0,"lv":[16,20],"st":["Agility","Wisdom"],"mo":[],"b":["Desert"],"d":["Big Cat Claw","Jaguar Pelt","Jaguar Skull","Jaguar Tail","Scar: Dorsal Scratch","Scar: Scratched Back"]},{"n":"Cougar","e":0,"lv":[9,17],"st":["Speed","Agility","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Rainforest"],"d":["Big Cat Claw","Cougar Pelt","Cougar Skull","Cougar Tail","Scar: Eye - Large [Left]","Scar: Eye - Large [Right]","Scar: Scratched Front Leg [Left]","Scar: Scratched Front Leg [Right]","Scar: Scratched Side","Scar: Scratched Upper Leg [Left]","Scar: Scratched Upper Leg [Right]"]},{"n":"Cowboy","e":0,"lv":[10,15],"st":["Strength","Speed","Wisdom"],"mo":["Soft skin"],"b":["Prairie"],"d":["Odd Teeth","Old Horseshoe","Sausage","Shoe","Scar: Triceps Scratch [Left]","Scar: Triceps Scratch [Right]"]},{"n":"Coyote","e":0,"lv":[1,11],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail","Scar: Foot"]},{"n":"Coyote Pack","e":0,"lv":[1,13],"st":["Smarts","Wisdom"],"mo":["Group","Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail"]},{"n":"Death Rattler","e":0,"lv":[12,19],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Swamp"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Desert Bighorn Ram","e":0,"lv":[4,12],"st":["Agility","Wisdom"],"mo":["Large prey","Prey"],"b":["Desert"],"d":["Bighorn Horns","Bighorn Skull","Cracked Bighorn Horns","Gnawing Hoof"]},{"n":"Desert Mule Deer Buck","e":0,"lv":[2,13],"st":["Wisdom"],"mo":["Large prey","Prey"],"b":["Desert"],"d":["Deer Ear","Gnawing Hoof","Mule Deer Carcass","Venison Liver","Scar: Eye - Large [Left]","Scar: Eye - Large [Right]"]},{"n":"Eastern Copperhead","e":0,"lv":[15,20],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Grasslands"],"d":["Light Viper Skin","Snake Meat","Venom Gland","Viper Skull","Scar: Foot"]},{"n":"Eastern Diamondback","e":0,"lv":[8,16],"st":["Speed","Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Swamp"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Venom Gland"]},{"n":"Eastern Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Brown]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Eastern Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Brown]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Elephant Seal","e":0,"lv":[7,16],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Tundra"],"d":["Blubber","Rugged Flipper","Seal Skull","Seal Teeth","Scar: Muzzle","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Elk Bull","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Deciduous Forest","Mountains","Riparian Woodland","Coniferous Forest","Taiga","Swamp"],"d":["Broken Antler","Elk Antlers","Elk Ear","Gnawing Hoof","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Enraged Canada Goose","e":0,"lv":[10,16],"st":["Smarts","Wisdom"],"mo":["Fearless","Soft skin"],"b":["Grasslands"],"d":["Goose Beak","Goose Leg","Goose Skull","Large Bird Meat","Scar: Front Paw [Left]","Scar: Front Paw [Right]"]},{"n":"Feral Dog Pack","e":0,"lv":[7,18],"st":["Speed","Agility","Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest","Prairie","Riparian Woodland","Swamp"],"d":["Canine Claw","Canine Fang","Dog Pelt","Dog Skull","Scar: Lip","Scar: Nose"]},{"n":"Florida Black Bear","e":0,"lv":[11,18],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Swamp"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Scratched Face"]},{"n":"Frenzied Razorback","e":0,"lv":[4,15],"st":["Strength","Wisdom"],"mo":["Fearless","Prey","Small prey"],"b":["Grasslands","Riparian Woodland","Desert","Swamp","Rainforest"],"d":["Boar Pelt","Boar Skull","Boar Tusks","Gnawing Hoof","Scar: Nose Bridge","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]"]},{"n":"Ghillie Hunter","e":0,"lv":[10,15],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Deciduous Forest","Coniferous Forest","Taiga"],"d":["Nesting Material","Odd Teeth","Sausage","Shoe","Scar: Hock [Left]","Scar: Hock [Right]"]},{"n":"Glacier Bear","e":0,"lv":[10,18],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Face"]},{"n":"Golden Eagle","e":0,"lv":[4,14],"st":["Smarts","Wisdom"],"mo":["Fearless","Soft skin"],"b":["Coniferous Forest","Desert","Taiga"],"d":["Eagle Beak","Eagle Skull","Eagle Talon","Large Bird Meat","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Gray Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Riparian Woodland","Prairie","Desert","Swamp","Rainforest"],"d":["Canine Claw","Canine Fang","Fox Pelt [Gray]","Fox Skull","Fox Tail [Gray]","Scar: Foot"]},{"n":"Greater Grison","e":0,"lv":[5,14],"st":["Strength","Agility","Wisdom"],"mo":[],"b":["Rainforest"],"d":["Grison Pelt","Grison Skull","Mustelid Claws","Mustelid Fangs","Scar: Scratched Hind Leg [Left]","Scar: Scratched Hind Leg [Right]"]},{"n":"Greenland Wolf","e":0,"lv":[1,20],"st":["Agility","Wisdom"],"mo":[],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Light]","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Greenland Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Light]","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Grizzly Bear","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Mountains","Riparian Woodland","Coniferous Forest","Taiga","Tundra"],"d":["Bear Fangs","Bear Paw [Grizzly]","Bear Pelt [Grizzly]","Bear Skull","Scar: Face"]},{"n":"Guarding Sled Dogs","e":0,"lv":[1,14],"st":["Speed","Wisdom","Smarts"],"mo":["Group"],"b":["Tundra","Glacier"],"d":["Canine Claw","Canine Fang","Dog Pelt","Dog Skull","Scar: Lip"]},{"n":"Hooded Seal","e":0,"lv":[4,15],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Crab Leg","Rattling Spine","Rugged Flipper","Seal Carcass","Seal Skull","Seal Teeth","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Horned Rattlesnake","e":0,"lv":[12,19],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Hunter","e":0,"lv":[10,15],"st":["Strength","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Mountains","Desert","Tundra","Glacier"],"d":["Carrot","Chicken Roast","Odd Teeth","Shoe","Scar: Cheekbone [Left]","Scar: Cheekbone [Right]","Scar: Scratched Hind Leg [Left]","Scar: Scratched Hind Leg [Right]"]},{"n":"Jaguar","e":0,"lv":[12,19],"st":["Agility","Wisdom"],"mo":[],"b":["Desert","Rainforest"],"d":["Big Cat Claw","Jaguar Pelt","Jaguar Skull","Jaguar Tail","Scar: Eye - Large [Left]","Scar: Eye - Large [Right]","Scar: Scratched Front Leg [Left]","Scar: Scratched Front Leg [Right]","Scar: Scratched Side","Scar: Scratched Upper Leg [Left]","Scar: Scratched Upper Leg [Right]"]},{"n":"Jaguarundi","e":0,"lv":[10,18],"st":["Speed","Agility","Wisdom"],"mo":["Soft skin"],"b":["Rainforest"],"d":["Big Cat Claw","Jaguarundi Pelt","Jaguarundi Skull","Jaguarundi Tail","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]","Scar: Nose Bridge","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"Kermode Bear","e":0,"lv":[11,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Coniferous Forest","Taiga"],"d":["Bear Fangs","Bear Paw [Kermode]","Bear Pelt [Kermode]","Bear Skull","Scar: Face"]},{"n":"Killer Whale","e":0,"lv":[15,20],"st":["Strength","Smarts","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Rattling Spine","Whale Meat","Whale Rib Bone","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Kodiak Brown Bear","e":0,"lv":[14,20],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Tundra"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Scratched Shoulder [Left]","Scar: Scratched Shoulder [Right]"]},{"n":"Leucistic Wolf","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":[],"b":["Desert","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Leucistic Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Desert","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [White]","Wolf Skull","Wolf Tail"]},{"n":"Lone Vicious Black Wolf","e":0,"lv":[1,20],"st":["Strength","Speed","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Black]","Wolf Skull","Wolf Tail"]},{"n":"Lone Vicious Gray Wolf","e":0,"lv":[1,20],"st":["Strength","Speed","Agility","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Light]","Wolf Skull","Wolf Tail"]},{"n":"Louisiana Black Bear","e":0,"lv":[9,17],"st":["Strength","Wisdom"],"mo":["Slow","Thick skin"],"b":["Swamp"],"d":["Bear Fangs","Bear Paw [Black]","Bear Pelt [Black]","Bear Skull","Scar: Stop"]},{"n":"Manitoban Elk Bull","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Prairie"],"d":["Broken Antler","Elk Antlers","Elk Ear","Gnawing Hoof","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Mearns Coyote","e":0,"lv":[1,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Desert"],"d":["Canine Fang"]},{"n":"Mearns Coyote Pack","e":0,"lv":[3,13],"st":["Agility","Smarts","Wisdom"],"mo":["Group","Soft skin"],"b":["Desert"],"d":["Canine Claw","Canine Fang"]},{"n":"Melanistic Jaguar","e":0,"lv":[7,19],"st":["Agility","Wisdom"],"mo":[],"b":["Rainforest"],"d":["Big Cat Claw","Jaguar Pelt [Melanistic]","Jaguar Skull","Jaguar Tail [Melanistic]","Scar: Thigh Swipe [Left]","Scar: Thigh Swipe [Right]"]},{"n":"Mexican Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Desert"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Mexican Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Desert"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Mojave Rattlesnake","e":0,"lv":[15,20],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Moose Bull","e":0,"lv":[7,17],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Mountains","Coniferous Forest","Taiga","Tundra"],"d":["Broken Moose Antler","Gnawing Hoof","Moose Antler","Moose Ear","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Moose Cow","e":0,"lv":[5,13],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Deciduous Forest"],"d":["Gnawing Hoof","Moose Cow Carcass","Thick Fur Tuft","Scar: Cheek"]},{"n":"Morelets Crocodile","e":0,"lv":[13,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Crocodile Leg","Crocodile Skin","Crocodile Skull","Crocodile Tail","Scar: Shoulder [Left]","Scar: Shoulder [Right]"]},{"n":"Mountain Goat","e":0,"lv":[8,16],"st":["Agility","Smarts","Wisdom"],"mo":["Small prey","Prey"],"b":["Mountains"],"d":["Mountain Goat Carcass","Odd Teeth","Thick Fur Tuft","Scar: Cheekbone [Left]","Scar: Cheekbone [Right]"]},{"n":"Muskox","e":0,"lv":[6,16],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Gnawing Hoof","Muskox Horns","Muskox Skull","Thick Fur Tuft","Scar: Cheek","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Muskox Herd","e":0,"lv":[9,18],"st":["Strength","Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Tundra","Glacier"],"d":["Gnawing Hoof","Muskox Horns","Muskox Skull","Thick Fur Tuft","Scar: Forehead"]},{"n":"Mustang Herd","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Grasslands","Prairie"],"d":["Horse Carcass","Horse Skull","Large Hoof","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Mustang Stallion","e":0,"lv":[6,14],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Grasslands","Prairie"],"d":["Horse Skull","Horse Tail","Large Hoof","Odd Teeth","Scar: Nose"]},{"n":"Narwhal","e":0,"lv":[15,20],"st":["Strength","Smarts","Wisdom"],"mo":["Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Narwhal Tooth","Rattling Spine","Whale Meat","Whale Rib Bone","Scar: Abdomen"]},{"n":"Northeastern Coyote","e":0,"lv":[2,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Taiga"],"d":["Canine Claw","Canine Fang","Coyote Pelt"]},{"n":"Northeastern Coyote Pack","e":0,"lv":[1,13],"st":["Speed","Agility","Wisdom"],"mo":["Group","Soft skin"],"b":["Taiga"],"d":["Canine Fang","Coyote Pelt"]},{"n":"Ocelot","e":0,"lv":[7,16],"st":["Speed","Agility","Wisdom"],"mo":["Soft skin"],"b":["Desert","Rainforest"],"d":["Big Cat Claw","Ocelot Pelt","Ocelot Skull","Ocelot Tail","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]","Scar: Scratched Thigh [Left]","Scar: Scratched Thigh [Right]"]},{"n":"Peary Caribou","e":0,"lv":[3,10],"st":["Agility","Smarts","Wisdom"],"mo":["Large prey","Prey"],"b":["Glacier"],"d":["Caribou Antlers","Caribou Bull Carcass","Caribou Cow Carcass","Gnawing Hoof","Thick Fur Tuft","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]"]},{"n":"Peary Caribou Herd","e":0,"lv":[4,12],"st":["Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Glacier"],"d":["Caribou Antlers","Caribou Bull Carcass","Caribou Cow Carcass","Gnawing Hoof","Thick Fur Tuft"]},{"n":"Piebald Wolf","e":0,"lv":[1,20],"st":["Strength","Wisdom"],"mo":[],"b":["Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Piebald]","Wolf Skull","Wolf Tail"]},{"n":"Piebald Wolf Pack","e":0,"lv":[1,20],"st":["Strength","Smarts","Agility","Wisdom"],"mo":["Group"],"b":["Riparian Woodland","Prairie"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Piebald]","Wolf Skull","Wolf Tail"]},{"n":"Plains Bison","e":0,"lv":[10,18],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Prairie"],"d":["Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Plains Bison Herd","e":0,"lv":[15,20],"st":["Strength","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Prairie"],"d":["Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Plains Coyote","e":0,"lv":[1,10],"st":["Agility","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Prairie"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail","Scar: Ripped Mouth"]},{"n":"Plains Coyote Pack","e":0,"lv":[1,13],"st":["Smarts","Wisdom"],"mo":["Group","Soft skin"],"b":["Prairie"],"d":["Canine Claw","Canine Fang","Coyote Pelt","Coyote Skull","Coyote Tail"]},{"n":"Poacher","e":0,"lv":[10,15],"st":["Speed","Smarts","Wisdom"],"mo":["Soft skin"],"b":["Rainforest"],"d":["Chicken Roast","Hiker's Rope","Shoe","Scar: Eye - Long: Left","Scar: Eye - Long: Right"]},{"n":"Polar Bear","e":0,"lv":[15,20],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Bear Fangs","Bear Paw [Polar]","Bear Pelt [Polar]","Polar Bear Skull","Scar: Face"]},{"n":"Porcupine Caribou","e":0,"lv":[2,12],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Tundra"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Porcupine Caribou Herd","e":0,"lv":[4,14],"st":["Speed","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Tundra"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Prairie Rattlesnake","e":0,"lv":[16,20],"st":["Speed","Agility","Wisdom"],"mo":["Soft skin"],"b":["Prairie"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Venom Gland","Scar: Wrist [Left]","Scar: Wrist [Right]"]},{"n":"Pronghorn Herd","e":0,"lv":[3,12],"st":["Speed","Wisdom"],"mo":["Group","Prey","Small prey"],"b":["Grasslands","Mountains","Prairie"],"d":["Gnawing Hoof","Pronghorn Horns","Pronghorn Pelt","Pronghorn Skull","Scar: Forehead"]},{"n":"Red Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Taiga","Swamp","Tundra","Rainforest"],"d":["Canine Claw","Canine Fang","Fox Pelt [Red]","Fox Skull","Fox Tail [Red]","Scar: Foot"]},{"n":"Red Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Swamp","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Red Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Swamp","Rainforest"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Rock Rattlesnake","e":0,"lv":[8,16],"st":["Speed","Smarts","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Hock [Left]","Scar: Hock [Right]"]},{"n":"Rocky Mountain Elk Bull","e":0,"lv":[4,13],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Mountains"],"d":["Elk Antlers","Elk Bull Carcass","Elk Ear","Gnawing Hoof"]},{"n":"Rocky Mountain Mule Deer Buck","e":0,"lv":[2,12],"st":["Speed","Agility","Wisdom"],"mo":["Large prey","Prey"],"b":["Mountains"],"d":["Mule Deer Carcass","Venison Liver"]},{"n":"Rocky Mountains Wolf","e":0,"lv":[1,20],"st":["Wisdom"],"mo":[],"b":["Mountains"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Tawny]","Wolf Tail"]},{"n":"Rocky Mountains Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Mountains"],"d":["Canine Fang","Wolf Pelt [Light]","Wolf Pelt [Tawny]","Wolf Skull"]},{"n":"Shiras Moose Bull","e":0,"lv":[6,17],"st":["Strength","Wisdom"],"mo":["Large prey","Prey"],"b":["Riparian Woodland"],"d":["Broken Moose Antler","Gnawing Hoof","Moose Antler","Moose Bull Carcass","Moose Ear"]},{"n":"Sitka Brown Bear","e":0,"lv":[16,19],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Tundra"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Triceps Scratch [Left]","Scar: Triceps Scratch [Right]"]},{"n":"Snowy Owl","e":0,"lv":[1,11],"st":["Smarts","Wisdom"],"mo":["Soft skin"],"b":["Tundra","Glacier"],"d":["Large Bird Meat","Owl Skull","Owl Talon","Snowy Owl Feathers","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Spectacled Bear","e":0,"lv":[6,16],"st":["Strength","Smarts","Wisdom"],"mo":["Slow","Thick skin"],"b":["Rainforest"],"d":["Bear Fangs","Bear Paw [Spectacled]","Bear Pelt [Spectacled]","Bear Skull","Scar: Scratched Shoulder [Left]","Scar: Scratched Shoulder [Right]"]},{"n":"Spectacled Caiman","e":0,"lv":[8,17],"st":["Strength","Agility","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Delicate Meat","Scar: Eye - Small [Left]","Scar: Eye - Small [Right]"]},{"n":"Starving Wolf","e":0,"lv":[1,20],"st":["Strength","Wisdom"],"mo":[],"b":["Grasslands","Deciduous Forest"],"d":["Canine Fang","Wolf Pelt [Brown]","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"Starving Wolf Pack","e":0,"lv":[1,20],"st":["Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest"],"d":["Canine Claw","Wolf Skull","Wolf Tail"]},{"n":"Steller Sea Lion","e":0,"lv":[3,13],"st":["Strength","Smarts","Wisdom"],"mo":["Slow","Thick skin"],"b":["Tundra"],"d":["Rattling Spine","Seal Skull"]},{"n":"Stickeen Brown Bear","e":0,"lv":[9,16],"st":["Strength","Wisdom"],"mo":["Slow"],"b":["Coniferous Forest"],"d":["Bear Fangs","Bear Paw [Brown]","Bear Pelt [Brown]","Bear Skull","Scar: Forehead"]},{"n":"Survivalist","e":0,"lv":[10,15],"st":["Agility","Wisdom"],"mo":["Soft skin"],"b":["Riparian Woodland"],"d":["Hiker's Rope","Odd Teeth","Venison Liver","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Swamp Wolf","e":0,"lv":[1,20],"st":["Speed","Wisdom"],"mo":[],"b":["Swamp"],"d":["Canine Fang","Wolf Pelt [Dark]","Wolf Pelt [Red]","Wolf Skull","Wolf Tail"]},{"n":"Swamp Wolf Pack","e":0,"lv":[1,20],"st":["Agility","Wisdom"],"mo":["Group"],"b":["Swamp"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Dark]","Wolf Pelt [Red]","Wolf Skull"]},{"n":"Swift Fox","e":0,"lv":[1,20],"st":["Agility","Wisdom","Smarts"],"mo":["Soft skin"],"b":["Prairie"],"d":["Canine Claw","Canine Fang","Fox Pelt [Swift]","Fox Skull","Fox Tail [Swift]","Scar: Foot"]},{"n":"Tayra","e":0,"lv":[7,16],"st":["Agility","Wisdom","Smarts"],"mo":[],"b":["Rainforest"],"d":["Mustelid Claws","Mustelid Fangs","Tayra Pelt","Tayra Skull","Scar: Bite","Scar: Lip"]},{"n":"Timber Rattlesnake","e":0,"lv":[10,16],"st":["Speed","Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Mountains","Riparian Woodland"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Venom Gland","Scar: Bite"]},{"n":"Timber Wolf","e":0,"lv":[1,25],"st":["Strength","Speed","Agility","Wisdom","Smarts"],"mo":[],"b":["Deciduous Forest","Mountains","Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Ear [Left]","Scar: Ear [Right]"]},{"n":"Timber Wolf Pack","e":0,"lv":[1,20],"st":["Smarts","Wisdom"],"mo":["Group"],"b":["Deciduous Forest","Mountains","Coniferous Forest","Taiga"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Red]","Wolf Skull","Wolf Tail","Scar: Hind Leg [Left]","Scar: Hind Leg [Right]"]},{"n":"Trapper","e":0,"lv":[10,15],"st":["Smarts","Wisdom"],"mo":["Soft skin"],"b":["Swamp"],"d":["Carrot","Chicken Roast","Odd Teeth","Shoe"]},{"n":"Tule Elk","e":0,"lv":[8,15],"st":["Strength","Agility","Wisdom"],"mo":["Large prey","Prey"],"b":["Prairie"],"d":["Broken Antler","Elk Bull Carcass","Gnawing Hoof"]},{"n":"Turkey Vulture","e":0,"lv":[3,13],"st":["Smarts","Wisdom"],"mo":["Soft skin"],"b":["Grasslands","Riparian Woodland","Desert","Swamp","Rainforest"],"d":["Large Bird Meat","Vulture Eggs","Vulture Skull","Vulture Talon","Scar: Eye - Medium [Left]","Scar: Eye - Medium [Right]"]},{"n":"Walrus","e":0,"lv":[12,19],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Rugged Flipper","Walrus Skull","Walrus Tusk","Scar: Muzzle","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Walrus Group","e":0,"lv":[13,19],"st":["Strength","Wisdom"],"mo":["Fearless","Group","Slow","Thick skin"],"b":["Glacier"],"d":["Blubber","Rugged Flipper","Walrus Skull","Walrus Tusk","Scar: Muzzle","Scar: Ripped Leg [Left]","Scar: Ripped Leg [Right]"]},{"n":"Wandering Tala","e":0,"lv":[15,20],"st":["Strength","Wisdom","Smarts"],"mo":["Fearless"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Medicine: Cure-For-All","Medicine: Rich Healing Salve"]},{"n":"Wandering Wolf Pack","e":0,"lv":[4,16],"st":["Speed","Wisdom"],"mo":["Group"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Tundra","Rainforest","Glacier"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Brown]","Wolf Pelt [Dark]","Wolf Pelt [Light]","Wolf Pelt [Tawny]","Wolf Skull","Wolf Tail"]},{"n":"Water Moccasin","e":0,"lv":[15,19],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Swamp"],"d":["Cottonmouth Skull","Dark Viper Skin","Snake Meat","Venom Gland","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Western Rattlesnake","e":0,"lv":[10,16],"st":["Agility","Wisdom"],"mo":["Slow","Venom","Thick skin"],"b":["Desert"],"d":["Rattle","Rattlesnake Skin","Rattlesnake Skull","Snake Meat","Scar: Front Leg [Left]","Scar: Front Leg [Right]"]},{"n":"Whitetail Buck","e":0,"lv":[1,10],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Grasslands","Deciduous Forest","Mountains","Riparian Woodland","Prairie","Coniferous Forest","Desert","Taiga","Swamp","Rainforest"],"d":["Broken Antler","Deer Ear","Gnawing Hoof","Whitetail Antlers","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Wild Boar","e":0,"lv":[4,15],"st":["Strength","Wisdom"],"mo":["Fearless","Prey","Small prey"],"b":["Deciduous Forest","Riparian Woodland","Swamp"],"d":["Boar Pelt","Boar Skull","Boar Tusks","Gnawing Hoof","Scar: Nose Bridge","Scar: Nose Bridge [High]","Scar: Nose Bridge [Low]"]},{"n":"Wolverine","e":0,"lv":[8,17],"st":["Strength","Wisdom","Smarts"],"mo":[],"b":["Coniferous Forest","Taiga","Tundra","Glacier"],"d":["Mustelid Claws","Mustelid Fangs","Wolverine Pelt","Wolverine Skull","Scar: Ripped Mouth"]},{"n":"Wood Bison","e":0,"lv":[10,16],"st":["Strength","Smarts","Wisdom"],"mo":["Large prey","Prey"],"b":["Coniferous Forest","Taiga"],"d":["Bison Carcass","Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Snout"]},{"n":"Wood Bison Herd","e":0,"lv":[12,18],"st":["Strength","Smarts","Wisdom"],"mo":["Group","Large prey","Prey"],"b":["Coniferous Forest","Taiga"],"d":["Bison Carcass","Bison Horns","Bison Skull","Gnawing Hoof","Thick Fur Tuft","Scar: Snout"]},{"n":"Woodland Caribou","e":0,"lv":[2,12],"st":["Speed","Wisdom"],"mo":["Large prey","Prey"],"b":["Taiga"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Eyeless [Left]","Scar: Eyeless [Right]"]},{"n":"Woodland Caribou Herd","e":0,"lv":[4,14],"st":["Speed","Wisdom","Smarts"],"mo":["Group","Large prey","Prey"],"b":["Taiga"],"d":["Broken Antler","Caribou Antlers","Gnawing Hoof","Thick Fur Tuft","Scar: Forehead"]},{"n":"Yukon Wolf","e":0,"lv":[1,20],"st":["Wisdom"],"mo":[],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Dark]","Wolf Skull","Wolf Tail"]},{"n":"Yukon Wolf Pack","e":0,"lv":[1,20],"st":["Strength","Speed","Wisdom"],"mo":["Group"],"b":["Tundra"],"d":["Canine Claw","Canine Fang","Wolf Pelt [Dark]","Wolf Pelt [Tawny]","Wolf Skull","Wolf Tail"]},{"n":"American Crocodile","e":1,"lv":[24,25],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Rainforest"],"d":["Crocodile Carcass","Crocodile Leg","Crocodile Skin","Crocodile Skull","Crocodile Tail","Scar: Throat"]},{"n":"Nanulak","e":1,"lv":[24,25],"st":["Strength","Wisdom"],"mo":["Fearless","Slow","Thick skin"],"b":["Glacier"],"d":["Bear Fangs","Bear Paw [Polar]","Bear Pelt [Polar]","Nanulak Skull","Thick Fur Tuft","Scar: Thigh Swipe [Left]","Scar: Thigh Swipe [Right]"]}],"enemyUnknownBiomes":[],"disp":["Aggressive","Friendly","Romantic","Stoic"],"moves":[{"n":"Bare Teeth","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Bark","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Bristle Fur","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Groom","v":["Very Negative","Very Positive","Positive","Negative"]},{"n":"Growl","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Huff","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Lick Mouth","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Nuzzle","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Play Bow","v":["Very Negative","Very Positive","Positive","Negative"]},{"n":"Raise Tail","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Relax Tail","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Sing","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Sniff","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Sniff Glands","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Snarl","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Stare Down","v":["Very Positive","Very Negative","Negative","Positive"]},{"n":"Touch Nose","v":["Negative","Positive","Very Positive","Very Negative"]},{"n":"Wag Tail","v":["Positive","Negative","Very Negative","Very Positive"]},{"n":"Whine","v":["Very Negative","Very Positive","Positive","Negative"]},{"n":"Zoomies","v":["Very Negative","Very Positive","Positive","Negative"]}],"roles":[{"n":"Hunter: Stalker","uses":["Smarts","Wisdom"],"how":"Proficiency rises by 1 for every hunt in this position and decays by 1 each rollover, so it only climbs on more than one hunt a day."},{"n":"Hunter: Chaser","uses":["Agility","Speed"],"how":"A wolf only gains proficiency for the first position it is assigned, checked stalker, then chaser, then finisher."},{"n":"Hunter: Finisher","uses":["Strength"],"how":"Stats matter more than proficiency or synergy, so levelling changes hunting success faster than anything else."},{"n":"Forager","uses":["Speed"],"how":"Brings back one or two herbs, plus one more at every 25 proficiency up to 75, so five at most. Winter takes one off. Speed divided by ten is minutes off the trip, up to ten."},{"n":"Scout","uses":["the biome's own stat"],"how":"How much of the bar one scout fills comes from the biome's difficulty, the scout's stats in that biome's stat, and their scouting proficiency."}],"fish":[["Alaska Blackfish",0,["Tundra","Glacier"],"",""],["Arctic Cisco",0,["Taiga","Tundra","Glacier"],"",""],["Arctic Lamprey",0,["Tundra","Glacier"],"",""],["Arroyo Chub",0,["Prairie","Desert","Swamp"],"",""],["Brook Stickleback",0,["Riparian Woodland","Coniferous Forest","Taiga"],"",""],["Creek Chub",0,["Coniferous Forest","Taiga","Tundra"],"",""],["Fallfish",0,["Riparian Woodland","Coniferous Forest","Taiga"],"",""],["Firemouth Cichlid",0,["Swamp","Rainforest"],"",""],["Flame Chub",0,["Mountains","Prairie","Desert"],"",""],["Four-Eyed Fish",0,["Swamp","Rainforest"],"",""],["Green Sunfish",0,["Grasslands","Mountains","Coniferous Forest"],"",""],["Least Cisco",0,["Tundra","Glacier"],"",""],["Logperch",0,["Riparian Woodland","Coniferous Forest","Taiga"],"",""],["Longear Sunfish",0,["Grasslands","Deciduous Forest","Mountains"],"wet",""],["Mummichog",0,["Taiga","Tundra","Glacier"],"",""],["Northern Hogsucker",0,["Mountains","Prairie","Desert"],"",""],["Northern Redbelly Dace",0,["Grasslands","Mountains","Coniferous Forest"],"",""],["Northern Studfish",0,["Grasslands","Deciduous Forest","Mountains"],"wet",""],["Northern Sunfish",0,["Deciduous Forest","Riparian Woodland","Prairie"],"",""],["Orangespotted Sunfish",0,["Grasslands","Deciduous Forest","Riparian Woodland"],"",""],["Red Shiner",0,["Mountains","Prairie","Desert"],"",""],["Redeye Bass",0,["Grasslands","Deciduous Forest","Riparian Woodland"],"",""],["Redspotted Sunfish",0,["Desert","Swamp","Rainforest"],"wet",""],["Rio Grande Cichlid",0,["Prairie","Desert","Swamp"],"",""],["River Carpsucker",0,["Deciduous Forest","Riparian Woodland","Prairie"],"",""],["River Chub",0,["Grasslands","Deciduous Forest","Mountains"],"wet",""],["River Goby",0,["Deciduous Forest","Riparian Woodland","Prairie"],"",""],["Rusty Crayfish",0,["Grasslands","Mountains","Coniferous Forest"],"",""],["Sailfin Molly",0,["Desert","Swamp","Rainforest"],"",""],["Silver Lamprey",0,["Coniferous Forest","Taiga","Tundra"],"",""],["Speckled Dace",0,["Prairie","Desert","Swamp"],"night",""],["Swamp Darter",0,["Desert","Swamp","Rainforest"],"",""],["Tadpole Madtom",0,["Coniferous Forest","Taiga","Tundra"],"",""],["Threadfin Shad",0,["Grasslands","Deciduous Forest","Riparian Woodland"],"",""],["Three-Spined Stickleback",0,["Taiga","Tundra","Glacier"],"",""],["Wimple Piranha",0,["Swamp","Rainforest"],"",""],["Alewife",1,["Coniferous Forest","Taiga","Tundra"],"",""],["Arctic Grayling",1,["Tundra","Glacier"],"",""],["Arctic Whitefish",1,["Tundra","Glacier"],"twilight",""],["Bluegill",1,["Grasslands","Deciduous Forest","Riparian Woodland"],"",""],["Brook Trout",1,["Grasslands","Mountains","Coniferous Forest"],"day",""],["Coastal Cutthroat Trout",1,["Taiga","Tundra","Glacier"],"",""],["Common Shiner",1,["Riparian Woodland","Coniferous Forest","Taiga"],"",""],["Desert Sucker",1,["Prairie","Desert","Swamp"],"",""],["Flathead Mullet",1,["Desert","Swamp","Rainforest"],"day",""],["Flier",1,["Desert","Swamp","Rainforest"],"",""],["Freshwater Drum",1,["Coniferous Forest","Taiga","Tundra"],"day",""],["Golden Redhorse",1,["Mountains","Prairie","Desert"],"",""],["Goldeye",1,["Coniferous Forest","Taiga","Tundra"],"",""],["Jaguar Cichlid",1,["Swamp","Rainforest"],"",""],["Lake Whitefish",1,["Taiga","Tundra","Glacier"],"wet",""],["Mountain Sucker",1,["Grasslands","Mountains","Coniferous Forest"],"",""],["Mud Shad",1,["Grasslands","Deciduous Forest","Riparian Woodland"],"",""],["Peamouth",1,["Taiga","Tundra","Glacier"],"",""],["Perch",1,["Deciduous Forest","Riparian Woodland","Prairie"],"",""],["Quillback",1,["Grasslands","Deciduous Forest","Mountains"],"",""],["Redbreast Sunfish",1,["Deciduous Forest","Riparian Woodland","Prairie"],"",""],["Redear Sunfish",1,["Desert","Swamp","Rainforest"],"",""],["Round Whitefish",1,["Tundra","Glacier"],"",""],["Sacramento Blackfish",1,["Prairie","Desert","Swamp"],"",""],["Sauger",1,["Riparian Woodland","Coniferous Forest","Taiga"],"",""],["Shad",1,["Grasslands","Deciduous Forest","Mountains"],"wet",""],["Shoal Bass",1,["Swamp","Rainforest"],"",""],["Shorthead Redhorse",1,["Mountains","Prairie","Desert"],"",""],["Signal Crayfish",1,["Grasslands","Mountains","Coniferous Forest"],"",""],["Smallmouth Bass",1,["Riparian Woodland","Coniferous Forest","Taiga"],"day",""],["Spotted Gar",1,["Grasslands","Deciduous Forest","Mountains"],"",""],["Spotted Shovelnose Catfish",1,["Swamp","Rainforest"],"night",""],["Warmouth",1,["Mountains","Prairie","Desert"],"day",""],["White Crappie",1,["Grasslands","Deciduous Forest","Riparian Woodland"],"twilight",""],["Yaqui Sucker",1,["Prairie","Desert","Swamp"],"night",""],["Yellow Bass",1,["Deciduous Forest","Riparian Woodland","Prairie"],"day",""],["Bering Cisco",2,["Glacier"],"",""],["Bigmouth Buffalo",2,["Deciduous Forest"],"",""],["Black Buffalo",2,["Coniferous Forest"],"day",""],["Blue Catfish",2,["Deciduous Forest"],"",""],["Blue Sucker",2,["Riparian Woodland"],"",""],["Bonytail Chub",2,["Desert"],"",""],["Bowfin",2,["Tundra"],"night",""],["Brown Bullhead",2,["Taiga"],"night",""],["Bull Trout",2,["Mountains"],"",""],["Carp",2,["Grasslands"],"night",""],["Chain Pickerel",2,["Grasslands"],"",""],["Chum Salmon",2,["Taiga"],"",""],["Colorado River Cutthroat Trout",2,["Mountains"],"",""],["Flathead Catfish",2,["Riparian Woodland"],"night",""],["Flatwhiskered Catfish",2,["Rainforest"],"",""],["Lake Trout",2,["Glacier"],"day",""],["Largemouth Bass",2,["Swamp"],"twilight",""],["Longnose Sucker",2,["Tundra"],"",""],["Mayan Sea Catfish",2,["Rainforest"],"",""],["Mexican Golden Trout",2,["Rainforest"],"day",""],["Mountain Whitefish",2,["Mountains"],"",""],["Nelma",2,["Tundra"],"",""],["Pink Salmon",2,["Coniferous Forest"],"",""],["Rio Grande Cutthroat Trout",2,["Desert"],"day",""],["Rock Bass",2,["Grasslands"],"",""],["Roundtail Chub",2,["Desert"],"wet",""],["Shortnose Gar",2,["Prairie"],"",""],["Silver Redhorse",2,["Coniferous Forest"],"",""],["Smallmouth Buffalo",2,["Prairie"],"night",""],["Sockeye Salmon",2,["Taiga"],"",""],["Spotted Bass",2,["Swamp"],"",""],["Suwannee Bass",2,["Swamp"],"",""],["Twohorn Sculpin",2,["Glacier"],"wet",""],["Walleye",2,["Deciduous Forest"],"night",""],["White Bass",2,["Riparian Woodland"],"",""],["Yellow Bullhead",2,["Prairie"],"",""],["American Eel",3,["Tundra"],"night",""],["Apache Trout",3,["Coniferous Forest"],"twilight",""],["Arctic Char",3,["Glacier"],"",""],["Athabasca Rainbow Trout",3,["Mountains"],"day",""],["Atlantic Salmon",3,["Glacier"],"day",""],["Big Sandy Crayfish",3,["Riparian Woodland"],"day",""],["Bighead Carp",3,["Deciduous Forest"],"twilight",""],["Black Bullhead",3,["Grasslands"],"night",""],["Black Carp",3,["Coniferous Forest"],"night",""],["Blind Swamp Eel",3,["Swamp"],"night",""],["Broad Whitefish",3,["Glacier"],"twilight",""],["Burbot",3,["Grasslands"],"twilight",""],["Cavefish",3,["Rainforest"],"night",""],["Channel Catfish",3,["Prairie"],"twilight",""],["Florida Gar",3,["Swamp"],"",""],["Gila Trout",3,["Coniferous Forest"],"",""],["Grass Pickerel",3,["Grasslands"],"",""],["Kokanee Salmon",3,["Tundra"],"twilight",""],["Mudpuppy",3,["Mountains"],"night",""],["Muskellunge",3,["Taiga"],"night",""],["Northern Cavefish",3,["Prairie"],"night",""],["Northern Pikeminnow",3,["Prairie"],"",""],["Northern Snakehead",3,["Taiga"],"twilight",""],["Painted Turtle",3,["Deciduous Forest"],"day",""],["Pirapitinga",3,["Swamp"],"",""],["Rainbow Darter",3,["Riparian Woodland"],"twilight",""],["Razorback Sucker",3,["Desert"],"",""],["Redfin Pickerel",3,["Riparian Woodland"],"",""],["Redtail Catfish",3,["Rainforest"],"wet",""],["Sacramento Pikeminnow",3,["Desert"],"twilight",""],["Sea-Run Brook Trout",3,["Tundra"],"",""],["Tropical Gar",3,["Rainforest"],"day",""],["Westslope Cutthroat Trout",3,["Taiga"],"",""],["White Bullhead",3,["Deciduous Forest"],"",""],["Yaqui Catfish",3,["Desert"],"night",""],["Yellowstone Cutthroat Trout",3,["Mountains"],"",""],["Alligator Gar",4,["Swamp"],"night","Food"],["Alligator Snapping Turtle",4,["Riparian Woodland"],"day","Amusement"],["Atlantic Sturgeon",4,["Grasslands"],"twilight","Food"],["Axolotl",4,["Desert"],"twilight","Amusement"],["Baby Alligator",4,["Swamp"],"wet","Food"],["Baby Crocodile",4,["Rainforest"],"wet","Food"],["Black Spot Piranha",4,["Rainforest"],"twilight","Food"],["Bog Turtle",4,["Tundra"],"day","Amusement"],["Bull Shark",4,["Riparian Woodland"],"wet","Food"],["Bullfrog",4,["Grasslands"],"wet","Amusement"],["California Newt",4,["Desert"],"wet","Amusement"],["Chinook Salmon",4,["Mountains"],"day","Food"],["Coho Salmon",4,["Tundra"],"wet","Food"],["Colorado Pikeminnow",4,["Desert"],"day","Food"],["Common Snapping Turtle",4,["Deciduous Forest"],"day","Food"],["Grass Carp",4,["Prairie"],"day","Food"],["Green Sturgeon",4,["Coniferous Forest"],"night","Food"],["Greenland Shark",4,["Glacier"],"night","Food"],["Gulf Sturgeon",4,["Swamp"],"twilight","Food"],["Hellbender",4,["Mountains"],"twilight","Food"],["Lake Sturgeon",4,["Grasslands"],"day","Food"],["Longnose Gar",4,["Riparian Woodland"],"night","Food"],["Northern Pike",4,["Taiga"],"day","Food"],["Northern Red-Bellied Cooter",4,["Deciduous Forest"],"twilight","Amusement"],["Paddlefish",4,["Prairie"],"wet","Food"],["Pallid Sturgeon",4,["Prairie"],"twilight","Food"],["Red King Crab",4,["Glacier"],"wet","Food"],["Rough-Skinned Newt",4,["Mountains"],"wet","Amusement"],["Seal Pup",4,["Glacier"],"twilight","Food"],["Shovelnose Sturgeon",4,["Deciduous Forest"],"wet","Food"],["Spotted Turtle",4,["Coniferous Forest"],"twilight","Amusement"],["Tambaqui",4,["Rainforest"],"day","Food"],["Tiger Muskie",4,["Taiga"],"wet","Food"],["Western Pond Turtle",4,["Coniferous Forest"],"wet","Amusement"],["White Sturgeon",4,["Tundra"],"night","Food"],["Wood Turtle",4,["Taiga"],"twilight","Amusement"]],"fishOddConditions":[]};
   /* @guides-end */
 
   // Genetics facts from the Grouse House Wiki. Regenerate with: python tools/export_genetics.py
