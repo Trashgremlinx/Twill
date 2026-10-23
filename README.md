@@ -20,6 +20,8 @@ glance without a separate lore document. Breeding challenges and planning your p
 
 **[Read the full write up, with pictures &rarr;](https://trashgremlinx.github.io/Twill/)**
 
+**[What's changed: the Twill Field Guide &rarr;](https://trashgremlinx.github.io/Twill/changelog_twill.html)**
+
 ## Install
 
 Two steps.
@@ -32,6 +34,8 @@ Two steps.
 
 Then open Wolvden. The Twill mark sits in the corner of every page. Click it, or press `Alt+K`.
 
+**Other scripts:** HoLMod: compatible with Twill.
+
 Updates happen by themselves after that. Nothing you have written or set is lost when it updates.
 Don't want to wait? Click the Tampermonkey icon in your browser and choose **Check for userscript
 updates**, or click the install link again. If Tampermonkey asks before installing the new version,
@@ -43,7 +47,7 @@ say yes.
 
 | | |
 |---|---|
-| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 253 bases, 196 eye colours, 2,386 markings, 28 mutations and 40 personalities |
+| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 253 bases, 196 eye colours, 2,581 markings, 28 mutations and 40 personalities |
 | **Lore** | Your own fields on your own wolves, in sections you name. Wolf-link fields cross reference both ways. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players can read it too |
 | **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet. **Copy for Discord** copies a tidy message about a wolf |
 | **Breeding projects** | Up to 4 projects with 8 wolves each, started from scratch or from the Tray, `Alt+B`: a goal, planned pairings, matchmaking, a heat counter you type into, and sharing as a Wolvden post, Discord message or spreadsheet |
