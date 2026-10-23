@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.3
+// @version      0.37.4
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,13 +56,15 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.3';
+  const VERSION = '0.37.4';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
   const BUILD = VERSION.split('.').length > 3 ? VERSION : '';
   // The Twill Field Guide, Change log edition: every change, newest first.
   const TWILL_CHANGES = 'https://trashgremlinx.github.io/Twill/changelog_twill.html';
+  // The full write up, the front page of Twill's site.
+  const TWILL_SITE = 'https://trashgremlinx.github.io/Twill/';
 
   /* Two copies of Twill on one page, say an old test build left installed
      beside this one, would draw two buttons and two hubs, and both would save
@@ -817,6 +819,9 @@
     .dk-pq-foot { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .dk-pq-foot > span { flex: 1; min-width: 140px; font-size: 11px; }
     #dk-hub .dk-pq-foot a.dk-btn { text-decoration: none; }
+    /* Help & About: the report buttons and Learn rows are links, dressed as buttons and rows. */
+    #dk-hub a.dk-btn, #dk-hub a.dk-row { text-decoration: none; }
+    #dk-hub a.dk-btn.dk-primary { color: var(--dk-on-accent) !important; }
 
     /* Text size. Phones leave it to the browser's own setting, because a
        zoomed panel there would run off the edge of the screen. */
@@ -2103,6 +2108,15 @@
         'Guides › Events now covers the whole year: Springtide Howl Fayre, Cataclysms and Echoes of the Ancient join the others.',
         'Every change to Twill now lives in the Twill Field Guide, linked from About and from this card.'
       ]
+    },
+    '0.37.4': {
+      title: 'Help & About',
+      go: 'about',
+      items: [
+        'About is now Help & About. Report a problem, ask a question or suggest an idea, and a form opens on the Twill Field Guide with your version and page already filled in.',
+        'No Discord account needed to send one. Twill itself still sends nothing: you write the report and send it from the form.',
+        'Learn links to the Twill Field Guide and the full write up.'
+      ]
     }
   };
   if (!savedCore) save('seenVersion', VERSION);
@@ -2224,7 +2238,7 @@
       : screen === 'compare' ? 'Compare'
       : screen === 'compose' ? 'Compose a post'
       : screen === 'comfort' ? 'Comfort'
-      : screen === 'about' ? 'About'
+      : screen === 'about' ? 'Help & About'
       : screen === 'guides' ? 'Guides'
       : screen === 'herbs' ? 'Herb map'
       : screen === 'scout' ? 'Scout map'
@@ -2250,11 +2264,11 @@
         onclick: () => { screen = upTo; saveAsOpen = false; render(); }
       }));
     }
-    // The mark doubles as the way into About, so the credit is never more than
-    // one click away without costing a row on any screen.
+    // The mark doubles as the way into Help & About, so the credit is never more
+    // than one click away without costing a row on any screen.
     head.append(
       h('button', {
-        type: 'button', class: 'dk-mark', title: 'About Twill', 'aria-label': 'About Twill',
+        type: 'button', class: 'dk-mark', title: 'Help & About', 'aria-label': 'Help & About',
         onclick: () => { screen = 'about'; render(); }
       }, h('img', { src: TWILL_MARK_DARK, alt: '', width: 19, height: 22 })),
       h('span', { class: 'dk-title', text: title }),
@@ -3250,9 +3264,40 @@
       text: 'A pack can have at most 3 foragers, and there is no way to raise that.' }));
   }
 
-  // About: who made it, how to reach them, where the facts came from, and the
-  // rules it keeps. Everything a stranger who was handed the file should read.
+  /* Help & About. The report buttons are ordinary links to the form on the Twill
+     Field Guide, opened in a new tab and filled in with the kind, Twill, this
+     version and the page you're on. Twill sends nothing itself: you write the
+     report and send it from the form. Each place below must match an option in
+     the form's "Where" list exactly, curly apostrophe and all. */
+  const REPORT_WHERE = {
+    den: 'The den', wolf: 'A wolf’s page', family: 'A Family page', hoard: 'The Hoard',
+    trades: 'The Trading Center', trade: 'The Trading Center', explore: 'Exploring', fishing: 'Fishing',
+    enclave: 'The Enclave', pairlists: 'Pair lists', wardrobe: 'The Wardrobe'
+  };
+
+  // Then About: who made it, how to reach them, where the facts came from, and
+  // the rules it keeps. Everything a stranger who was handed the file should read.
   function renderAbout() {
+    const where = REPORT_WHERE[currentPage().kind] || 'Somewhere else';
+    // A quiet fix (0.37.3.1) goes in whole, since that is what a report needs.
+    const ver = BUILD || SHOWN_VERSION;
+    const tell = (kind, label, primary) => h('a', {
+      class: 'dk-btn' + (primary ? ' dk-primary' : ''), target: '_blank', rel: 'noopener noreferrer', text: label,
+      href: TWILL_CHANGES + '?' + new URLSearchParams({ kind, product: 'twill', version: ver, where }) + '#report'
+    });
+    const learn = (href, title, sub) => h('a', { class: 'dk-row dk-link', href, target: '_blank', rel: 'noopener noreferrer', style: 'padding-top:4px' },
+      h('div', { class: 'dk-t' }, h('strong', { text: title }), h('span', { text: sub })),
+      h('span', { class: 'dk-chev', 'aria-hidden': 'true', text: '↗' }));
+    sheet.append(
+      h('div', { class: 'dk-lb', text: 'Tell us what you found' }),
+      h('div', { class: 'dk-btns', style: 'margin-top:0' },
+        tell('bug', 'Report a problem', true), tell('question', 'Ask a question'), tell('idea', 'Suggest an idea')),
+      h('div', { class: 'dk-note', style: 'margin-top:6px',
+        text: 'Each opens the form on the Twill Field Guide in a new tab, filled in with Twill ' + ver + ' and the page you’re on. Twill sends nothing itself.' }),
+      h('div', { class: 'dk-lb', text: 'Learn' }),
+      learn(TWILL_CHANGES + '?v=' + encodeURIComponent(SHOWN_VERSION), 'The Twill Field Guide', 'what’s new and every change, newest first'),
+      learn(TWILL_SITE, 'The full write up', 'everything Twill does, and how to install it'),
+      h('div', { class: 'dk-lb', text: 'About' }));
     sheet.append(
       // About wears whichever mark the corner button wears, always the same one.
       h('div', { class: 'dk-about-mark' }, h('img', {
@@ -3368,7 +3413,7 @@
     row('Comfort', () => { screen = 'comfort'; render(); }, 'reading font, spacing, motion, custom layouts');
     row('Backup', () => { screen = 'backup'; render(); });
     row('Guides', () => { screen = 'guides'; render(); }, '9 references, kept offline');
-    row('About', () => { screen = 'about'; render(); }, 'Society of Fur  ·  version ' + SHOWN_VERSION);
+    row('Help & About', () => { screen = 'about'; render(); }, 'report, ask, learn  ·  version ' + SHOWN_VERSION);
 
     paint();
   }
