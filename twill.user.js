@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.4
+// @version      0.37.4.1
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.4';
+  const VERSION = '0.37.4.1';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
@@ -856,7 +856,8 @@
     }
     #dk-hub .dk-seg button + button { border-left: 1px solid var(--dk-line); }
     #dk-hub .dk-seg button[aria-pressed="true"] { color: var(--dk-on-accent); background: var(--dk-accent); font-weight: 700; }
-    .dk-seg svg, .dk-sunmoon svg { width: 14px; height: 14px; flex: none; }
+    /* Wolvden's Explore page gives every svg on the page its map as a background; keep the icons clean. */
+    .dk-seg svg, .dk-sunmoon svg { width: 14px; height: 14px; flex: none; background: none !important; max-width: none !important; position: static !important; }
     .dk-tlist { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
     #dk-hub .dk-tlist button {
       display: flex; align-items: center; gap: 6px; margin: 0; padding: 5px 7px; text-align: left; cursor: pointer;
