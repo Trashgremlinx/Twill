@@ -47,7 +47,7 @@ say yes.
 
 | | |
 |---|---|
-| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 253 bases, 196 eye colours, 2,581 markings, 28 mutations and 40 personalities |
+| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 253 bases, 197 eye colours, 2,585 markings, 28 mutations and 40 personalities |
 | **Lore** | Your own fields on your own wolves, in sections you name. Wolf-link fields cross reference both ways. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players can read it too |
 | **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet. **Copy for Discord** copies a tidy message about a wolf |
 | **Breeding projects** | Up to 4 projects with 8 wolves each, started from scratch or from the Tray, `Alt+B`: a goal, planned pairings, matchmaking, a heat counter you type into, and sharing as a Wolvden post, Discord message or spreadsheet |
