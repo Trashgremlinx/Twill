@@ -47,7 +47,7 @@ say yes.
 
 | | |
 |---|---|
-| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 253 bases, 197 eye colours, 2,585 markings, 28 mutations and 40 personalities |
+| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 255 bases, 198 eye colours, 2,593 markings, 28 mutations and 40 personalities |
 | **Lore** | Your own fields on your own wolves, in sections you name. Wolf-link fields cross reference both ways. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players can read it too |
 | **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet. **Copy for Discord** copies a tidy message about a wolf |
 | **Breeding projects** | Up to 4 projects with 8 wolves each, started from scratch or from the Tray, `Alt+B`: a goal, planned pairings, matchmaking, a heat counter you type into, and sharing as a Wolvden post, Discord message or spreadsheet |
@@ -57,7 +57,7 @@ say yes.
 | **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
 | **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades, in any den listing. Every section folds on its own |
 | **Wardrobe** | Custom decor as extra layers, plus looks you can save and try on again in the preview |
-| **Item Lookup** | A magnifier on every item in your Hoard and on trades: 284 recipes, the catalogue, or the trading centre, already searched |
+| **Item Lookup** | A magnifier on every item in your Hoard and on trades: 287 recipes, the catalogue, or the trading centre, already searched |
 | **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear, with your own price notes |
 | **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
 | **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |
