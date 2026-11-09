@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.8
+// @version      0.37.9
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.8';
+  const VERSION = '0.37.9';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
@@ -1894,7 +1894,7 @@
   /* Reading comfort: a reading font and spacing, reduced motion, and how
      players' custom den layouts are treated. The fonts are only ever ones
      already on this computer; Twill never downloads a font. */
-  const COMFORT_DEFAULTS = { font: '', ls: 0, ws: 0, lh: 0, scope: 'twill', motion: 'auto', calm: true, layouts: 'ask' };
+  const COMFORT_DEFAULTS = { font: '', ls: 0, ws: 0, lh: 0, scope: 'twill', motion: 'auto', calm: true, layouts: 'ask', ruler: false };
   let comfort = Object.assign({}, COMFORT_DEFAULTS, load('comfort', {}));
   const saveComfort = () => save('comfort', comfort);
 
@@ -1924,6 +1924,54 @@
   const motionOn = () => comfort.motion === 'on' || (comfort.motion === 'auto' && !!(sysCalm && sysCalm.matches));
   const clampN = (v, lo, hi) => Math.min(hi, Math.max(lo, Number(v) || 0));
 
+  /* Reading ruler: a soft band on the line under the pointer in a forum post or a
+     wolf's bio, with the rest of that block dimmed a little, so it's easier to
+     keep your place. It draws over the page and never touches it. */
+  const RULER_TEXT = 'td.forum-post, .wolf-bio';
+  let rulerBox = null, rulerBand = null, rulerAt = null, rulerFrame = 0;
+  // The line under a point: one character from the caret there, measured.
+  function rulerLine(x, y) {
+    let node = null, at = 0;
+    if (document.caretPositionFromPoint) {
+      const p = document.caretPositionFromPoint(x, y);
+      if (p) { node = p.offsetNode; at = p.offset; }
+    } else if (document.caretRangeFromPoint) {
+      const r = document.caretRangeFromPoint(x, y);
+      if (r) { node = r.startContainer; at = r.startOffset; }
+    }
+    if (!node || node.nodeType !== 3 || !node.length) return null;
+    const range = document.createRange();
+    const start = Math.min(at, node.length - 1);
+    range.setStart(node, start);
+    range.setEnd(node, start + 1);
+    const box = range.getBoundingClientRect();
+    return box.height && y >= box.top - 4 && y <= box.bottom + 4 ? box : null;
+  }
+  function rulerDraw() {
+    rulerFrame = 0;
+    const hide = () => { if (rulerBox) rulerBox.hidden = true; };
+    if (!comfort.ruler || !rulerAt) return hide();
+    const hit = document.elementFromPoint(rulerAt.x, rulerAt.y);
+    const block = hit && hit.closest ? hit.closest(RULER_TEXT) : null;
+    const line = block && rulerLine(rulerAt.x, rulerAt.y);
+    if (!line) return hide();
+    if (!rulerBox) {
+      rulerBand = h('div');
+      rulerBox = h('div', { id: 'dk-ruler', 'aria-hidden': 'true' }, rulerBand);
+      document.body.appendChild(rulerBox);
+    }
+    const b = block.getBoundingClientRect();
+    Object.assign(rulerBox.style, { left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px' });
+    Object.assign(rulerBand.style, { top: (line.top - b.top - 3) + 'px', height: (line.height + 6) + 'px' });
+    rulerBox.hidden = false;
+  }
+  const rulerSoon = () => { if (!rulerFrame) rulerFrame = requestAnimationFrame(rulerDraw); };
+  const rulerFollow = (e) => { if (!comfort.ruler) return; rulerAt = { x: e.clientX, y: e.clientY }; rulerSoon(); };
+  document.addEventListener('pointermove', rulerFollow, { passive: true });
+  document.addEventListener('pointerdown', rulerFollow, { passive: true });
+  window.addEventListener('scroll', () => { if (comfort.ruler) rulerSoon(); }, { passive: true, capture: true });
+  document.documentElement.addEventListener('pointerleave', () => { rulerAt = null; rulerSoon(); });
+
   const comfortEl = document.createElement('style');
   comfortEl.id = 'dk-comfort';
   function paintComfort() {
@@ -1951,6 +1999,13 @@
           ' html, body { scroll-behavior: auto !important; }');
       }
     }
+    if (comfort.ruler) {
+      css.push('#dk-ruler { position: fixed; z-index: 2147483000; pointer-events: none; overflow: hidden; border-radius: 4px; }' +
+        ' #dk-ruler[hidden] { display: none; }' +
+        ' #dk-ruler > div { position: absolute; left: 4px; right: 4px; border-radius: 5px;' +
+        ' background: color-mix(in srgb, var(--dk-accent, #93b46a) 16%, transparent);' +
+        ' box-shadow: 0 0 0 1px color-mix(in srgb, var(--dk-accent, #93b46a) 35%, transparent), 0 0 0 9999px rgba(0, 0, 0, .18); }');
+    } else if (rulerBox) rulerBox.hidden = true;
     comfortEl.textContent = css.join('\n');
     if (!comfortEl.isConnected) document.head.appendChild(comfortEl);
   }
@@ -2147,6 +2202,13 @@
       items: [
         'Genetics knows Convex and Torpor from Lunar Dreams, and Enaid and Madog from Coigreach, as skins, noses and claws.',
         'The wiki has finished its skin, nose and claw pages, so the cards link to the finished ones.'
+      ]
+    },
+    '0.37.9': {
+      title: 'A reading ruler',
+      items: [
+        'New in Comfort: Reading ruler. Switch it on and a soft band follows the line you’re reading in forum posts and wolf bios, with the rest dimmed a little, so it’s easier to keep your place.',
+        'It follows your pointer, or your finger on a phone, and only draws on top of the page.'
       ]
     }
   };
@@ -4387,6 +4449,12 @@
         text: (sysCalm && sysCalm.matches ? 'Your computer asks for reduced motion, ' : 'Your computer doesn’t ask for reduced motion, ') +
           (motionOn() ? 'so motion is calmed now.' : 'so nothing is calmed now.') +
           ' Animated GIFs can’t be paused by a page style, so they keep playing.' }));
+
+    // --- reading ruler ---
+    sheet.append(h('div', { class: 'dk-lb', text: 'Reading ruler' }),
+      h('div', { class: 'dk-seg' }, segBtn('ruler', false, 'Off'), segBtn('ruler', true, 'On')),
+      h('div', { class: 'dk-note', style: 'margin-top:4px',
+        text: 'A soft band in your theme’s colour on the line you’re reading in forum posts and wolf bios, and the rest dims slightly. It follows your pointer, or your finger on a phone, and only draws on top: the post is never changed.' }));
 
     // --- custom layouts ---
     sheet.append(h('div', { class: 'dk-lb', text: 'Players’ custom layouts' }),
