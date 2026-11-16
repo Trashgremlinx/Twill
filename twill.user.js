@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.9
+// @version      0.37.9.1
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.9';
+  const VERSION = '0.37.9.1';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
@@ -10692,11 +10692,13 @@
       for (const [i, c] of ws.custom.entries()) {
         const row = h('div', { class: 'dk-wd-row' });
         const tick = h('input', { type: 'checkbox', checked: c.on !== false, 'aria-label': 'Show this layer' });
-        tick.addEventListener('change', () => { c.on = tick.checked; saveWardrobe(); inject(); });
+        // Only your own clicks count: a change the page sends to every control must
+        // not quietly hide a layer or move it behind the wolf.
+        tick.addEventListener('change', (e) => { if (!e.isTrusted) { tick.checked = c.on !== false; return; } c.on = tick.checked; saveWardrobe(); inject(); });
         const where = h('select', { 'aria-label': 'Above or below the wolf' },
           h('option', { value: 'below', text: 'behind', selected: !c.over }),
           h('option', { value: 'over', text: 'in front', selected: !!c.over }));
-        where.addEventListener('change', () => { c.over = where.value === 'over'; saveWardrobe(); inject(); });
+        where.addEventListener('change', (e) => { if (!e.isTrusted) { where.value = c.over ? 'over' : 'below'; return; } c.over = where.value === 'over'; saveWardrobe(); inject(); });
         row.append(tick,
           h('span', { class: 'dk-wd-url', text: c.url, title: c.url }),
           where,
@@ -10711,7 +10713,10 @@
         const add = () => {
           const v = url.value.trim();
           if (!IMG_OK.test(v)) { err.textContent = 'Needs a full https:// address that points at an image.'; return; }
-          ws.custom.push({ url: v, over: true, on: true });
+          // A Wolvden decor address says itself whether it goes in front of the wolf
+          // or behind it (…/decor/<pose>/<age>/over/… or …/below/…), so start it there.
+          const side = v.match(/\/decor\/[^/]+\/[^/]+\/(over|below)\//i);
+          ws.custom.push({ url: v, over: side ? side[1].toLowerCase() === 'over' : true, on: true });
           saveWardrobe(); inject(); paint();
         };
         url.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
