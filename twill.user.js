@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.10
+// @version      0.37.10.2
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.10';
+  const VERSION = '0.37.10.2';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
@@ -6161,6 +6161,13 @@
 
   // ===================================================== module: genetics
 
+  /* How the Genetics colours look in the Wardrobe: chosen in the Wardrobe's
+     settings, painted by the Genetics module. Pill on the left edge, by the
+     arrow or off, and a soft wash, an outline and an underline to mix in. */
+  const WARD_GENE_LOOK = { pill: 'off', wash: false, outline: true, under: false };
+  const wardGeneLook = () => Object.assign({}, WARD_GENE_LOOK, load('wardGenes', {}));
+  let restyleWardGenes = () => {};
+
   defineModule((() => {
     const TIERS = { 0: 'Common', 1: 'Grove', 2: 'Raffle', 3: 'Event', 4: 'Special breeding', 6: 'Breeding (combos)', 7: 'Random Marking Applicator', 8: 'Newly befriended wolves', 10: 'Special breeding (combos)' };
 
@@ -6967,22 +6974,56 @@
     const sameBadge = (old, tag) => old && tag && old.title === tag.from && old.style.getPropertyValue('--g') === tag.colour &&
       old.textContent === (tag.pips || '') + (tag.tier || '');
 
-    // The box itself: beside a plain dropdown, or inside a marking's Chosen box.
+    /* Everything sits inside its own box, never beside it. A marking's box is the
+       game's searchable dropdown, which it builds a moment after the page loads,
+       so a marking waits for it rather than being marked twice. A plain dropdown
+       can't hold anything, so its bar is painted on as a background. */
+    // The look you picked, as classes on the page, so the stylesheet can mix them.
+    function wardLookClasses() {
+      const look = wardGeneLook();
+      const html = document.documentElement.classList;
+      html.toggle('dk-wgs-left', look.pill === 'left');
+      html.toggle('dk-wgs-arrow', look.pill === 'arrow');
+      html.toggle('dk-wgs-wash', !!look.wash);
+      html.toggle('dk-wgs-outline', !!look.outline);
+      html.toggle('dk-wgs-under', !!look.under);
+    }
     function wardPaintBox(sel) {
       const label = wardLabel(sel.name);
       const opt = sel.options[sel.selectedIndex];
       const tag = label && opt ? wardTag(label, opt.textContent) : null;
-      const chosen = sel.nextElementSibling && sel.nextElementSibling.classList.contains('chosen-container')
-        ? sel.nextElementSibling.querySelector('.chosen-single') : null;
-      const host = chosen || sel.parentNode;
-      const old = chosen ? chosen.querySelector(':scope > .dk-wg')
-        : (sel.nextElementSibling && sel.nextElementSibling.classList.contains('dk-wg') ? sel.nextElementSibling : null);
-      if (!tag) { if (old) old.remove(); return; }
-      if (sameBadge(old, tag)) return;
-      const badge = wardBadge(tag);
-      if (old) old.replaceWith(badge);
-      else if (chosen) { const span = chosen.querySelector('span'); if (span) span.after(badge); else chosen.prepend(badge); }
-      else host.insertBefore(badge, sel.nextSibling);
+      // Anything an earlier version left beside a box goes.
+      for (const stray of sel.parentNode.querySelectorAll(':scope > .dk-wg')) stray.remove();
+      const box = sel.nextElementSibling && sel.nextElementSibling.classList.contains('chosen-container') ? sel.nextElementSibling : null;
+      if (box) {
+        const single = box.querySelector('.chosen-single');
+        const old = single && single.querySelector(':scope > .dk-wg');
+        if (!single) return;
+        if (!tag) { if (old) old.remove(); single.classList.remove('dk-wg-cs'); single.style.removeProperty('--g'); return; }
+        single.classList.add('dk-wg-cs');
+        single.style.setProperty('--g', tag.colour);
+        if (sameBadge(old, tag)) return;
+        const badge = wardBadge(tag);
+        if (old) old.replaceWith(badge);
+        else { const span = single.querySelector('span'); if (span) span.after(badge); else single.prepend(badge); }
+        return;
+      }
+      // A marking whose searchable box isn't built yet: leave it until it is.
+      if (/^Slot /.test(label) || sel.style.display === 'none') return;
+      if (!tag) { wardPlain(sel, null); return; }
+      wardPlain(sel, tag);
+    }
+    function wardPlain(sel, tag) {
+      if (!tag) {
+        sel.classList.remove('dk-wg-sel');
+        sel.style.removeProperty('--g');
+        if (sel.dataset.dkWgTitle != null) { sel.title = sel.dataset.dkWgTitle; delete sel.dataset.dkWgTitle; }
+        return;
+      }
+      if (sel.dataset.dkWgTitle == null) sel.dataset.dkWgTitle = sel.title || '';
+      sel.classList.add('dk-wg-sel');
+      sel.style.setProperty('--g', tag.colour);
+      sel.title = tag.from;
     }
 
     // The open marking list: every result Chosen draws gets its own badge.
@@ -7017,7 +7058,27 @@
       .dk-wg-pips { color: var(--g); font-size: 11px; letter-spacing: 1px; font-weight: 400; }
       .dk-wg-t { color: var(--dk-muted, #999); font-size: 11px; }
       .chosen-single > .dk-wg { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); margin: 0;
-        padding-left: 6px; background: inherit; }
+        padding-left: 6px; }
+      /* Plain boxes can't hold anything, so every part of the look is a background
+         layer, switched in and out by the classes on the page. */
+      select.dk-wg-sel { --wg-pill: none; --wg-wash: none; --wg-pos: left 5px center;
+        background-image: var(--wg-pill), var(--wg-wash) !important; background-repeat: no-repeat !important;
+        background-size: 5px 15px, 100% 100% !important; background-position: var(--wg-pos), 0 0 !important; }
+      html.dk-wgs-left select.dk-wg-sel { --wg-pill: linear-gradient(var(--g), var(--g)); padding-left: 15px !important; }
+      html.dk-wgs-arrow select.dk-wg-sel { --wg-pill: linear-gradient(var(--g), var(--g)); --wg-pos: right 19px center; padding-right: 27px !important; }
+      html.dk-wgs-wash select.dk-wg-sel { --wg-wash: linear-gradient(90deg, color-mix(in srgb, var(--g) 20%, transparent), transparent 70%); }
+      html.dk-wgs-outline select.dk-wg-sel { border-color: var(--g) !important; box-shadow: 0 0 0 1px var(--g) !important; }
+      html.dk-wgs-under select.dk-wg-sel { border-bottom: 3px solid var(--g) !important; }
+      /* Marking boxes: the pill moves to the left edge, or stays in the badge by the arrow. */
+      .chosen-single.dk-wg-cs { position: relative; }
+      html.dk-wgs-left .chosen-single.dk-wg-cs { padding-left: 16px !important; }
+      html.dk-wgs-left .chosen-single.dk-wg-cs::before { content: ''; position: absolute; left: 5px; top: 50%; width: 5px; height: 15px;
+        transform: translateY(-50%); border-radius: 3px; background: var(--g);
+        box-shadow: inset 0 2px 1px rgba(255,255,255,.4), inset 0 -2px 1px rgba(0,0,0,.3); }
+      html:not(.dk-wgs-arrow) .chosen-single > .dk-wg > .dk-wg-pill { display: none; }
+      html.dk-wgs-wash .chosen-single.dk-wg-cs { background-image: linear-gradient(90deg, color-mix(in srgb, var(--g) 20%, transparent), transparent 70%) !important; }
+      html.dk-wgs-outline .chosen-single.dk-wg-cs { border-color: var(--g) !important; box-shadow: 0 0 0 1px var(--g) !important; }
+      html.dk-wgs-under .chosen-single.dk-wg-cs { border-bottom: 3px solid var(--g) !important; }
       .chosen-results li.dk-wg-li { display: flex; align-items: center;
         background-image: linear-gradient(90deg, color-mix(in srgb, var(--g) 14%, transparent), transparent 60%); }
       .chosen-results li.dk-wg-li > .dk-wg { margin-left: auto; }
@@ -7025,11 +7086,13 @@
     function startWardrobe() {
       if (wardObs) return;
       document.head.appendChild(wardStyle);
+      wardLookClasses();
+      restyleWardGenes = () => { wardLookClasses(); wardPaint(); };
       wardPaint();
       wardObs = new MutationObserver(wardSoon);
-      for (const box of document.querySelectorAll('.chosen-container')) {
-        wardObs.observe(box, { childList: true, subtree: true, characterData: true });
-      }
+      const table = document.querySelector('select[name="marking1"]');
+      const watchHere = table ? table.closest('table, ul, form, #main') || document.body : document.body;
+      wardObs.observe(watchHere, { childList: true, subtree: true, characterData: true });
       document.addEventListener('change', wardOnInput, true);
       document.addEventListener('click', wardOnInput, true);
     }
@@ -7039,6 +7102,10 @@
       document.removeEventListener('change', wardOnInput, true);
       document.removeEventListener('click', wardOnInput, true);
       document.querySelectorAll('.dk-wg').forEach((el) => el.remove());
+      document.querySelectorAll('select.dk-wg-sel').forEach((s) => wardPlain(s, null));
+      document.querySelectorAll('.dk-wg-cs').forEach((el) => { el.classList.remove('dk-wg-cs'); el.style.removeProperty('--g'); });
+      document.documentElement.classList.remove('dk-wgs-left', 'dk-wgs-arrow', 'dk-wgs-wash', 'dk-wgs-outline', 'dk-wgs-under');
+      restyleWardGenes = () => {};
       document.querySelectorAll('.dk-wg-li').forEach((li) => { li.classList.remove('dk-wg-li'); li.style.removeProperty('--g'); });
       wardStyle.remove();
     }
@@ -10972,6 +11039,18 @@
     }
 
     function settings(box) {
+      // How the Genetics colours look on the gene boxes here. Mix and match.
+      const look = wardGeneLook();
+      const keep = (k, v) => { look[k] = v; save('wardGenes', look); restyleWardGenes(); };
+      const pillBtn = (v, label) => h('button', { type: 'button', 'aria-pressed': String(look.pill === v),
+        onclick: (e) => { keep('pill', v); e.currentTarget.parentNode.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === e.currentTarget))); } }, label);
+      box.append(h('div', { class: 'dk-lb', style: 'margin-top:0', text: 'Gene colours on the boxes' }),
+        h('div', { class: 'dk-note', style: 'margin-top:0', text: 'Needs Genetics switched on. Pick where the colour pill sits, then add any of the rest.' }),
+        h('div', { class: 'dk-seg' }, pillBtn('left', 'Pill on the left'), pillBtn('arrow', 'Pill by the arrow'), pillBtn('off', 'No pill')),
+        check('Soft wash across the box', !!look.wash, (v) => keep('wash', v)),
+        check('Coloured outline', !!look.outline, (v) => keep('outline', v)),
+        check('Underline', !!look.under, (v) => keep('under', v)));
+      box.append(h('div', { class: 'dk-lb', text: 'About' }));
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0', text:
         'Wolvden\u2019s wardrobe already lets you preview every decor, owned or not, 10 at a time. Twill adds the 3 things it does not: custom decor as extra layers, looks you can keep and compare, and a line under each slot saying where that decor comes from.' }));
       box.append(h('div', { class: 'dk-lb', text: 'Saved' }));
