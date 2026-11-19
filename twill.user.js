@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.9.1
+// @version      0.37.10
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.9.1';
+  const VERSION = '0.37.10';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
@@ -2209,6 +2209,14 @@
       items: [
         'New in Comfort: Reading ruler. Switch it on and a soft band follows the line you’re reading in forum posts and wolf bios, with the rest dimmed a little, so it’s easier to keep your place.',
         'It follows your pointer, or your finger on a phone, and only draws on top of the page.'
+      ]
+    },
+    '0.37.10': {
+      title: 'Gene colours in the Wardrobe',
+      items: [
+        'The Wardrobe’s gene boxes get the same colours as a wolf’s page: where each base, eye, skin, nose, claw, mutation and marking comes from.',
+        'Markings also show their rarity dots and tier, in the open list too, so you can plan a wolf with the rare ones in view.',
+        'Thanks for the idea! It only changes how the boxes look; Twill never picks anything for you.'
       ]
     }
   };
@@ -6923,9 +6931,122 @@
       }
     `;
 
+    /* The Wardrobe's gene dropdowns, in the same colours as a wolf's page: each
+       box gets a pill for where its gene comes from, and markings also get their
+       rarity dots and tier, in the open list as well as the chosen one. Only how
+       they look changes. Nothing is chosen, set or sent: the game's own value is
+       read, never written. */
+    const WARD_LABEL = { base: 'Base', eyecolor: 'Eyes', skin: 'Skin', nose: 'Nose', claws: 'Claws',
+      mutation: 'Mutation', tertiarymutation: 'Tertiary Mutation' };
+    const wardLabel = (name) => {
+      const m = /^marking(\d+)$/.exec(name || '');
+      return m ? 'Slot ' + m[1] : WARD_LABEL[name] || null;
+    };
+    const wardSelects = () => [...document.querySelectorAll('select[name]')].filter((s) => wardLabel(s.name));
+    const wardColour = (hue) => hue == null ? 'var(--dk-muted)' : 'hsl(' + hue + ' var(--dk-gene-s, 72%) var(--dk-gene-l, 55%))';
+
+    // What one gene shows: its colour, and for a marking its dots and tier.
+    function wardTag(label, name) {
+      if (!name || /^none$/i.test(name.trim())) return null;
+      const t = traitOf(label, name);
+      const marking = /^Slot /.test(label);
+      const row = marking ? GENETICS.marks[k(name)] : null;
+      return {
+        colour: wardColour(hueOf(t.o)),
+        from: (ORIGIN[t.o] || ORIGIN.unknown)[1] || '',
+        pips: marking && gst.pips ? pipsFor(t) : '',
+        tier: row && row[0] != null ? 'T' + row[0] : ''
+      };
+    }
+    function wardBadge(tag) {
+      return h('span', { class: 'dk-wg', title: tag.from, style: '--g:' + tag.colour },
+        h('i', { class: 'dk-wg-pill' }),
+        tag.pips ? h('b', { class: 'dk-wg-pips', text: tag.pips }) : null,
+        tag.tier ? h('small', { class: 'dk-wg-t', text: tag.tier }) : null);
+    }
+    const sameBadge = (old, tag) => old && tag && old.title === tag.from && old.style.getPropertyValue('--g') === tag.colour &&
+      old.textContent === (tag.pips || '') + (tag.tier || '');
+
+    // The box itself: beside a plain dropdown, or inside a marking's Chosen box.
+    function wardPaintBox(sel) {
+      const label = wardLabel(sel.name);
+      const opt = sel.options[sel.selectedIndex];
+      const tag = label && opt ? wardTag(label, opt.textContent) : null;
+      const chosen = sel.nextElementSibling && sel.nextElementSibling.classList.contains('chosen-container')
+        ? sel.nextElementSibling.querySelector('.chosen-single') : null;
+      const host = chosen || sel.parentNode;
+      const old = chosen ? chosen.querySelector(':scope > .dk-wg')
+        : (sel.nextElementSibling && sel.nextElementSibling.classList.contains('dk-wg') ? sel.nextElementSibling : null);
+      if (!tag) { if (old) old.remove(); return; }
+      if (sameBadge(old, tag)) return;
+      const badge = wardBadge(tag);
+      if (old) old.replaceWith(badge);
+      else if (chosen) { const span = chosen.querySelector('span'); if (span) span.after(badge); else chosen.prepend(badge); }
+      else host.insertBefore(badge, sel.nextSibling);
+    }
+
+    // The open marking list: every result Chosen draws gets its own badge.
+    function wardPaintList(sel) {
+      const box = sel.nextElementSibling;
+      const ul = box && box.classList.contains('chosen-container') ? box.querySelector('.chosen-results') : null;
+      if (!ul) return;
+      const label = wardLabel(sel.name);
+      for (const li of ul.querySelectorAll('li.active-result')) {
+        const opt = sel.options[Number(li.getAttribute('data-option-array-index'))];
+        const tag = opt ? wardTag(label, opt.textContent) : null;
+        const old = li.querySelector(':scope > .dk-wg');
+        if (!tag) { if (old) old.remove(); continue; }
+        if (sameBadge(old, tag)) continue;
+        if (old) old.remove();
+        li.append(wardBadge(tag));
+        li.style.setProperty('--g', tag.colour);
+        li.classList.add('dk-wg-li');
+      }
+    }
+
+    let wardObs = null, wardTimer = 0;
+    const wardPaint = () => { for (const s of wardSelects()) { wardPaintBox(s); wardPaintList(s); } };
+    const wardSoon = () => { clearTimeout(wardTimer); wardTimer = setTimeout(wardPaint, 40); };
+    // Your own picks, and the game's dice: both change a value without the page
+    // changing shape, so they are listened for rather than watched.
+    const wardOnInput = (e) => { if (e.target && (e.target.matches('select[name]') || e.target.closest('.customiser-dice, .chosen-container'))) wardSoon(); };
+    const wardStyle = h('style', {}, `
+      .dk-wg { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; vertical-align: middle; pointer-events: none; }
+      .dk-wg-pill { display: inline-block; width: 5px; height: 15px; border-radius: 3px; background: var(--g);
+        box-shadow: inset 0 2px 1px rgba(255,255,255,.4), inset 0 -2px 1px rgba(0,0,0,.3); }
+      .dk-wg-pips { color: var(--g); font-size: 11px; letter-spacing: 1px; font-weight: 400; }
+      .dk-wg-t { color: var(--dk-muted, #999); font-size: 11px; }
+      .chosen-single > .dk-wg { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); margin: 0;
+        padding-left: 6px; background: inherit; }
+      .chosen-results li.dk-wg-li { display: flex; align-items: center;
+        background-image: linear-gradient(90deg, color-mix(in srgb, var(--g) 14%, transparent), transparent 60%); }
+      .chosen-results li.dk-wg-li > .dk-wg { margin-left: auto; }
+    `);
+    function startWardrobe() {
+      if (wardObs) return;
+      document.head.appendChild(wardStyle);
+      wardPaint();
+      wardObs = new MutationObserver(wardSoon);
+      for (const box of document.querySelectorAll('.chosen-container')) {
+        wardObs.observe(box, { childList: true, subtree: true, characterData: true });
+      }
+      document.addEventListener('change', wardOnInput, true);
+      document.addEventListener('click', wardOnInput, true);
+    }
+    function stopWardrobe() {
+      if (wardObs) { wardObs.disconnect(); wardObs = null; }
+      clearTimeout(wardTimer);
+      document.removeEventListener('change', wardOnInput, true);
+      document.removeEventListener('click', wardOnInput, true);
+      document.querySelectorAll('.dk-wg').forEach((el) => el.remove());
+      document.querySelectorAll('.dk-wg-li').forEach((li) => { li.classList.remove('dk-wg-li'); li.style.removeProperty('--g'); });
+      wardStyle.remove();
+    }
+
     return {
-      id: 'genes', name: 'Genetics', blurb: 'Explains the genes on wolf pages',
+      id: 'genes', name: 'Genetics', blurb: 'Explains the genes on wolf pages and in the Wardrobe',
       start() {
+        if (currentPage().kind === 'wardrobe') { startWardrobe(); return; }
         if (currentPage().kind !== 'wolf' || wrapped.length) return;
         document.head.appendChild(styleEl);
         decorate();
@@ -6949,6 +7070,7 @@
         wrapped.length = 0;
         styleEl.remove();
         hidePop();
+        stopWardrobe();
       },
       reload: reloadGenes,
       settings(sheet) {
