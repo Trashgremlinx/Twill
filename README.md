@@ -1,10 +1,6 @@
 <p align="center">
-  <img src="twill-mark.png" alt="" width="120">
+  <a href="https://trashgremlinx.github.io/Twill/"><img src="banner.png" alt="Twill, toolkit by Fallowe #145906"></a>
 </p>
-
-<h1 align="center">Twill</h1>
-
-<p align="center">Toolkit by <a href="https://www.wolvden.com/profile/145906">Fallowe #145906</a></p>
 
 ---
 
