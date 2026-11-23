@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twill
 // @namespace    fallowe.wolvden
-// @version      0.37.14
+// @version      0.38.0
 // @description  Twill reads the page you already have open, lets you expand on details you would otherwise need a separate document for, and gives you space to grow your pack in a lore rich environment. It never plays the game for you.
 // @author       Fallowe (Society of Fur)
 // @homepage     https://discord.gg/ZQDz8ANTUR
@@ -56,7 +56,7 @@
   // GitHub renders Markdown in the browser, where Pages would hand over the
   // raw file and some browsers would download it instead of showing it.
   const TWILL_LICENCE = 'https://github.com/Trashgremlinx/Twill/blob/main/LICENCE.md';
-  const VERSION = '0.37.14';
+  const VERSION = '0.38.0';
   // Players see 3 parts. A 4th part is a fix delivered quietly (0.37.3.1): it shows
   // only as a build number on About, for bug reports.
   const SHOWN_VERSION = VERSION.split('.').slice(0, 3).join('.');
@@ -665,6 +665,29 @@
     /* Compare needs a column per wolf, so the hub widens while it is open and
        shrinks back to 320px as soon as you leave it. */
     #dk-hub.dk-hub-wide { width: min(900px, calc(100vw - 24px)); }
+    /* Compose widens a little to make room for the snippet shelf beside the box. */
+    #dk-hub.dk-hub-mid { width: min(540px, calc(100vw - 24px)); }
+    .dk-snip-wrap { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 10px; align-items: start; }
+    .dk-snip-shelf { border-right: 1px solid var(--dk-line); padding-right: 8px; }
+    .dk-snip { display: flex; align-items: center; gap: 2px; margin: 0 0 3px; }
+    #dk-hub .dk-snip-use { flex: 1; min-width: 0; padding: 3px 6px; margin: 0; text-align: left; cursor: pointer;
+      background: var(--dk-surface); color: var(--dk-text); border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
+      font: 11.5px/1.35 var(--dk-body-font); overflow-wrap: anywhere; }
+    #dk-hub .dk-snip-use:hover { border-color: var(--dk-accent); }
+    .dk-snip-use span { color: var(--dk-tip-title); }
+    #dk-hub .dk-snip-x { padding: 0 3px; margin: 0; background: none; border: 0; color: var(--dk-muted); cursor: pointer; }
+    .dk-snip-none { color: var(--dk-muted); font-size: 11px; }
+    .dk-snip-fill:not(:empty) { margin: 0 0 8px; padding: 7px 9px; background: var(--dk-surface); border: 1px solid var(--dk-line);
+      border-left: 2px solid var(--dk-accent); border-radius: var(--dk-radius); }
+    .dk-snip-fill input { width: 100%; box-sizing: border-box; margin: 0 0 5px; }
+    .dk-snip-bl { color: var(--dk-muted); font-size: 11px; }
+    /* On a narrow screen the shelf folds above the box. */
+    @media (max-width: 600px) {
+      .dk-snip-wrap { grid-template-columns: 1fr; }
+      .dk-snip-shelf { border-right: 0; padding-right: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+      .dk-snip-shelf .dk-lb { flex: 0 0 100%; }
+      .dk-snip { margin: 0; }
+    }
     #dk-hub.dk-c-br { right: 12px; bottom: 50px; }
     #dk-hub.dk-c-bl { left: 12px; bottom: 50px; }
     #dk-hub.dk-c-tr { right: 12px; top: 50px; }
@@ -713,6 +736,13 @@
     }
     .dk-head button:hover, .dk-head button:focus-visible { opacity: 1; }
     .dk-head .dk-x { font-size: 16px; }
+    .dk-head .dk-help {
+      flex: none; width: 22px; height: 22px; padding: 0; border-radius: 50%; display: inline-grid; place-items: center;
+      font: 700 12.5px/1 var(--dk-title-font); color: var(--dk-head-text); opacity: .9;
+      border: 1.5px solid color-mix(in srgb, var(--dk-head-text) 60%, transparent);
+      background: color-mix(in srgb, var(--dk-head-text) 10%, transparent);
+    }
+    .dk-head .dk-help[aria-pressed="true"] { background: var(--dk-head-text); color: var(--dk-head); border-color: var(--dk-head-text); opacity: 1; }
     .dk-body { overflow: auto; padding: 2px 11px 12px; }
     .dk-body::-webkit-scrollbar { width: 8px; }
     .dk-body::-webkit-scrollbar-thumb { background: var(--dk-line); border-radius: 4px; }
@@ -818,11 +848,41 @@
     .dk-pq-card li { margin: 2px 0; }
     .dk-pq-foot { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .dk-pq-foot > span { flex: 1; min-width: 140px; font-size: 11px; }
-    .dk-pc.dk-pc-on { display: flex; gap: 12px; align-items: center; }
-    .dk-pc-ring { flex: 0 0 56px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; }
-    .dk-pc-ring span { width: 42px; height: 42px; border-radius: 50%; background: var(--dk-surface); display: grid; place-items: center;
-      font: 700 13px var(--dk-title-font); color: var(--dk-tip-title); }
-    .dk-pc-t { flex: 1; min-width: 0; }
+    .dk-ring { flex: 0 0 48px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; }
+    .dk-ring span { width: 36px; height: 36px; border-radius: 50%; background: var(--dk-panel); display: grid; place-items: center;
+      font: 700 11.5px var(--dk-title-font); color: var(--dk-tip-title); }
+    .dk-ring.dk-ring-s { flex-basis: 22px; width: 22px; height: 22px; }
+    .dk-ring.dk-ring-s span { width: 14px; height: 14px; }
+    .dk-greet { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 2px 0 8px; }
+    .dk-greet b { font: 700 14px var(--dk-title-font); }
+    .dk-greet span { color: var(--dk-muted); font-size: 11px; }
+    #dk-hub .dk-gl-edit { padding: 0; margin: 0; background: none; border: 0; cursor: pointer; font: inherit; color: var(--dk-tip-title);
+      border-bottom: 1px dotted var(--dk-tip-title); }
+    .dk-gl-pick { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--dk-line); }
+    .dk-gl-pick label { flex: 1; display: flex; gap: 6px; align-items: center; margin: 0; cursor: pointer; }
+    #dk-hub .dk-gl-mv { padding: 1px 7px; margin: 0; background: none; color: var(--dk-text); border: 1px solid var(--dk-line);
+      border-radius: var(--dk-radius); cursor: pointer; font: 12px/1.3 var(--dk-body-font); }
+    #dk-hub .dk-gl-mv:disabled { opacity: .35; cursor: default; }
+    .dk-glance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 4px; }
+    #dk-hub .dk-gl {
+      position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 1px; min-width: 0; margin: 0;
+      padding: 7px 18px 7px 9px; text-align: left; cursor: pointer; color: var(--dk-text);
+      background: var(--dk-surface); border: 1px solid var(--dk-line); border-radius: var(--dk-radius);
+      font: 12px/1.4 var(--dk-body-font);
+    }
+    #dk-hub .dk-gl:hover { border-color: var(--dk-accent); }
+    .dk-gl-wide { grid-column: 1 / -1; }
+    #dk-hub .dk-gl-warm { border-left: 2px solid var(--dk-accent); }
+    .dk-gl-c { position: absolute; right: 7px; top: 5px; color: var(--dk-muted); }
+    .dk-gl-k { font: 700 9.5px var(--dk-title-font); text-transform: uppercase; letter-spacing: .08em; color: var(--dk-tip-title); }
+    .dk-gl-v { font-size: 12.5px; overflow-wrap: anywhere; }
+    .dk-gl-m { color: var(--dk-muted); font-size: 11px; }
+    .dk-gl-bar { display: block; height: 5px; margin-top: 4px; border-radius: 3px; overflow: hidden; background: var(--dk-line); }
+    .dk-gl-bar i { display: block; height: 100%; background: var(--dk-accent); }
+    .dk-pb { display: flex; gap: 7px; align-items: center; margin: 0 0 8px; padding: 5px 6px;
+      background: var(--dk-surface); border: 1px solid var(--dk-line); border-left: 2px solid var(--dk-accent); border-radius: var(--dk-radius);
+      font-size: 11.5px; line-height: 1.35; }
+    .dk-pb small { display: block; color: var(--dk-muted); font-size: 10.5px; }
     #dk-hub .dk-pq-foot a.dk-btn { text-decoration: none; }
     /* Help & About: the report buttons and Learn rows are links, dressed as buttons and rows. */
     #dk-hub a.dk-btn, #dk-hub a.dk-row { text-decoration: none; }
@@ -2065,7 +2125,7 @@
   // The backup nudge counts from your last backup, or from the first day Twill
   // ran here if you have never made one.
   if (!load('firstSeen', null)) save('firstSeen', Date.now());
-  const BACKUP_KEYS = ['lore', 'notes', 'proj', 'goals', 'have', 'wish', 'remind', 'hide', 'layoutsOff', 'post', 'gifts'];
+  const BACKUP_KEYS = ['lore', 'notes', 'proj', 'goals', 'have', 'wish', 'remind', 'hide', 'layoutsOff', 'post', 'gifts', 'snips'];
   function backupNudge() {
     const every = Number(load('backupEvery', 14));
     if (!every) return null;
@@ -2088,6 +2148,7 @@
 
   let newsDot = false;           // the What's new dot on the corner button
   let screen = 'home';           // 'home' | 'look' | a module id
+  let helpFrom = '';             // the screen the "?" was pressed on, to go back to
   let saveAsOpen = false;        // the inline "name your theme" row on Look
   let pairIds = [];              // the two wolves the tray sent to the Pairing screen
 
@@ -2140,6 +2201,7 @@
   const WHATS_NEW = {
     '0.36.0': {
       title: 'Light and dark',
+      go: 'look',
       items: [
         'A sun and moon in the header swaps between light and dark. Auto follows your computer.',
         'Two new starting themes, Vellum and Antler Night, and the themes are now sorted into Light and Dark.',
@@ -2171,6 +2233,7 @@
     },
     '0.37.2': {
       title: 'Every den listing, Copy for Discord, price notes',
+      go: 'den',
       items: [
         'Den Manager now reads the Standard and Standard (no headshots) den listings as well as Card listing.',
         'Collapsed caves are named under At a glance, since Wolvden leaves their wolves off the page and Den Manager can’t count them.',
@@ -2183,6 +2246,7 @@
     },
     '0.37.3': {
       title: 'Anniversary markings, and every event in the year',
+      go: 'events',
       items: [
         'Genetics knows the 195 markings from Wolvden’s 6 Year Anniversary: 13 new shapes, from Agouti Highlights to Heavy Urajiro. Hover one on a wolf’s page for its card.',
         'Each card names the marking it deviates from.',
@@ -2201,6 +2265,7 @@
     },
     '0.37.5': {
       title: 'Every anniversary marking has its tier',
+      go: 'genes',
       items: [
         'The Grouse House Wiki now lists all 195 markings from the 6 Year Anniversary, so the 38 without a tier have one: 32 are Tier 8 and 6 are Tier 1.',
         'New in Genetics: 4 Meniscus markings and the Circadian eyes, both from Lunar Dreams applicators.'
@@ -2208,6 +2273,7 @@
     },
     '0.37.6': {
       title: 'Every marking deviation, and this year’s Coigreach',
+      go: 'genes',
       items: [
         'Deviates from now covers every deviation the Grouse House Wiki lists, like Half Cape and Wings Heavy.',
         'New in Genetics: Coigreach’s Anamchara and Sionnach, and Anam eyes.',
@@ -2216,6 +2282,7 @@
     },
     '0.37.7': {
       title: 'Fishing, Halloween and 3 new recipes',
+      go: 'guides',
       items: [
         'Fishing: Blue Sucker now only bites by day, and Bull Trout only by night.',
         'The Halloween guide has Mohkra’s bigger Tier 2 shop.',
@@ -2224,6 +2291,7 @@
     },
     '0.37.8': {
       title: 'New skins, noses and claws',
+      go: 'genes',
       items: [
         'Genetics knows Convex and Torpor from Lunar Dreams, and Enaid and Madog from Coigreach, as skins, noses and claws.',
         'The wiki has finished its skin, nose and claw pages, so the cards link to the finished ones.'
@@ -2231,6 +2299,7 @@
     },
     '0.37.9': {
       title: 'A reading ruler',
+      go: 'comfort',
       items: [
         'New in Comfort: Reading ruler. Switch it on and a soft band follows the line you’re reading in forum posts and wolf bios, with the rest dimmed a little, so it’s easier to keep your place.',
         'It follows your pointer, or your finger on a phone, and only draws on top of the page.'
@@ -2238,6 +2307,7 @@
     },
     '0.37.10': {
       title: 'Gene colours in the Wardrobe',
+      go: 'wardrobe',
       items: [
         'The Wardrobe’s gene boxes get the same colours as a wolf’s page: where each base, eye, skin, nose, claw, mutation and marking comes from.',
         'Markings also show their rarity dots and tier, in the open list too, so you can plan a wolf with the rare ones in view.',
@@ -2246,6 +2316,7 @@
     },
     '0.37.11': {
       title: 'Move the Tray anywhere',
+      go: 'tray',
       items: [
         'Drag the dots at the Tray’s left end to put it wherever suits you, like the Notepad. It stays there on every page.',
         'Tray settings can put it back in the corner. Thank you for the idea!'
@@ -2253,6 +2324,7 @@
     },
     '0.37.12': {
       title: 'Guides refreshed from the wiki',
+      go: 'guides',
       items: [
         'Coigreach: the Badger Cave shop has grown to 91 items in Tier 1 and 113 in Tier 2.',
         'Fishing: Blue Sucker bites at any time again, and Pirapitinga only in wet weather.'
@@ -2260,14 +2332,44 @@
     },
     '0.37.13': {
       title: 'Pair bond helpers',
+      go: 'home',
       items: [
-        'A Pair breedings ring on the hub’s home screen: type your territory once, press “+ Bred one” after each pair breeding, and it empties itself on the 1st. Switch it off in Pair Lists order settings.',
         'Bonded wolves in the Tray get a rose edge, a bonded pair sits together in a dashed box, and hovering a chip shows who it’s bonded to. Twill learns a bond when you visit the wolf’s page. Switch it off in Tray settings.',
         'Genetics knows this week’s Lunar Dreams: the Pennant combo base, REM eyes and the 16 Unfolded Antumbra and Penumbra markings. They aren’t on the wiki yet, so their cards say so, and the markings show no tier until the wiki lists one.'
       ]
     },
+    '0.38.0': {
+      go: 'home',
+      title: 'Timelines, snippets, and a hub you arrange',
+      items: [
+        'Breeding projects has a Timeline: each step’s heat, pregnancy and pups-due across the next six weeks, with the dates spelt out underneath.',
+        'Snippets in Compose a post: save blocks you post often on a shelf beside the box. Put {blanks} in curly brackets and Twill asks you to fill them in each time.',
+        'On Pair Lists, a pair that’s in a breeding project gets a small note saying which project, which step, and what’s next.',
+        'Press Edit beside the hub’s greeting to choose your cards and their order. New ones: Coming up, Reminders, Shopping list, Notepad, Collection, Backup, Pair breedings and December gifts.',
+        'Wardrobe: the custom decor box takes an image address however it’s copied, with or without the https: part.'
+      ]
+    },
+    '0.37.16': {
+      go: 'home',
+      title: 'A “?” for help, and the stag goes home',
+      items: [
+        'Help, About & Backup now sit behind the round “?” in the hub’s top corner, on every screen. Press it again to go back to where you were.',
+        'The stag at the top left takes you to the hub’s home page from anywhere.'
+      ]
+    },
+    '0.37.15': {
+      go: 'home',
+      title: 'A home page for the hub',
+      items: [
+        'The hub opens on a home page: what’s happening now, your Puppy quest, the next step in a project, your Goals and the Tray, each a tap away. Below, everything is grouped into Your pack, Writing and Settings.',
+        'Look and Comfort share one screen, and Backup now sits in Help & About.',
+        'Pair breedings are read from Pair Lists, nothing to type: a ring there, and a small one at the top of Breeding projects saying how many are left and when it was read.',
+        '“Have a look” on these cards now takes you to what’s new, not to Look.'
+      ]
+    },
     '0.37.14': {
       title: 'Lunar Essence above the explore box',
+      go: 'xbars',
       items: [
         'During a lunar event the Explore bars show your Lunar Essence too, on its own row under the others, in Wolvden’s own blue. Outside an event it stays out of the way. Switch it off in Explore bars settings.'
       ]
@@ -2381,9 +2483,13 @@
   function render() {
     if (hub.hidden) return;
     hub.classList.toggle('dk-hub-wide', screen === 'compare');
+    hub.classList.toggle('dk-hub-mid', screen === 'compose');
     const mod = modules.find((m) => m.id === screen);
     const title = screen === 'home' ? 'Twill'
-      : screen === 'look' ? 'Look'
+      : screen === 'look' || screen === 'comfort' ? 'Look & comfort'
+      : screen === 'quest' ? 'Enclave Puppy Quest'
+      : screen === 'goals' ? 'Goals'
+      : screen === 'glances' ? 'Your glances'
       : screen === 'backup' ? 'Backup'
       : screen === 'recipes' ? 'Recipes'
       : screen === 'modules' ? 'Modules'
@@ -2391,7 +2497,6 @@
       : screen === 'pair' ? 'Pairing'
       : screen === 'compare' ? 'Compare'
       : screen === 'compose' ? 'Compose a post'
-      : screen === 'comfort' ? 'Comfort'
       : screen === 'about' ? 'Help & About'
       : screen === 'guides' ? 'Guides'
       : screen === 'herbs' ? 'Herb map'
@@ -2408,24 +2513,37 @@
       : screen === 'event' ? ((EVENT_GUIDES.find((x) => x.id === eventId) || {}).n || 'Events')
       : (mod ? mod.name : 'Twill');
 
+    if (screen !== 'about' && screen !== 'backup') helpFrom = '';
     hub.textContent = '';
     const head = h('div', { class: 'dk-head' });
     if (screen !== 'home') {
       const upTo = screen === 'event' ? 'events'
-        : ['herbs', 'scout', 'rates', 'ills', 'prey', 'bonds', 'battle', 'friend', 'roles', 'fish', 'events'].includes(screen) ? 'guides' : 'home';
+        : ['herbs', 'scout', 'rates', 'ills', 'prey', 'bonds', 'battle', 'friend', 'roles', 'fish', 'events'].includes(screen) ? 'guides'
+          : screen === 'backup' ? 'about'
+            : screen === 'about' ? (helpFrom || 'home') : 'home';
       head.append(h('button', {
         type: 'button', text: '‹', title: 'Back', 'aria-label': 'Back',
         onclick: () => { screen = upTo; saveAsOpen = false; render(); }
       }));
     }
-    // The mark doubles as the way into Help & About, so the credit is never more
-    // than one click away without costing a row on any screen.
+    // The mark takes you home from anywhere. The "?" opens Help, About & Backup
+    // from any screen, like Canto's, and pressing it again goes back to where you were.
+    const atHelp = screen === 'about' || screen === 'backup';
     head.append(
       h('button', {
-        type: 'button', class: 'dk-mark', title: 'Help & About', 'aria-label': 'Help & About',
-        onclick: () => { screen = 'about'; render(); }
+        type: 'button', class: 'dk-mark', title: 'Home', 'aria-label': 'Home',
+        onclick: () => { screen = 'home'; saveAsOpen = false; render(); }
       }, h('img', { src: TWILL_MARK_DARK, alt: '', width: 19, height: 22 })),
       h('span', { class: 'dk-title', text: title }),
+      h('button', {
+        type: 'button', class: 'dk-help', text: '?', title: 'Help, About & Backup', 'aria-label': 'Help, About & Backup',
+        'aria-pressed': String(atHelp),
+        onclick: () => {
+          if (atHelp) screen = helpFrom || 'home';
+          else { helpFrom = screen; screen = 'about'; }
+          render();
+        }
+      }),
       sunMoonButton(),
       h('button', {
         type: 'button', class: 'dk-x', text: '×', title: 'Close (Alt+K)', 'aria-label': 'Close',
@@ -2436,8 +2554,19 @@
     hub.append(head, sheet);
 
     if (screen === 'home') renderHome();
-    else if (screen === 'look') renderLook();
-    else if (screen === 'comfort') renderComfort();
+    else if (screen === 'look' || screen === 'comfort') {
+      // Look and Comfort share one screen, with a switch at the top.
+      const tab = (to, label) => h('button', { type: 'button', 'aria-pressed': String(screen === to), onclick: () => { screen = to; render(); } }, label);
+      sheet.append(h('div', { class: 'dk-seg', style: 'margin:0 0 10px' }, tab('look', 'Look'), tab('comfort', 'Comfort')));
+      if (screen === 'look') renderLook(); else renderComfort();
+    }
+    else if (screen === 'quest') {
+      const q = load('pupquest', null);
+      if (q && Array.isArray(q.req) && q.req.length) renderPupQuest(sheet);
+      else sheet.append(h('div', { class: 'dk-empty', text: 'No quest kept. Visit the Enclave while a Puppy Quest is open and Twill keeps it here.' }));
+    }
+    else if (screen === 'goals') renderGoals(sheet);
+    else if (screen === 'glances') renderGlanceEdit();
     else if (screen === 'backup') renderBackup();
     else if (screen === 'recipes') renderRecipes();
     else if (screen === 'modules') renderModules();
@@ -3456,6 +3585,10 @@
       h('div', { class: 'dk-lb', text: 'Learn' }),
       learn(TWILL_CHANGES + '?v=' + encodeURIComponent(SHOWN_VERSION), 'The Twill Field Guide', 'what’s new and every change, newest first'),
       learn(TWILL_SITE, 'The full write up', 'everything Twill does, and how to install it'),
+      h('div', { class: 'dk-lb', text: 'Your data' }),
+      h('div', { class: 'dk-row dk-link', onclick: () => { screen = 'backup'; render(); } },
+        h('div', { class: 'dk-t' }, h('strong', { text: 'Backup' }), h('span', { text: 'save or restore everything Twill keeps' })),
+        h('button', { type: 'button', class: 'dk-chev', text: '›', 'aria-label': 'Backup' })),
       h('div', { class: 'dk-lb', text: 'About' }));
     sheet.append(
       // About wears whichever mark the corner button wears, always the same one.
@@ -3526,7 +3659,7 @@
         h('div', { style: 'margin:-2px 0 8px;font-size:12px' },
           h('a', { href: TWILL_CHANGES + '?v=' + encodeURIComponent(SHOWN_VERSION), target: '_blank', rel: 'noopener noreferrer', text: 'Every change, in the Twill Field Guide ›' })),
         h('div', { class: 'dk-btns', style: 'margin-top:0' },
-          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Have a look', onclick: () => { save('seenVersion', VERSION); markNews(); screen = n.go || 'look'; render(); } }),
+          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Have a look', onclick: () => { save('seenVersion', VERSION); markNews(); screen = n.go || 'home'; render(); } }),
           h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Got it', onclick: done }))));
     }
     const nudge = backupNudge();
@@ -3550,32 +3683,194 @@
     let t = null;
     find.addEventListener('input', () => { clearTimeout(t); t = setTimeout(paint, 120); });
 
-    renderPupQuest(rest);
-    renderPairCount(rest);
-    renderGoals(rest);
+    renderGlance(rest);
 
     const on = modules.filter(isOn).length;
     const row = (label, go, sub) => rest.append(h('div', { class: 'dk-row dk-link', onclick: go },
       h('div', { class: 'dk-t' }, h('strong', { text: label }), sub ? h('span', { text: sub }) : null),
       h('button', { type: 'button', class: 'dk-chev', text: '›', 'aria-label': label })
     ));
-    rest.append(h('div', { class: 'dk-lb', text: 'Twill' }));
-    row('Modules', () => { screen = 'modules'; render(); }, on + ' of ' + modules.length + ' on');
-    row('Collection', () => { screen = 'collection'; render(); }, haveCount() ? haveCount().toLocaleString('en-GB') + ' ticked' : 'a checklist you tick yourself');
+    const group = (t) => rest.append(h('div', { class: 'dk-lb', text: t }));
+    group('Your pack');
     const bp = modules.find((m) => m.id === 'breed');
     if (bp) {
       const n = (Array.isArray(proj.list) ? proj.list : []).length;
       row('Breeding projects', () => { if (!isOn(bp)) setModuleOn(bp, true); toggleHub(false); bp.open(); },
         (n ? n + ' of ' + PROJ_MAX + ' projects' : 'plan pairings toward a goal') + '  ·  Alt+B');
     }
-    row('Compose a post', () => { screen = 'compose'; render(); }, 'checks what Wolvden will strip');
-    row('Look  ·  ' + themeLabel(), () => { screen = 'look'; render(); });
-    row('Comfort', () => { screen = 'comfort'; render(); }, 'reading font, spacing, motion, custom layouts');
-    row('Backup', () => { screen = 'backup'; render(); });
+    row('Collection', () => { screen = 'collection'; render(); }, haveCount() ? haveCount().toLocaleString('en-GB') + ' ticked' : 'a checklist you tick yourself');
     row('Guides', () => { screen = 'guides'; render(); }, '9 references, kept offline');
-    row('Help & About', () => { screen = 'about'; render(); }, 'report, ask, learn  ·  version ' + SHOWN_VERSION);
+    group('Writing');
+    row('Compose a post', () => { screen = 'compose'; render(); }, 'checks what Wolvden will strip');
+    group('Settings');
+    row('Modules', () => { screen = 'modules'; render(); }, on + ' of ' + modules.length + ' on');
+    row('Look & comfort', () => { screen = 'look'; render(); }, themeLabel() + '  ·  fonts, spacing, motion');
 
-    paint();
+        paint();
+  }
+
+  /* The top of the hub's home screen: a few small cards saying what's going on,
+     each built from what Twill already keeps, and each opening its own screen
+     the way the rows below do. A card with nothing to say isn't drawn. */
+  // Every glance card Twill can draw, in its starting order. You choose which
+  // show and in what order (Edit, beside the greeting); a card with nothing to
+  // say still hides itself.
+  const GLANCES = [
+    ['now', 'Happening now'], ['soon', 'Coming up'], ['quest', 'Puppy quest'], ['next', 'Next in a project'],
+    ['goals', 'Goals'], ['tray', 'Tray'], ['remind', 'Reminders'], ['wish', 'Shopping list'], ['notes', 'Notepad'],
+    ['coll', 'Collection'], ['backup', 'Backup'], ['pairs', 'Pair breedings'], ['gifts', 'December gifts']
+  ];
+  function glancePrefs() {
+    const g = load('glances', null) || {};
+    const known = GLANCES.map(([id]) => id);
+    const order = (Array.isArray(g.order) ? g.order : []).filter((id) => known.includes(id));
+    for (const id of known) if (!order.includes(id)) order.push(id);
+    return { order, off: (Array.isArray(g.off) ? g.off : []).filter((id) => known.includes(id)) };
+  }
+
+  /* The top of the hub's home screen: small cards saying what's going on,
+     each built from what Twill already keeps, and each opening its own screen
+     the way the rows below do. A card with nothing to say isn't drawn. */
+  function renderGlance(box) {
+    const now = new Date();
+    const hr = now.getHours();
+    const pl = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+    box.append(h('div', { class: 'dk-greet' },
+      h('b', { text: hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening' }),
+      h('span', {}, now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }), '  ·  ',
+        h('button', { type: 'button', class: 'dk-gl-edit', text: 'Edit', title: 'Choose which cards show, and their order',
+          onclick: () => { screen = 'glances'; render(); } }))));
+    const grid = h('div', { class: 'dk-glance' });
+    box.append(grid);
+    const card = (key, value, sub, go, cls) => grid.append(h('button', { type: 'button', class: 'dk-gl' + (cls ? ' ' + cls : ''), onclick: go },
+      h('span', { class: 'dk-gl-c', 'aria-hidden': 'true', text: '›' }),
+      h('span', { class: 'dk-gl-k', text: key }),
+      h('span', { class: 'dk-gl-v', text: value }),
+      typeof sub === 'string' ? (sub ? h('span', { class: 'dk-gl-m', text: sub }) : null) : sub));
+    const bar = (pct) => h('span', { class: 'dk-gl-bar' }, h('i', { style: 'width:' + Math.max(0, Math.min(100, Math.round(pct))) + '%' }));
+    const mod = (id) => { const m = modules.find((x) => x.id === id); return m && isOn(m) ? m : null; };
+    const runs = EVENT_GUIDES.map((ev) => ({ ev, r: eventRun(ev, now) })).filter((x) => x.r);
+
+    const draw = {
+      now() {
+        for (const { ev, r } of runs) {
+          if (!r.on) continue;
+          const left = daysBetween(now, r.end);
+          card('Happening now', ev.n + '  ·  until ' + shortDate(r.end), left === 0 ? 'ends today' : 'ends in ' + pl(left, 'day', 'days'),
+            () => { eventId = ev.id; screen = 'event'; render(); }, 'dk-gl-wide dk-gl-warm');
+        }
+      },
+      soon() {
+        if (runs.some((x) => x.r.on)) return;
+        const x = runs.slice().sort((a, b) => a.r.start - b.r.start)[0];
+        if (!x) return;
+        const until = daysBetween(now, x.r.start);
+        card('Coming up', x.ev.n, until === 1 ? 'tomorrow' : 'in ' + pl(until, 'day', 'days') + '  ·  ' + shortDate(x.r.start),
+          () => { eventId = x.ev.id; screen = 'event'; render(); });
+      },
+      quest() {
+        const q = load('pupquest', null);
+        const pq = modules.find((x) => x.id === 'pupquest');
+        if (!q || !Array.isArray(q.req) || !q.req.length || (pq && !isOn(pq))) return;
+        card('Puppy quest', q.req.slice(0, 2).join(' or ') + (q.req.length > 2 ? ' (+' + (q.req.length - 2) + ')' : ''),
+          questWhen(q).short, () => { screen = 'quest'; render(); });
+      },
+      next() {
+        const bp = mod('breed');
+        const n = bp && bp.nextUp ? bp.nextUp().filter((x) => x.at < 998).sort((a, b) => a.at - b.at)[0] : null;
+        if (n) card('Next in a project', n.what, n.when + '  ·  ' + (n.p.n || 'Untitled project'), () => { toggleHub(false); bp.openNext(); });
+      },
+      goals() {
+        const done = goals.filter((g) => g.done).length;
+        card('Goals', goals.length ? done + ' of ' + goals.length + ' done' : 'Nothing yet',
+          goals.length ? bar(done / goals.length * 100) : 'write what you’re working towards', () => { screen = 'goals'; render(); });
+      },
+      tray() {
+        const inTray = load('tray', []);
+        if (!mod('tray') || !inTray.length) return;
+        const coll = load('coll', {});
+        card('Tray', pl(inTray.length, 'wolf', 'wolves'), inTray.slice(0, 3).map((id) => (coll[id] && coll[id].n) || '#' + id).join(', ') + (inTray.length > 3 ? '…' : ''),
+          () => { screen = 'tray'; render(); });
+      },
+      remind() {
+        const all = Object.values(remindersAll()).filter((r) => r && r.t);
+        if (!mod('remind') || !all.length) return;
+        // The one due soonest first, then the newest.
+        const first = all.slice().sort((a, b) => ((reminderDue(a).days ?? 1e9) - (reminderDue(b).days ?? 1e9)) || ((b.at || 0) - (a.at || 0)))[0];
+        const due = reminderDue(first).text;
+        card('Reminders', pl(all.length, 'wolf', 'wolves'), (first.n ? first.n + ': ' : '') + first.t + (due ? '  ·  ' + due : ''),
+          () => { screen = 'remind'; render(); });
+      },
+      wish() {
+        const w = load('wish', {});
+        const want = Array.isArray(w.want) ? w.want.filter(Boolean) : [];
+        if (!mod('wish') || !want.length) return;
+        card('Shopping list', want.length + ' to buy', want.slice(0, 2).join(', ') + (want.length > 2 ? '…' : ''),
+          () => { screen = 'wish'; render(); });
+      },
+      notes() {
+        const list = (load('notes', {}).notes || []).filter(Boolean);
+        const nt = mod('notes');
+        if (!nt || !list.length) return;
+        const n = list.slice().sort((a, b) => (b.updated || 0) - (a.updated || 0))[0];
+        const text = String(n.html || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+        card('Notepad', n.title || 'Untitled note', text ? '“' + text.slice(0, 48) + (text.length > 48 ? '…' : '') + '”' : 'an empty note',
+          () => { toggleHub(false); nt.open(); });
+      },
+      coll() {
+        const n = haveCount();
+        if (!n) return;
+        const total = Object.keys(GENETICS.marks).length;
+        card('Collection', n.toLocaleString('en-GB') + ' ticked',
+          h('span', {}, bar(have.marks.size / total * 100), h('span', { class: 'dk-gl-m', text: have.marks.size.toLocaleString('en-GB') + ' of ' + total.toLocaleString('en-GB') + ' markings' })),
+          () => { screen = 'collection'; render(); });
+      },
+      backup() {
+        const last = Number(load('lastBackup', 0));
+        const days = last ? Math.floor((Date.now() - last) / 864e5) : null;
+        card('Backup', last ? (days === 0 ? 'Today' : days === 1 ? 'Yesterday' : days + ' days ago') : 'Never backed up',
+          'back up now', () => { screen = 'backup'; render(); });
+      },
+      pairs() {
+        const seen = load('pairSeen', null);
+        if (!seen || seen.mon !== pairMonthNow()) return;
+        const bp = mod('breed');
+        card('Pair breedings', Math.max(0, seen.c - seen.u) + ' of ' + seen.c + ' left', 'read from Pair Lists',
+          bp ? () => { toggleHub(false); bp.open(); } : () => {});
+      },
+      gifts() {
+        if (now.getMonth() !== 11) return;
+        const g = giftCount();
+        card('December gifts', 'Given ' + g.give + '  ·  got ' + g.got, 'your own count',
+          () => { eventId = 'december'; screen = 'event'; render(); });
+      }
+    };
+    const prefs = glancePrefs();
+    for (const id of prefs.order) {
+      if (prefs.off.includes(id) || !draw[id]) continue;
+      try { draw[id](); } catch (e) { console.warn('[Twill] glance ' + id, e); }
+    }
+    if (!grid.childElementCount) grid.append(h('div', { class: 'dk-empty dk-gl-wide', text: 'Nothing to show. Press Edit to choose your cards.' }));
+  }
+
+  // Edit: tick which glance cards show, and move them up or down.
+  function renderGlanceEdit() {
+    const prefs = glancePrefs();
+    const keep = () => { save('glances', prefs); render(); };
+    sheet.append(h('div', { class: 'dk-note', style: 'margin-top:0', text: 'Tick the cards you want on the home page, and move them up or down. A card with nothing to say hides itself anyway.' }));
+    const names = Object.fromEntries(GLANCES);
+    prefs.order.forEach((id, i) => {
+      const on = !prefs.off.includes(id);
+      const mv = (d) => { const j = i + d; if (j < 0 || j >= prefs.order.length) return; [prefs.order[i], prefs.order[j]] = [prefs.order[j], prefs.order[i]]; keep(); };
+      sheet.append(h('div', { class: 'dk-gl-pick' },
+        h('label', {}, h('input', { type: 'checkbox', checked: on,
+          onchange: (e) => { prefs.off = prefs.off.filter((x) => x !== id); if (!e.target.checked) prefs.off.push(id); keep(); } }), ' ' + names[id]),
+        h('button', { type: 'button', class: 'dk-gl-mv', text: '↑', title: 'Move up', 'aria-label': 'Move ' + names[id] + ' up', disabled: i === 0, onclick: () => mv(-1) }),
+        h('button', { type: 'button', class: 'dk-gl-mv', text: '↓', title: 'Move down', 'aria-label': 'Move ' + names[id] + ' down', disabled: i === prefs.order.length - 1, onclick: () => mv(1) })));
+    });
+    sheet.append(h('div', { class: 'dk-btns' },
+      h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Done', onclick: () => { screen = 'home'; render(); } }),
+      h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Back to how it was', onclick: () => { del('glances'); render(); } })));
   }
 
   // Goals are yours to write. A goal can carry a counter, and where Twill
@@ -3624,63 +3919,6 @@
   }
 
   const saveGoals = () => save('goals', goals);
-
-  /* Pair breedings this month: the allowance from your territory, which you
-     type once (2 under 10, then 1 more per 10, up to 22), and how many you've
-     used, which you add yourself. Nothing is read from Wolvden to count them.
-     It empties itself on the 1st. */
-  const pairCap = (t) => Math.min(22, 2 + Math.floor(Math.max(0, Number(t) || 0) / 10));
-  const pairMonth = (d) => d.getFullYear() + '-' + (d.getMonth() + 1);
-  function pairCount() {
-    const c = Object.assign({ terr: null, used: 0, mon: '' }, load('pairCount', {}));
-    const now = pairMonth(new Date());
-    if (c.mon !== now) { c.used = 0; c.mon = now; }
-    return c;
-  }
-  function renderPairCount(box) {
-    if (!load('pairCard', true)) return;
-    const c = pairCount();
-    const now = new Date();
-    const keep = () => { save('pairCount', c); render(); };
-    const month = now.toLocaleDateString('en-GB', { month: 'long' });
-    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleDateString('en-GB', { month: 'long' });
-    box.append(h('div', { class: 'dk-lb', text: 'Pair breedings  ·  ' + month }));
-    const card = h('div', { class: 'dk-pq-card dk-pc' });
-    box.append(card);
-    if (c.terr == null || c.edit) {
-      const input = h('input', { type: 'number', min: '0', max: '9999', value: c.terr == null ? '' : String(c.terr),
-        placeholder: 'e.g. 48', 'aria-label': 'Your territory size', style: 'width:90px' });
-      const set = () => {
-        const v = Math.floor(Number(input.value));
-        if (!input.value.trim() || !(v >= 0)) return;
-        c.terr = v; delete c.edit; keep();
-      };
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); set(); } });
-      card.append(h('div', { text: 'How big is your territory? Twill works out how many pair breedings you get each month.' }),
-        h('div', { class: 'dk-pq-foot', style: 'margin-top:6px' }, input,
-          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Save', onclick: set }),
-          c.edit ? h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Cancel', onclick: () => { delete c.edit; keep(); } }) : null));
-      return;
-    }
-    const cap = pairCap(c.terr);
-    const used = Math.min(c.used, cap);
-    const left = cap - used;
-    const pct = cap ? Math.round(used / cap * 100) : 0;
-    card.classList.add('dk-pc-on');
-    card.append(
-      h('div', { class: 'dk-pc-ring', role: 'img', 'aria-label': used + ' of ' + cap + ' used',
-        style: 'background:conic-gradient(var(--dk-accent) 0 ' + pct + '%, var(--dk-line) ' + pct + '% 100%)' },
-      h('span', { text: used + '/' + cap })),
-      h('div', { class: 'dk-pc-t' },
-        h('div', { text: left ? left + ' left this month' : 'All used this month' }),
-        h('div', { class: 'dk-muted', style: 'font-size:11px', text: 'Resets on 1 ' + next + '  ·  territory ' + c.terr }),
-        h('div', { class: 'dk-pq-foot', style: 'margin-top:5px' },
-          h('button', { type: 'button', class: 'dk-btn dk-primary', text: '+ Bred one', disabled: !left,
-            onclick: () => { c.used = used + 1; keep(); } }),
-          used ? h('button', { type: 'button', class: 'dk-btn', text: 'Undo', onclick: () => { c.used = used - 1; keep(); } }) : null,
-          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Territory', title: 'Change your territory size',
-            onclick: () => { c.edit = true; save('pairCount', c); render(); } }))));
-  }
 
   // If a goal names something Twill counts, show the count beside it.
   function goalProgress(g) {
@@ -4165,7 +4403,87 @@
     let t = null;
     box.addEventListener('input', () => { clearTimeout(t); t = setTimeout(check, 200); });
 
-    sheet.append(h('div', { class: 'dk-lb', text: 'Your post' }), box, countLine, countBar, report,
+    /* Snippets: blocks you post often, kept on a shelf beside the box. One with
+       blanks in curly brackets, like {prize}, asks for each blank first. Picking
+       one puts it in where your cursor is. Up to 20, kept with the rest of Twill. */
+    const SNIP_MAX = 20;
+    const snips = () => (Array.isArray(load('snips', [])) ? load('snips', []) : []).filter((x) => x && x.n);
+    const blanksIn = (t) => [...new Set([...String(t).matchAll(/\{([a-z][\w ]{0,23})\}/gi)].map((m) => m[1]))];
+    const putIn = (text) => {
+      const at = box.selectionStart ?? box.value.length, to = box.selectionEnd ?? at;
+      box.setRangeText(text, at, to, 'end');
+      box.focus();
+      check(); count();
+    };
+    const shelf = h('div', { class: 'dk-snip-shelf' });
+    const fill = h('div', { class: 'dk-snip-fill' });
+    const quirksIn = (t) => QUIRKS.map((q) => ({ q, n: q.count(t) })).filter((x) => x.n);
+    function useSnip(sn) {
+      fill.textContent = '';
+      const blanks = blanksIn(sn.t);
+      if (!blanks.length) { putIn(sn.t); return; }
+      const ins = blanks.map((b) => h('input', { type: 'text', 'aria-label': b, placeholder: b }));
+      const done = () => blanks.reduce((t, b, i) => t.split('{' + b + '}').join(ins[i].value), sn.t);
+      fill.append(h('div', { class: 'dk-lb', style: 'margin-top:0', text: 'Fill in: ' + sn.n }),
+        ...blanks.flatMap((b, i) => [h('div', { class: 'dk-snip-bl', text: b }), ins[i]]),
+        h('div', { class: 'dk-btns' },
+          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Insert', onclick: () => { putIn(done()); fill.textContent = ''; } }),
+          h('button', { type: 'button', class: 'dk-btn', text: 'Copy', onclick: async (e) => {
+            try { await navigator.clipboard.writeText(done()); e.target.textContent = 'Copied'; } catch { e.target.textContent = 'Couldn’t copy'; }
+            setTimeout(() => { e.target.textContent = 'Copy'; }, 1400);
+          } }),
+          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Cancel', onclick: () => { fill.textContent = ''; } })));
+      ins[0].focus();
+    }
+    function paintShelf() {
+      shelf.textContent = '';
+      const list = snips();
+      shelf.append(h('div', { class: 'dk-lb', style: 'margin-top:0', text: 'Snippets  ·  ' + list.length }));
+      if (!list.length) shelf.append(h('div', { class: 'dk-snip-none', text: 'Write a block you post often, then Save as a snippet. Put {blanks} in curly brackets to fill in each time.' }));
+      for (const [i, sn] of list.entries()) {
+        const b = blanksIn(sn.t).length;
+        shelf.append(h('div', { class: 'dk-snip' },
+          h('button', { type: 'button', class: 'dk-snip-use', title: b ? 'Fill in ' + b + (b === 1 ? ' blank' : ' blanks') + ', then insert' : 'Insert where your cursor is',
+            onclick: () => useSnip(sn) }, sn.n, b ? h('span', { text: ' {' + b + '}' }) : null),
+          h('button', { type: 'button', class: 'dk-snip-x', text: '✕', title: 'Delete this snippet', 'aria-label': 'Delete ' + sn.n,
+            onclick: () => { if (!confirm('Delete the snippet "' + sn.n + '"?')) return; const all = snips(); all.splice(i, 1); save('snips', all); paintShelf(); } })));
+      }
+    }
+    const saveBox = h('div', { class: 'dk-snip-fill' });
+    function askSave() {
+      saveBox.textContent = '';
+      if (!box.value.trim()) { saveBox.append(h('div', { class: 'dk-note', text: 'Write something first, then save it.' })); return; }
+      const name = h('input', { type: 'text', maxLength: 40, placeholder: 'Call it…', 'aria-label': 'Snippet name' });
+      const found = quirksIn(box.value);
+      const list = snips();
+      const full = list.length >= SNIP_MAX;
+      const go = () => {
+        const n = name.value.trim();
+        if (!n) { name.focus(); return; }
+        const all = snips();
+        const same = all.findIndex((x) => x.n.toLowerCase() === n.toLowerCase());
+        if (same >= 0) all[same] = { n, t: box.value };
+        else if (all.length < SNIP_MAX) all.push({ n, t: box.value });
+        else return;
+        save('snips', all);
+        saveBox.textContent = '';
+        paintShelf();
+      };
+      name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      saveBox.append(h('div', { class: 'dk-lb', style: 'margin-top:0', text: 'Save as a snippet' }), name,
+        found.length ? h('div', { class: 'dk-post-warn' }, h('strong', { text: 'Wolvden will strip ' + found.length + (found.length === 1 ? ' thing' : ' things') }),
+          h('span', { text: found.map((x) => x.q.what).join('; ') })) : null,
+        full ? h('div', { class: 'dk-note', text: 'You have ' + SNIP_MAX + ' snippets, the most Twill keeps. Saving with an existing name replaces that one.' }) : null,
+        h('div', { class: 'dk-note', text: 'Saving with a name you already use replaces that snippet.' }),
+        h('div', { class: 'dk-btns' },
+          h('button', { type: 'button', class: 'dk-btn dk-primary', text: 'Save', onclick: go }),
+          h('button', { type: 'button', class: 'dk-btn dk-quiet', text: 'Cancel', onclick: () => { saveBox.textContent = ''; } })));
+      name.focus();
+    }
+    paintShelf();
+
+    sheet.append(h('div', { class: 'dk-snip-wrap' }, shelf, h('div', { class: 'dk-snip-main' },
+      fill, h('div', { class: 'dk-lb', text: 'Your post' }), box, countLine, countBar, report,
       h('div', { class: 'dk-btns' },
         h('button', {
           type: 'button', class: 'dk-btn dk-primary', text: 'Copy',
@@ -4175,10 +4493,11 @@
             setTimeout(() => { e.target.textContent = 'Copy'; }, 1400);
           }
         }),
+        h('button', { type: 'button', class: 'dk-btn', text: 'Save as a snippet', onclick: askSave }),
         h('button', {
           type: 'button', class: 'dk-btn dk-quiet', text: 'Clear',
           onclick: () => { box.value = ''; check(); count(); }
-        })),
+        })), saveBox)),
       h('div', { class: 'dk-lb', text: 'What survives' }), preview,
       h('div', { class: 'dk-note', text: 'The preview drops exactly what Wolvden drops, so what you see is what posts. It checks the quirks we have actually seen bite, not every rule Wolvden has.' }));
     check();
@@ -9469,6 +9788,26 @@
       return !isPup(b) && b ? b : !isPup(a) && a ? a : '';
     }
 
+    // The project and step a Pair Lists pair belongs to, and what's next for it.
+    function pairNote(a, b) {
+      for (const p of st.list) {
+        const steps = p.steps || [];
+        const first = steps.find((x) => x.st !== 'kept');
+        for (const [i, s] of steps.entries()) {
+          if (s.st === 'kept') continue;
+          const x = resolve(p, s.a), y = resolve(p, s.b);
+          if (!x || !y || !((x === a && y === b) || (x === b && y === a))) continue;
+          let next = 'Planned, after step ' + (steps.indexOf(first) + 1);
+          if (s === first) {
+            const n = nextUp().find((z) => z.p === p);
+            if (n) next = (n.when === 'Now' ? '' : n.when.split('  ·  ').pop() + ': ') + n.what;
+          }
+          return { id: p.id, name: p.n || 'Untitled project', step: i + 1, next };
+        }
+      }
+      return null;
+    }
+
     // --- What's next, across every project ---
     function nextUp() {
       const items = [];
@@ -9542,6 +9881,8 @@
       const lb = (t) => L.append(h('div', { class: 'dk-bp-lb', text: t }));
       const item = (on, title, sub, go) => L.append(h('button', { type: 'button', class: 'dk-np-item' + (on ? ' dk-on' : ''), onclick: go },
         h('strong', { text: title }), h('span', { text: sub })));
+      const pb = pairBreedingsBox();
+      if (pb) L.append(pb);
       lb('Across all projects');
       const n = nextUp().filter((x) => x.at < 998).length;
       item(st.active === 'next', 'What’s next', n ? plural(n, 'thing', 'things') + ' coming up' : 'nothing dated yet', () => { st.active = 'next'; persist(); paint(); });
@@ -9625,14 +9966,15 @@
           }
         })));
       const tabs = h('div', { class: 'dk-bp-tabs' });
-      for (const [k, label] of [['plan', 'Plan'], ['wolves', 'Wolves ' + (p.wolves || []).length + ' of ' + PROJ_WOLVES], ['match', 'Matchmaking'], ['share', 'Share']]) {
+      for (const [k, label] of [['plan', 'Plan'], ['time', 'Timeline'], ['wolves', 'Wolves ' + (p.wolves || []).length + ' of ' + PROJ_WOLVES], ['match', 'Matchmaking'], ['share', 'Share']]) {
         tabs.append(h('button', { type: 'button', class: 'dk-bp-tab' + (st.tab === k ? ' dk-on' : ''), text: label,
           onclick: () => { st.tab = k; persist(); paintEditor(); } }));
       }
       E.append(tabs);
       const pane = h('div');
       E.append(pane);
-      if (st.tab === 'wolves') renderWolves(p, pane);
+      if (st.tab === 'time') renderTimeline(p, pane);
+      else if (st.tab === 'wolves') renderWolves(p, pane);
       else if (st.tab === 'match') renderMatch(p, pane);
       else if (st.tab === 'share') renderShare(p, pane);
       else renderPlan(p, pane);
@@ -9640,6 +9982,75 @@
 
     const lbl = (t) => h('div', { class: 'dk-bp-lb', text: t });
     const muted = (t, extra) => h('div', { class: 'dk-bp-m' + (extra ? ' ' + extra : ''), text: t });
+
+    // --- Timeline ---
+    /* Each step's heat, pregnancy and pups-due across the next six weeks, from
+       the cycle typed into that step, counted the same way as What's next: one
+       rollover a day from the day you typed it. Bars give the shape; the list
+       under them says each date in words. Nothing is read from Wolvden. */
+    const TL_DAYS = 42;
+    function renderTimeline(p, box) {
+      const steps = (p.steps || []).map((s, i) => ({ s, i })).filter(({ s }) => s.st !== 'kept');
+      if (!steps.length) { box.append(h('div', { class: 'dk-empty', text: (p.steps || []).length ? 'Every step is done.' : 'No steps yet. Plan a pairing on the Plan tab.' })); return; }
+      const day0 = new Date(); day0.setHours(0, 0, 0, 0);
+      const dayAt = (n) => new Date(day0.getTime() + n * DAY);
+      const fmt = (n) => dayAt(n).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      const lanes = [], events = [], untyped = [];
+      for (const { s, i } of steps) {
+        const gen = 'Gen ' + (i + 1);
+        const her = femaleOf(p, s);
+        const herName = her ? nameOf(p, her) : 'Her';
+        const c = cycle(s.heat);
+        if (!s.a || !s.b) { untyped.push(gen + ': pick both wolves on the Plan tab.'); continue; }
+        if (!c) { untyped.push(gen + ': type ' + herName + '’s cycle on the Plan tab to place it.'); continue; }
+        const blocks = [];
+        for (const x of c) {
+          const from = x.at, to = x.at + x.left;
+          if (from >= TL_DAYS) break;
+          const kind = x.ph === 'heat' ? 'heat' : x.ph === 'preg' ? 'preg' : 'wait';
+          blocks.push({ kind, from, to: Math.min(to, TL_DAYS), label: x.ph === 'heat' ? 'heat' : x.ph === 'preg' ? 'pregnant' : PHASES[x.ph][0].toLowerCase() });
+          if (x.ph === 'heat') {
+            if (from > 0) events.push({ at: from, kind: 'heat', text: herName + ' comes into heat', gen });
+            if (s.st !== 'bred' && to - 1 < TL_DAYS) events.push({ at: to - 1, kind: 'heat', text: 'Last day of ' + herName + '’s heat: breed by then', gen });
+          }
+          if (x.ph === 'preg' && to < TL_DAYS) {
+            blocks.push({ kind: 'due', from: to, to: Math.min(to + 1, TL_DAYS), label: 'due' });
+            events.push({ at: to, kind: 'due', text: herName + '’s pups due', gen });
+          }
+        }
+        lanes.push({ name: gen + '  ·  ' + herName, blocks });
+      }
+      if (lanes.length) {
+        const tl = h('div', { class: 'dk-tl' });
+        const wk = h('div', { class: 'dk-tl-wk' });
+        for (let w = 0; w < 6; w++) wk.append(h('span', { text: dayAt(w * 7).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
+        tl.append(wk);
+        for (const ln of lanes) {
+          const lane = h('div', { class: 'dk-tl-lane' }, h('span', { class: 'dk-tl-nm', text: ln.name }));
+          for (const b of ln.blocks) {
+            lane.append(h('span', { class: 'dk-tl-b dk-tl-' + b.kind, title: b.label + ', ' + fmt(b.from) + (b.to - b.from > 1 ? ' to ' + fmt(b.to - 1) : ''),
+              style: 'left:' + (b.from / TL_DAYS * 100) + '%;width:' + ((b.to - b.from) / TL_DAYS * 100) + '%', text: b.to - b.from >= 3 ? b.label : '' }));
+          }
+          tl.append(lane);
+        }
+        tl.append(h('span', { class: 'dk-tl-today', title: 'Today' }));
+        box.append(tl, h('div', { class: 'dk-tl-key' },
+          ...[['heat', 'in heat'], ['preg', 'pregnant'], ['due', 'pups due'], ['wait', 'waiting']].map(([k, t]) => h('span', {}, h('i', { class: 'dk-tl-' + k }), t))));
+      }
+      events.sort((a, b) => a.at - b.at);
+      const groups = [['This week', (n) => n < 7], ['Next week', (n) => n >= 7 && n < 14], ['Later', (n) => n >= 14]];
+      for (const [title, test] of groups) {
+        const list = events.filter((e) => test(e.at));
+        if (!list.length) continue;
+        box.append(lbl(title));
+        for (const e of list) {
+          box.append(h('div', { class: 'dk-tl-li' }, h('i', { class: 'dk-tl-' + e.kind }), h('b', { text: e.at === 0 ? 'Today' : fmt(e.at) }),
+            h('span', {}, e.text, h('span', { class: 'dk-bp-m', text: '  ·  ' + e.gen }))));
+        }
+      }
+      for (const t of untyped) box.append(h('div', { class: 'dk-tl-li' }, h('i', { class: 'dk-tl-wait' }), h('b', { text: 'Not typed' }), h('span', { class: 'dk-bp-m', text: t })));
+      box.append(muted('From the cycles you typed, one rollover a day. Twill doesn’t check them against Wolvden.', 'dk-small'));
+    }
 
     // --- Plan ---
     function renderPlan(p, box) {
@@ -10211,6 +10622,22 @@
         font: 600 13px/1.3 var(--dk-title-font);
       }
       #dk-bp .dk-np-head .dk-title { flex: 1; }
+      #dk-bp .dk-tl { position: relative; margin: 18px 0 4px; }
+      #dk-bp .dk-tl-wk { display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: 1px solid var(--dk-line); color: var(--dk-muted); font-size: 10.5px; }
+      #dk-bp .dk-tl-wk span { padding: 0 0 3px 3px; border-left: 1px solid var(--dk-line); }
+      #dk-bp .dk-tl-lane { position: relative; height: 28px; border-bottom: 1px dashed color-mix(in srgb, var(--dk-line) 70%, transparent); }
+      #dk-bp .dk-tl-nm { position: absolute; right: 3px; top: 0; font-size: 10px; color: var(--dk-muted); }
+      #dk-bp .dk-tl-b { position: absolute; top: 11px; height: 14px; border-radius: 3px; font-size: 9.5px; line-height: 14px; padding: 0 4px;
+        overflow: hidden; white-space: nowrap; box-sizing: border-box; color: #1e1a10; }
+      #dk-bp .dk-tl-heat { background: #c98aa8; } #dk-bp .dk-tl-preg { background: #8fb07a; } #dk-bp .dk-tl-due { background: var(--dk-edge, #c9a94f); }
+      #dk-bp .dk-tl-b.dk-tl-due { z-index: 1; min-width: 5px; }
+      #dk-bp .dk-tl-wait { background: color-mix(in srgb, var(--dk-muted) 45%, transparent); color: var(--dk-text); }
+      #dk-bp .dk-tl-today { position: absolute; left: 0; top: -14px; bottom: 0; border-left: 2px solid var(--dk-tip-title); }
+      #dk-bp .dk-tl-today::before { content: "today"; position: absolute; top: -2px; left: 4px; font: 700 9.5px var(--dk-title-font); color: var(--dk-tip-title); }
+      #dk-bp .dk-tl-key { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 2px; font-size: 10.5px; color: var(--dk-muted); }
+      #dk-bp .dk-tl-key i, #dk-bp .dk-tl-li i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+      #dk-bp .dk-tl-li { display: grid; grid-template-columns: 13px 82px 1fr; gap: 4px; align-items: baseline; padding: 4px 0; border-bottom: 1px solid var(--dk-line); }
+      #dk-bp .dk-tl-li b { color: var(--dk-tip-title); font-weight: 600; }
       #dk-bp .dk-np-head .dk-x { font: 16px/1 var(--dk-body-font); color: inherit; background: none; border: 0; margin: 0; padding: 0 4px; cursor: pointer; opacity: .8; }
       .dk-bp-wrap { flex: 1; min-height: 0; display: grid; grid-template-columns: 180px minmax(0, 1fr); }
       .dk-bp-list { min-height: 0; overflow: auto; padding: 8px; border-right: 1px solid var(--dk-line); display: flex; flex-direction: column; gap: 2px; }
@@ -10335,6 +10762,12 @@
     return {
       id: 'breed', name: 'Breeding projects', blurb: 'Plan pairings toward a goal (Alt+B)',
       start, stop, open: openWindow, fromTray,
+      // For Pair Lists: the project step these two wolves are planned for, if any.
+      pairNote: (a, b) => { reload(); return pairNote(a, b); },
+      openProject: (id) => { reload(); if (st.list.some((x) => x.id === id)) { st.active = id; st.tab = 'plan'; } openWindow(); },
+      // For the hub's home screen: what's coming up, and a way straight to it.
+      nextUp: () => { reload(); return nextUp(); },
+      openNext: () => { reload(); st.active = 'next'; openWindow(); },
       reload: () => { reload(); paint(); },
       // The tray or a kept wolf changed, here or in another tab: redraw.
       sync: () => { if (running) readHere(); paint(); },
@@ -10584,6 +11017,34 @@
           } }))));
   }
 
+  /* Pair breedings this month, as Pair Lists last said ("You have made 11/13
+     Pair Bond Breedings this month"). Only the two numbers and when they were
+     read are kept. It is only as fresh as your last visit to Pair Lists, so it
+     always says when it was read, and from the 1st it waits for a new visit. */
+  const pairMonthNow = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1); };
+  function pairRing(used, cap, small) {
+    const pct = cap ? Math.round(Math.min(used, cap) / cap * 100) : 0;
+    return h('span', { class: 'dk-ring' + (small ? ' dk-ring-s' : ''), role: 'img', 'aria-label': used + ' of ' + cap + ' used',
+      style: 'background:conic-gradient(var(--dk-accent) 0 ' + pct + '%, var(--dk-line) ' + pct + '% 100%)' },
+    h('span', { text: small ? '' : used + '/' + cap }));
+  }
+  function pairBreedingsBox() {
+    if (!load('pairCard', true)) return null;
+    const seen = load('pairSeen', null);
+    if (!seen || seen.mon !== pairMonthNow()) {
+      return h('div', { class: 'dk-pb' }, h('span', {},
+        h('b', { text: 'Pair breedings' }), h('small', { text: seen ? 'not read this month yet. Open Pair Lists.' : 'open Pair Lists and Twill reads this month’s count' })));
+    }
+    const at = new Date(seen.at);
+    const today = new Date().toDateString() === at.toDateString();
+    const when = (today ? 'today, ' : at.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ') +
+      at.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const left = Math.max(0, seen.c - seen.u);
+    return h('div', { class: 'dk-pb', title: 'Read from Pair Lists. Visit it again after breeding to update this.' },
+      pairRing(seen.u, seen.c, true),
+      h('span', {}, h('b', { text: String(left) }), ' of ' + seen.c + ' left', h('small', { text: 'read ' + when })));
+  }
+
   // ================================================= module: pair lists order
 
   defineModule((() => {
@@ -10611,7 +11072,30 @@
       .dk-pl-grp::after { content: ""; flex: 1; height: 1px; background: var(--dk-line); }
       .dk-pl-ready > .card { box-shadow: 0 0 0 2px var(--dk-accent) !important; }
       .dk-pl-hide { display: none !important; }
+      .dk-pl-proj {
+        display: block; width: 100%; margin: 8px 0 0; padding: 4px 7px; cursor: pointer; text-align: left;
+        border: 0; border-left: 3px solid var(--dk-edge, var(--dk-accent)); border-radius: var(--dk-radius);
+        background: var(--dk-panel); color: var(--dk-text); font: 11.5px/1.4 var(--dk-body-font); text-shadow: none;
+      }
+      .dk-pl-proj b { color: var(--dk-tip-title); }
     `);
+
+    // A pair that's part of a breeding project gets a small note: which project,
+    // which step, and what's next. It opens the project; nothing on the card is pressed.
+    let notes = [];
+    function projNote(col) {
+      const bp = modules.find((m) => m.id === 'breed');
+      const ids = ((col.querySelector('input[name="wolfids"]') || {}).value || '').split('-');
+      if (!bp || !isOn(bp) || !bp.pairNote || ids.length !== 2 || !load('plProj', true)) return;
+      const n = bp.pairNote(ids[0], ids[1]);
+      if (!n) return;
+      const host = col.querySelector('form') ? col.querySelector('form').parentNode : col;
+      const el = h('button', { type: 'button', class: 'dk-pl-proj', title: 'Open this project',
+        onclick: (e) => { e.preventDefault(); bp.openProject(n.id); } },
+      h('b', { text: n.name }), '  ·  step ' + n.step, h('br'), n.next);
+      host.append(el);
+      notes.push(el);
+    }
 
     const GROUPS = ['Ready to breed', 'In heat, not ready yet', 'Cooldown, soonest first', 'Not in heat right now', 'Pregnant or nursing'];
 
@@ -10635,6 +11119,8 @@
         .sort((x, y) => (x.c[0] - y.c[0]) || (x.c[1] - y.c[1]) || (x.i - y.i));
       for (const l of labels) l.remove();
       labels = [];
+      for (const n of notes) n.remove();
+      notes = [];
       const ready = ranked.filter((x) => x.c[0] === 0).length;
       let last = -1;
       for (const x of ranked) {
@@ -10646,15 +11132,29 @@
           row.append(lab);
         }
         x.col.classList.toggle('dk-pl-ready', x.c[0] === 0);
+        projNote(x.col);
         x.col.classList.toggle('dk-pl-hide', only && !!ready && x.c[0] !== 0);
         row.append(x.col);
       }
       const used = (document.querySelector('#main').textContent.match(/made (\d+)\s*\/\s*(\d+) Pair Bond Breedings/i) || []);
+      if (used[1]) {
+        const u = Number(used[1]), c = Number(used[2]);
+        const was = load('pairSeen', null);
+        // Kept for Breeding projects; only saved when it says something new.
+        if (!was || was.u !== u || was.c !== c || was.mon !== pairMonthNow() || Date.now() - was.at > 6e4) {
+          save('pairSeen', { u, c, mon: pairMonthNow(), at: Date.now() });
+          // An open Breeding projects window shows the new count straight away.
+          const bp = modules.find((m) => m.id === 'breed');
+          if (bp && isOn(bp) && bp.reload) safely(bp, 'reload');
+        }
+      }
       bar.textContent = '';
+      if (used[1]) bar.append(pairRing(Number(used[1]), Number(used[2])));
       bar.append(h('span', {},
         h('b', { text: ready ? plural(ready, 'pair', 'pairs') + ' ready to breed' : 'No pair can breed right now' }),
         ready ? ', moved to the top' : '',
-        used[1] ? '  ·  ' + used[1] + ' of ' + used[2] + ' pair breedings used this month' : ''),
+        used[1] ? h('small', { style: 'display:block;color:var(--dk-muted);font-size:11px',
+          text: plural(Math.max(0, used[2] - used[1]), 'pair breeding', 'pair breedings') + ' left this month  ·  resets on the 1st' }) : ''),
       h('label', {}, h('input', { type: 'checkbox', checked: only, onchange: (e) => { save('pairsOnly', e.target.checked); paint(); } }),
         only && !ready ? ' Only show ready pairs (none are, so all are shown)' : ' Only show ready pairs'));
     }
@@ -10675,6 +11175,8 @@
     function stop() {
       if (!bar) return;
       for (const l of labels) l.remove();
+      for (const n of notes) n.remove();
+      notes = [];
       for (const col of original) { col.classList.remove('dk-pl-ready', 'dk-pl-hide'); row.append(col); }
       bar.remove();
       bar = row = original = null;
@@ -10685,8 +11187,10 @@
     function settings(box) {
       box.append(h('div', { class: 'dk-note', style: 'margin-top:0', text: 'On Pair Lists, the pairs that can breed right now move to the top, then the rest: in heat but not ready, cooldowns soonest first, not in heat, and pregnant or nursing last. Read from each card’s own status icon every time the page loads. Twill only moves the cards; it never selects or presses anything.' }));
       box.append(check('Only show ready pairs (the rest fold away until you untick it)', !!load('pairsOnly', false), (v) => save('pairsOnly', v)));
-      box.append(check('Pair breedings card on the hub\u2019s home screen (your monthly allowance, which you add to yourself)', load('pairCard', true),
+      box.append(check('Show this month\u2019s pair breedings in Breeding projects (read from this page when you visit it)', load('pairCard', true),
         (v) => save('pairCard', v)));
+      box.append(check('Note under a pair that\u2019s in a breeding project (which project, which step, what\u2019s next)', load('plProj', true),
+        (v) => save('plProj', v)));
     }
 
     return { id: 'pairlists', name: 'Pair Lists order', blurb: 'Pairs that can breed go to the top', start, stop, settings };
@@ -11188,7 +11692,13 @@
         const url = h('input', { type: 'text', placeholder: 'https://\u2026 image address', 'aria-label': 'Image address' });
         const err = h('div', { class: 'dk-wd-err', 'aria-live': 'polite' });
         const add = () => {
-          const v = url.value.trim();
+          // Wolvden writes its own image addresses without the https: part
+          // (//static.wolvden.com/…), and an address copied from a page's code, or
+          // typed, can come that way or with no // at all, or wrapped in quotes or
+          // url( ). All of those are read as the https:// address they mean.
+          let v = url.value.trim().replace(/^url\(\s*/i, '').replace(/\s*\)$/, '').replace(/^['"]|['"]$/g, '').trim();
+          if (/^\/\//.test(v)) v = 'https:' + v;
+          else if (/^(static\.)?wolvden\.com\//i.test(v)) v = 'https://' + v;
           if (!IMG_OK.test(v)) { err.textContent = 'Needs a full https:// address that points at an image.'; return; }
           // A Wolvden decor address says itself whether it goes in front of the wolf
           // or behind it (…/decor/<pose>/<age>/over/… or …/below/…), so start it there.
