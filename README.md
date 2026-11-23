@@ -4,131 +4,125 @@
 
 <h1 align="center">Twill</h1>
 
-<p align="center">A Society of Fur toolkit for Wolvden</p>
+<p align="center">Toolkit by <a href="https://www.wolvden.com/profile/145906">Fallowe #145906</a></p>
 
 ---
 
-Twill reads the [Wolvden](https://www.wolvden.com/) page you already have open, lets you expand
-on details you would otherwise need a separate document for, and gives you space to grow your
-pack in a lore rich environment.
+> **Understand your wolves.** **Genetics** explains every gene on a [Wolvden](https://www.wolvden.com/)
+> wolf's page: where it comes from, how rare it is, and what it could become when bred.
+> **Collection** keeps count of what you own.
+>
+> **Plan your breeding.** Pin wolves in the **Tray** and pair them to see their pups' chances, then
+> plan a whole line in **Breeding projects** with heats and a timeline. **Pair Lists** puts ready
+> pairs first.
+>
+> **Keep your pack's story.** **Lore**, **Reminders** and the **Notepad** keep your words on each
+> wolf's page, and **Den Manager** sorts your den by what needs you.
+>
+> **Stay in control.** Twill only reads the page you're on. It never clicks or sends anything, and
+> never plays the game for you.
 
-Hover a gene and get expanded details on where it comes from, how it might look bred with another
-marking, and whether they can be a combo. Add detail to a wolf that you simply cannot see at a
-glance without a separate lore document. Breeding challenges and planning your pack become easier.
+<h3 align="center"><a href="https://trashgremlinx.github.io/Twill/#install">Get Twill</a></h3>
 
-**Twill will never play the game for you. We leave that to you.**
+<p align="center">
+  <a href="https://trashgremlinx.github.io/Twill/">See it in action</a> &nbsp;·&nbsp;
+  <a href="https://trashgremlinx.github.io/Twill/changelog_twill.html">What's changed: the Twill Field Guide</a>
+</p>
 
-**[Read the full write up, with pictures &rarr;](https://trashgremlinx.github.io/Twill/)**
+## What's in it
 
-**[What's changed: the Twill Field Guide &rarr;](https://trashgremlinx.github.io/Twill/changelog_twill.html)**
-
-## Install
-
-Two steps.
-
-1. Install [Tampermonkey](https://www.tampermonkey.net/), a free browser extension. On Chrome and
-   Edge, also open the extensions page, click **Details** on Tampermonkey and switch on **Allow
-   User Scripts**. On older versions without that switch, turn on **Developer mode** instead.
-2. Click **[twill.user.js](https://trashgremlinx.github.io/Twill/twill.user.js)** and press
-   **Install** when Tampermonkey asks.
-
-Then open Wolvden. The Twill mark sits in the corner of every page. Click it, or press `Alt+K`.
-
-**Other scripts:** HoLMod: compatible with Twill.
-
-Updates happen by themselves after that. Nothing you have written or set is lost when it updates.
-Don't want to wait? Click the Tampermonkey icon in your browser and choose **Check for userscript
-updates**, or click the install link again. If Tampermonkey asks before installing the new version,
-say yes.
-
-## What is in it
-
-19 tools, each of which can be switched off on its own.
-
-| | |
-|---|---|
-| **Genetics** | Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. A wolf's personality gets a pill naming its disposition (Aggressive, Friendly, Romantic or Stoic) and a card of its own. Built from 255 bases, 198 eye colours, 2,593 markings, 28 mutations and 40 personalities |
-| **Lore** | Your own fields on your own wolves, in sections you name. Wolf-link fields cross reference both ways. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players can read it too |
-| **Tray** | Pin two wolves, then pair them: what the pups could inherit slot by slot, what generation they will be, which personality groups they are likely to get, plus shared ancestors and the inbreeding figure for a pairing you have not made yet. **Copy for Discord** copies a tidy message about a wolf |
-| **Breeding projects** | Up to 4 projects with 8 wolves each, started from scratch or from the Tray, `Alt+B`: a goal, planned pairings, matchmaking, a heat counter you type into, and sharing as a Wolvden post, Discord message or spreadsheet |
-| **Pair Lists order** | The pairs that can breed right now go to the top of Pair Lists |
-| **Puppy quest** | Keep the Enclave Puppy Quest in your sidebar and hub, and a puppy's page says whether that pup could fit |
-| **Pedigree** | Keeps the family trees the pairing check needs, for the wolves in your tray and breeding projects |
-| **Collection** | A checklist of every base, eye colour and marking in the game. Tick what you have and Twill keeps count |
-| **Den Manager** | A card above your caves: care, breeding, pups, roles, old age, trades, in any den listing. Every section folds on its own |
-| **Wardrobe** | Custom decor as extra layers, plus looks you can save and try on again in the preview |
-| **Item Lookup** | A magnifier on every item in your Hoard and on trades: 287 recipes, the catalogue, or the trading centre, already searched |
-| **Shopping List** | Items you want tagged **buy**, items you would trade away tagged **in stock**, wherever they appear, with your own price notes |
-| **Store Front** | On Manage Your Trades: what to restock, and which trades have offers waiting |
-| **Notepad** | A movable notepad on every page, `Alt+N`. Pictures by web address, and notes can be pinned to a wolf |
-| **Explore bars** | Your Energy and HP drawn just above the explore box, so a phone never has to scroll down for them. On by default on phones, with a switch for computers |
-| **Fishing colours** | An accessibility filter for red-blind and green-blind players. It does not point at the fish |
-| **Filter** | Collapses posts from players you would rather not read, and folds chatter topics with words you choose |
-| **Reminders** | A one-line reminder on a wolf, with a date if you like, shown on its page and in Den Manager |
-| **Custom layouts** | Switch a hard-to-read den layout off, for one page or everywhere. Only you see the change |
-
-Plus **9 reference guides kept offline**: herbs, scouting, illnesses, prey, battle enemies,
-befriending, roles, mutation pass rates and pair bonds. 28 herbs and 21 medicines, 18 illnesses,
-61 prey, 146 enemies, every befriending move against every disposition, and what each role runs
-on, joined up rather than sitting in separate tables.
-
-**Comfort** in the hub adds a reading font (OpenDyslexic, Atkinson Hyperlegible or Lexend if you have them installed, or Verdana, Tahoma and others), letter, word and line spacing for Twill or the whole site, reduced motion, and a switch to turn off a hard-to-read den layout for just that page. There are also **High Contrast** Light and Dark themes.
-
-And **twelve themes in light and dark** with a sun and moon to swap them, **24 seasonal themes**, a font picker and a live editor, a post composer that catches those pesky HTML breaks,
-and **Backup** so you can carry everything with you to another computer.
+<table>
+  <tr><td colspan="2"><b>The hub</b><br>Opens on cards for what's going on: events, your Puppy quest, the next project step, Goals and more. You choose which.</td></tr>
+  <tr>
+    <td width="50%"><b>Genetics</b><br>A card for every gene, coloured by where it comes from, on wolf pages and in the Wardrobe.</td>
+    <td width="50%"><b>Tray and Pairing</b><br>Pin wolves and pair them: inheritance by slot, personality odds, shared ancestors.</td>
+  </tr>
+  <tr>
+    <td><b>Breeding projects</b><br>Goals, matchmaking, a heat counter and a six-week timeline.</td>
+    <td><b>Pair Lists</b><br>Ready pairs first, a note on pairs in a project, your monthly breedings counted.</td>
+  </tr>
+  <tr>
+    <td><b>Den Manager</b><br>Care, heats, pups, roles and old age, sorted above your caves.</td>
+    <td><b>Lore and Reminders</b><br>Your own fields and notes, shown on each wolf's page.</td>
+  </tr>
+  <tr>
+    <td><b>Compose a post</b><br>Shows what Wolvden will strip, and keeps snippets with blanks to fill in.</td>
+    <td><b>Collection and Wardrobe</b><br>Tick what you own; layer and save decor looks.</td>
+  </tr>
+  <tr>
+    <td><b>Notepad and Shopping List</b><br>Notes on every page; buy and in-stock tags with your prices.</td>
+    <td><b>11 guides</b><br>Herbs, scouting, illnesses, prey, battle, fishing, events and more, offline.</td>
+  </tr>
+  <tr><td colspan="2"><b>Comfort and colour</b><br>36 themes, reading fonts, spacing, a reading ruler, and fishing colours for colour-blind players.</td></tr>
+</table>
 
 ## What it will not do
 
-- It **never loads a page for you**. No randomly opened tabs.
-- It **never clicks, submits or fills a form for you**. No auto explore, no bump tools, no
-  pre-chosen answers for battles or befriending.
-- It **never refreshes** anything on a timer. You still bump your own trades, raffles and
-  chatter posts.
-- It **sends nothing anywhere**. No server, no account, no tracking, no analytics.
-- It **does not gather up the site**. Nothing is kept from Wolvden beyond the wolves you pick
-  yourself: up to 8 in the tray and 8 in each of up to 4 breeding projects, plus Lillemor's puppy
-  quest if you choose to keep it. They are forgotten when you take them out.
+> It **never clicks, submits or fills in** anything for you, and **never refreshes** a page.<br>
+> It **sends nothing anywhere**: no server, no account, no tracking.<br>
+> It **keeps only what you pick**: 8 wolves in the Tray, and 8 in each of up to 4 projects.
 
-These are facts about the source rather than promises. There is no `fetch`, `XMLHttpRequest`,
-`sendBeacon`, `WebSocket`, `setInterval`, `.submit()` or `location.href` anywhere in the file,
-and the script runs with `@grant none`.
+**Is this allowed?** We have received the green light from the Wolvden support team to publicly
+share Twill with you.
 
-## Your data
+It's free, everything stays in your own browser, and it updates itself. You'll need Tampermonkey,
+a free browser extension; Get Twill walks you through it. Found a bug or have an idea? Let me know!
+Community feedback helps this project flourish.
 
-Everything lives in your own browser's `localStorage`, under keys prefixed `denkit:`, and never
-leaves your machine. Almost all of it is what you wrote yourself: notes, lore, goals, lists, your
-Collection ticks and settings. The only things taken from Wolvden's pages are the genes and family
-tree of each wolf you pick (up to 8 in the tray, and 8 in each of up to 4 breeding projects), which
-are deleted when the wolf leaves them, and Lillemor's puppy quest if you press Show in Twill.
-Clearing site data removes all of it, so use **Backup** in the hub if you are moving computers.
+<h3 align="center"><a href="https://trashgremlinx.github.io/Twill/#install">Get Twill</a></h3>
 
-The file is around 600KB because every fact it explains is bundled inside it: bases, eye colours,
-markings, mutations, recipes, herbs, prey and battle enemies. That is what lets the guides work
-without ever contacting anything.
+<p align="center">
+  <a href="https://discord.gg/ZQDz8ANTUR"><img src="sof-logo.png" alt="The Society of Fur" width="48"></a>
+</p>
 
-## Thanks
+<p align="center"><sub>Facts from the <a href="https://grousehouse.wiki/">Grouse House Wiki</a>. An unofficial user script, not affiliated with Wolvden or Lioden Ltd. Use at your own risk.</sub></p>
+
+---
+
+<details>
+<summary><b>Installing by hand</b></summary>
+
+1. Install [Tampermonkey](https://www.tampermonkey.net/). On Chrome and Edge, open the extensions
+   page, click **Details** on Tampermonkey and switch on **Allow User Scripts** (on older versions,
+   turn on **Developer mode** instead).
+2. Click **[twill.user.js](https://trashgremlinx.github.io/Twill/twill.user.js)** and press
+   **Install** when Tampermonkey asks.
+
+Then open Wolvden: the Twill mark sits in the corner of every page. Click it, or press `Alt+K`.
+To update early, click the Tampermonkey icon and choose **Check for userscript updates**.
+
+**Other scripts:** HoLMod: compatible with Twill.
+</details>
+
+<details>
+<summary><b>Your data, and what's in the file</b></summary>
+
+Everything lives in your own browser, under keys starting `denkit:`, and never leaves your machine.
+Almost all of it is what you wrote yourself. The only things taken from Wolvden's pages are the
+genes and family tree of each wolf you pick (forgotten when it leaves the Tray or a project),
+Lillemor's puppy quest if you keep it, and this month's pair breedings count from Pair Lists. Use
+**Backup** (behind the **?** in the hub) if you move computers.
+
+There is no `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`, `setInterval`, `.submit()` or
+`location.href` anywhere in the file, and it runs with `@grant none`. It is just under 1MB because
+every fact it explains is bundled inside it, so the guides never contact anything.
+</details>
+
+<details>
+<summary><b>Thanks</b></summary>
 
 **[The Grouse House Wiki](https://grousehouse.wiki/)** for the game facts, gathered by people who
-did a great deal of careful work. Twill writes all of its content independently from facts
-collected across the wiki, Wolvden and community discussion.
+did a great deal of careful work. Twill writes all of its content in its own words.
 
-**Wolvden, by Lioden Ltd**, for the game, the art and the team behind it. This is an unofficial
-fan tool and is not affiliated with or endorsed by them.
+**Wolvden, by Lioden Ltd**, for the game, the art and the team behind it.
 
 **The Society of Fur**, for thoughts, wishes and feedback throughout.
+</details>
 
-## Licence
+<details>
+<summary><b>Licence</b></summary>
 
-Twill is free to use and free to pass on, and it asks to be passed on whole. Share the
-link or the file as much as you like, keep the credit where it is, and do not sell it or
-hand on a copy you have edited. An edited copy could break every promise above while
-still wearing this name, which is the one thing that cannot be allowed to happen.
-
-**[Read the licence](LICENCE.md)**
-
-## Come say hello
-
-- [Join us on Discord](https://discord.gg/ZQDz8ANTUR)
-- [The guild on Wolvden](https://www.wolvden.com/g/society/991)
-
-Bugs, ideas and requests are all welcome. By [Fallowe](https://www.wolvden.com/profile/145906).
+Twill is free to use and free to pass on, and it asks to be passed on whole. Share the link or the
+file as much as you like, keep the credit where it is, and do not sell it or hand on a copy you have
+edited. **[Read the licence](LICENCE.md)**
+</details>
