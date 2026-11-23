@@ -63,6 +63,8 @@
   .lede{margin:30px 0 0;padding:20px 22px;background:var(--card);border:1px solid var(--edge);
         border-left:4px solid var(--leaf);border-radius:var(--radius);font-size:17px}
   .lede strong{color:var(--green)}
+  .lede .hl{color:var(--bark);font-weight:700}
+  .canopy p a{color:inherit;text-decoration:none;border-bottom:1px solid currentColor}
   .lede p{margin:0 0 12px} .lede p:last-child{margin:0}
 
   h2{margin:48px 0 6px;font:600 26px/1.25 Fraunces,Georgia,serif;
@@ -166,6 +168,54 @@
   .cchips span.got::before{content:"\2713  "}
   .cchips em{font-style:normal;font-size:9px;opacity:.7;margin-left:3px}
   .demo-note{font-size:12.5px;color:var(--soft);margin:6px 0 0}
+  /* See it: colour dots in the heading, tabs by the four promises */
+  .seeh{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:2px solid var(--edge);margin:48px 0 8px}
+  .seeh h2{margin:0;border:0;padding-bottom:7px}
+  .seeh .tname{color:var(--soft);font-size:12.5px;min-height:1.2em}
+  .tpick{display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding-bottom:7px}
+  .tpick .tswitch{margin:0;gap:5px;justify-content:flex-end}
+  .tswitch button{width:24px;height:24px;padding:0;border-radius:50%;font-size:0;color:transparent;
+                  border:2px solid var(--cream);box-shadow:0 0 0 1px var(--edge)}
+  .tswitch button.on{box-shadow:0 0 0 2px var(--bark);border-color:var(--cream)}
+  .tswitch button:hover{box-shadow:0 0 0 2px var(--leaf)}
+  .ptabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}
+  .ptabs button{font:600 13.5px Karla,system-ui,sans-serif;cursor:pointer;background:var(--card);
+                border:1px solid var(--edge);border-radius:999px;padding:5px 14px;color:var(--green)}
+  .ptabs button[aria-selected="true"]{background:var(--green);border-color:var(--green);color:var(--cream)}
+  @media(min-width:860px){.demos{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .pane{display:contents} .pane[hidden]{display:none}
+  .pairbox{display:inline-flex;gap:4px;padding:2px;border:1px dashed #c98aa8;border-radius:4px;margin-bottom:4px}
+  .pchip{padding:1px 7px;border:1px solid #c98aa8;box-shadow:inset 0 -2px 0 #c98aa8;border-radius:var(--t-radius)}
+  .wbox{display:flex;gap:6px;align-items:baseline;padding:3px 7px;margin:3px 0;border:1px solid var(--t-line);
+        border-left:4px solid var(--wc);border-radius:var(--t-radius);color:var(--t-muted);font-size:11.5px}
+  .wbox b{color:var(--t-text);font-weight:600} .wbox .dots{margin-left:auto;color:var(--t-edge)}
+  .tlw{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--t-line);color:var(--t-muted);font-size:9.5px;margin-top:10px}
+  .tlw span{border-left:1px solid var(--t-line);padding-left:3px}
+  .tll{position:relative;height:22px;border-bottom:1px dashed var(--t-line)}
+  .tll i{position:absolute;top:5px;height:13px;border-radius:3px;font:normal 9px/13px Karla,sans-serif;padding:0 4px;overflow:hidden;white-space:nowrap;color:#1e1a10}
+  .tll i.h{background:#c98aa8} .tll i.p{background:#8fb07a} .tll i.d{background:#c9a94f;z-index:1} .tll i.w{background:color-mix(in srgb,var(--t-muted) 45%,transparent);color:var(--t-text)}
+  .tll b{position:absolute;top:-14px;bottom:0;border-left:2px solid var(--t-tip)}
+  .pnote{margin:3px 0;padding:2px 7px;border-left:3px solid var(--t-edge);background:var(--t-surface);font-size:11px}
+  .pnote b{color:var(--t-tip)}
+  .glw{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .gl{background:var(--t-surface);border:1px solid var(--t-line);border-radius:var(--t-radius);padding:4px 7px;font-size:11.5px}
+  .gl small{display:block;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--t-tip);font-weight:700}
+  .gl.wide{grid-column:1/-1;border-left:2px solid var(--t-accent)}
+  .snips{display:flex;flex-wrap:wrap;gap:4px}
+  .snips span{padding:1px 7px;border:1px solid var(--t-line);background:var(--t-surface);border-radius:var(--t-radius);font-size:11px}
+  .snips b{color:var(--t-tip)}
+  /* Explore more: tiles that open one section at a time */
+  .xtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0 4px}
+  @media(min-width:760px){.xtiles{grid-template-columns:repeat(5,minmax(0,1fr))}}
+  .xtiles button{cursor:pointer;text-align:left;background:var(--card);border:1px solid var(--edge);border-radius:var(--radius);
+                 padding:12px 14px;color:var(--ink);font:15px/1.3 Fraunces,Georgia,serif}
+  .xtiles button b{display:block;color:var(--green);font-weight:600}
+  .xtiles button small{display:block;margin-top:3px;font:13px/1.35 Karla,system-ui,sans-serif;color:var(--soft)}
+  .xtiles button:hover{border-color:var(--leaf)}
+  .xtiles button[aria-expanded="true"]{border-color:var(--bark);box-shadow:0 0 0 1px var(--bark)}
+  .xpane{margin:14px 0 0;padding:4px 18px 18px;background:var(--card);border:1px solid var(--edge);border-radius:var(--radius)}
+  .xpane > h3:first-child{margin-top:14px}
+  .xpane .xsub{margin-top:30px}
 
   .gchips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0}
   .gchips button{font:700 14px Karla,system-ui,sans-serif;cursor:pointer;background:var(--card);
@@ -378,7 +428,7 @@
   <div class="sky-day" aria-hidden="true"><i class="sun"></i><div class="clouds"><span style="left:14%;top:14%;--w:120px;--d:70s"></span><span style="left:63%;top:9%;--w:90px;--d:85s"></span><span style="left:80%;top:30%;--w:140px;--d:95s"></span><span style="left:34%;top:36%;--w:70px;--d:60s"></span></div></div>
   <div class="stars" aria-hidden="true"><i style="left:4.86%;top:26.35%;width:1.5px;height:1.5px;opacity:0.44;--o:0.44;--d:6.0s;--dl:-4.9s"></i><i style="left:69.07%;top:39.22%;width:2.0px;height:2.0px;opacity:0.29;--o:0.29;--d:6.3s;--dl:-4.6s"></i><i style="left:83.49%;top:15.88%;width:1.9px;height:1.9px;opacity:0.85;--o:0.85;--d:4.7s;--dl:-4.3s"></i><i style="left:69.09%;top:62.50%;width:1.6px;height:1.6px;opacity:0.22;--o:0.22;--d:4.9s;--dl:-0.3s"></i><i style="left:87.62%;top:14.88%;width:3.0px;height:3.0px;opacity:0.64;--o:0.64;--d:5.3s;--dl:-4.7s"></i><i style="left:97.10%;top:60.67%;width:1.6px;height:1.6px;opacity:0.40;--o:0.40;--d:5.3s;--dl:-1.9s"></i><i style="left:74.07%;top:28.28%;width:1.4px;height:1.4px;opacity:0.75;--o:0.75;--d:5.5s;--dl:-5.7s"></i><i style="left:2.48%;top:42.38%;width:1.5px;height:1.5px;opacity:0.81;--o:0.81;--d:6.5s;--dl:-5.4s"></i><i style="left:29.24%;top:46.20%;width:1.8px;height:1.8px;opacity:0.42;--o:0.42;--d:3.2s;--dl:-0.8s"></i><i style="left:86.45%;top:90.35%;width:2.2px;height:2.2px;opacity:0.78;--o:0.78;--d:5.1s;--dl:-5.0s"></i><i style="left:80.29%;top:88.41%;width:2.8px;height:2.8px;opacity:0.59;--o:0.59;--d:3.2s;--dl:-2.7s"></i><i style="left:46.56%;top:39.14%;width:2.0px;height:2.0px;opacity:0.27;--o:0.27;--d:3.7s;--dl:-3.0s"></i><i style="left:72.91%;top:15.39%;width:1.4px;height:1.4px;opacity:0.49;--o:0.49;--d:5.2s;--dl:-0.2s"></i><i style="left:87.73%;top:19.62%;width:2.3px;height:2.3px;opacity:0.35;--o:0.35;--d:4.7s;--dl:-4.5s"></i><i style="left:15.73%;top:6.15%;width:1.5px;height:1.5px;opacity:0.58;--o:0.58;--d:4.2s;--dl:-4.4s"></i><i style="left:0.10%;top:70.05%;width:2.3px;height:2.3px;opacity:0.79;--o:0.79;--d:3.0s;--dl:-5.4s"></i><i style="left:91.47%;top:2.68%;width:1.2px;height:1.2px;opacity:0.46;--o:0.46;--d:4.4s;--dl:-1.1s"></i><i style="left:3.42%;top:13.90%;width:1.5px;height:1.5px;opacity:0.35;--o:0.35;--d:6.0s;--dl:-1.1s"></i><i style="left:34.71%;top:21.01%;width:2.3px;height:2.3px;opacity:0.17;--o:0.17;--d:3.9s;--dl:-4.6s"></i><i style="left:58.17%;top:4.26%;width:1.0px;height:1.0px;opacity:0.27;--o:0.27;--d:3.6s;--dl:-0.2s"></i><i style="left:76.29%;top:29.06%;width:1.5px;height:1.5px;opacity:0.41;--o:0.41;--d:6.4s;--dl:-1.1s"></i><i style="left:43.38%;top:34.94%;width:2.6px;height:2.6px;opacity:0.28;--o:0.28;--d:5.1s;--dl:-5.7s"></i><i style="left:54.51%;top:91.02%;width:2.9px;height:2.9px;opacity:0.19;--o:0.19;--d:3.7s;--dl:-3.9s"></i><i style="left:1.02%;top:18.30%;width:2.7px;height:2.7px;opacity:0.57;--o:0.57;--d:2.8s;--dl:-0.4s"></i><i style="left:92.80%;top:78.49%;width:2.6px;height:2.6px;opacity:0.64;--o:0.64;--d:4.2s;--dl:-4.7s"></i><i style="left:47.14%;top:29.64%;width:2.3px;height:2.3px;opacity:0.20;--o:0.20;--d:6.0s;--dl:-2.3s"></i><i style="left:44.27%;top:48.27%;width:2.5px;height:2.5px;opacity:0.25;--o:0.25;--d:4.5s;--dl:-0.9s"></i><i style="left:49.63%;top:18.34%;width:1.6px;height:1.6px;opacity:0.17;--o:0.17;--d:6.3s;--dl:-3.7s"></i><i style="left:2.73%;top:86.77%;width:2.5px;height:2.5px;opacity:0.69;--o:0.69;--d:3.8s;--dl:-3.2s"></i><i style="left:72.70%;top:85.65%;width:2.2px;height:2.2px;opacity:0.47;--o:0.47;--d:4.8s;--dl:-4.8s"></i><i style="left:80.53%;top:21.16%;width:1.0px;height:1.0px;opacity:0.32;--o:0.32;--d:4.8s;--dl:-4.6s"></i><i style="left:87.95%;top:29.09%;width:2.9px;height:2.9px;opacity:0.32;--o:0.32;--d:6.4s;--dl:-2.8s"></i><i style="left:52.98%;top:97.11%;width:1.3px;height:1.3px;opacity:0.17;--o:0.17;--d:5.0s;--dl:-1.9s"></i><i style="left:52.17%;top:53.60%;width:2.2px;height:2.2px;opacity:0.15;--o:0.15;--d:5.0s;--dl:-3.4s"></i><i style="left:69.47%;top:23.26%;width:2.7px;height:2.7px;opacity:0.15;--o:0.15;--d:3.3s;--dl:-3.0s"></i><i style="left:51.78%;top:49.30%;width:2.8px;height:2.8px;opacity:0.28;--o:0.28;--d:2.6s;--dl:-0.2s"></i><i style="left:31.22%;top:82.34%;width:2.3px;height:2.3px;opacity:0.26;--o:0.26;--d:4.3s;--dl:-2.3s"></i><i style="left:13.95%;top:35.95%;width:1.4px;height:1.4px;opacity:0.46;--o:0.46;--d:3.6s;--dl:-5.7s"></i><i style="left:35.77%;top:8.91%;width:2.4px;height:2.4px;opacity:0.16;--o:0.16;--d:2.8s;--dl:-1.9s"></i><i style="left:84.34%;top:74.04%;width:2.9px;height:2.9px;opacity:0.78;--o:0.78;--d:4.1s;--dl:-3.0s"></i><i style="left:88.06%;top:33.83%;width:2.2px;height:2.2px;opacity:0.59;--o:0.59;--d:4.8s;--dl:-1.1s"></i><i style="left:71.61%;top:42.59%;width:1.1px;height:1.1px;opacity:0.56;--o:0.56;--d:2.9s;--dl:-2.8s"></i><i style="left:78.20%;top:95.38%;width:1.1px;height:1.1px;opacity:0.34;--o:0.34;--d:5.5s;--dl:-1.7s"></i><i style="left:58.46%;top:83.56%;width:2.5px;height:2.5px;opacity:0.21;--o:0.21;--d:4.2s;--dl:-3.2s"></i><i style="left:25.96%;top:17.00%;width:2.5px;height:2.5px;opacity:0.71;--o:0.71;--d:4.4s;--dl:-5.0s"></i><i style="left:79.47%;top:13.00%;width:2.4px;height:2.4px;opacity:0.32;--o:0.32;--d:6.1s;--dl:-0.3s"></i><i style="left:91.83%;top:51.80%;width:1.6px;height:1.6px;opacity:0.60;--o:0.60;--d:3.1s;--dl:-1.8s"></i><i style="left:65.51%;top:98.83%;width:1.8px;height:1.8px;opacity:0.23;--o:0.23;--d:4.4s;--dl:-4.5s"></i><i style="left:54.82%;top:93.60%;width:2.0px;height:2.0px;opacity:0.21;--o:0.21;--d:3.0s;--dl:-0.9s"></i><i style="left:54.83%;top:5.23%;width:2.8px;height:2.8px;opacity:0.25;--o:0.25;--d:2.8s;--dl:-5.0s"></i><i style="left:56.90%;top:54.73%;width:2.4px;height:2.4px;opacity:0.22;--o:0.22;--d:4.5s;--dl:-3.3s"></i><i style="left:70.90%;top:3.82%;width:1.4px;height:1.4px;opacity:0.75;--o:0.75;--d:5.7s;--dl:-5.5s"></i><i style="left:14.13%;top:10.52%;width:1.6px;height:1.6px;opacity:0.52;--o:0.52;--d:4.8s;--dl:-2.9s"></i><i style="left:66.81%;top:51.37%;width:1.5px;height:1.5px;opacity:0.19;--o:0.19;--d:5.8s;--dl:-3.4s"></i><i style="left:94.40%;top:10.33%;width:1.7px;height:1.7px;opacity:0.84;--o:0.84;--d:3.5s;--dl:-3.9s"></i><i style="left:36.38%;top:34.32%;width:1.1px;height:1.1px;opacity:0.22;--o:0.22;--d:6.2s;--dl:-3.3s"></i><i style="left:61.91%;top:55.42%;width:2.6px;height:2.6px;opacity:0.24;--o:0.24;--d:5.8s;--dl:-0.7s"></i><i style="left:91.96%;top:79.81%;width:2.5px;height:2.5px;opacity:0.61;--o:0.61;--d:5.7s;--dl:-4.3s"></i><i style="left:88.27%;top:43.30%;width:2.8px;height:2.8px;opacity:0.56;--o:0.56;--d:4.5s;--dl:-2.4s"></i><i style="left:8.86%;top:33.54%;width:2.9px;height:2.9px;opacity:0.37;--o:0.37;--d:5.7s;--dl:-3.3s"></i><i style="left:30.27%;top:78.92%;width:3.0px;height:3.0px;opacity:0.18;--o:0.18;--d:5.6s;--dl:-2.7s"></i><i style="left:36.46%;top:4.14%;width:2.0px;height:2.0px;opacity:0.17;--o:0.17;--d:5.0s;--dl:-2.0s"></i><i style="left:74.33%;top:52.41%;width:1.8px;height:1.8px;opacity:0.57;--o:0.57;--d:2.9s;--dl:-1.2s"></i><i style="left:75.99%;top:74.33%;width:2.4px;height:2.4px;opacity:0.63;--o:0.63;--d:4.6s;--dl:-1.0s"></i><i style="left:47.60%;top:83.50%;width:1.9px;height:1.9px;opacity:0.16;--o:0.16;--d:5.1s;--dl:-4.3s"></i><i style="left:24.98%;top:78.68%;width:2.7px;height:2.7px;opacity:0.51;--o:0.51;--d:2.8s;--dl:-2.3s"></i><i style="left:95.78%;top:32.70%;width:2.3px;height:2.3px;opacity:0.52;--o:0.52;--d:4.0s;--dl:-1.3s"></i><i style="left:88.38%;top:48.04%;width:2.1px;height:2.1px;opacity:0.82;--o:0.82;--d:5.9s;--dl:-5.2s"></i><i style="left:27.49%;top:79.02%;width:2.8px;height:2.8px;opacity:0.55;--o:0.55;--d:2.6s;--dl:-2.8s"></i><i style="left:56.31%;top:20.70%;width:1.9px;height:1.9px;opacity:0.19;--o:0.19;--d:5.1s;--dl:-5.5s"></i><i style="left:25.45%;top:64.44%;width:1.7px;height:1.7px;opacity:0.56;--o:0.56;--d:5.0s;--dl:-0.7s"></i><i style="left:48.51%;top:20.11%;width:1.5px;height:1.5px;opacity:0.21;--o:0.21;--d:3.7s;--dl:-4.5s"></i><i style="left:24.24%;top:4.99%;width:2.5px;height:2.5px;opacity:0.79;--o:0.79;--d:5.3s;--dl:-3.6s"></i><i style="left:25.49%;top:99.35%;width:2.1px;height:2.1px;opacity:0.46;--o:0.46;--d:3.5s;--dl:-4.9s"></i><i style="left:54.72%;top:68.60%;width:2.1px;height:2.1px;opacity:0.27;--o:0.27;--d:3.4s;--dl:-3.5s"></i><i style="left:66.25%;top:52.25%;width:1.5px;height:1.5px;opacity:0.29;--o:0.29;--d:5.9s;--dl:-3.7s"></i><i style="left:55.16%;top:19.45%;width:2.7px;height:2.7px;opacity:0.16;--o:0.16;--d:3.0s;--dl:-1.6s"></i><i style="left:12.78%;top:91.17%;width:2.0px;height:2.0px;opacity:0.55;--o:0.55;--d:3.1s;--dl:-1.7s"></i><i style="left:49.01%;top:29.14%;width:2.1px;height:2.1px;opacity:0.15;--o:0.15;--d:4.3s;--dl:-1.7s"></i><i style="left:81.12%;top:91.40%;width:2.8px;height:2.8px;opacity:0.57;--o:0.57;--d:4.6s;--dl:-4.9s"></i><i style="left:89.36%;top:54.47%;width:2.5px;height:2.5px;opacity:0.81;--o:0.81;--d:4.1s;--dl:-1.3s"></i><i style="left:39.17%;top:2.32%;width:1.9px;height:1.9px;opacity:0.28;--o:0.28;--d:5.7s;--dl:-5.7s"></i><i style="left:70.04%;top:81.86%;width:1.7px;height:1.7px;opacity:0.41;--o:0.41;--d:5.7s;--dl:-4.9s"></i><i style="left:51.12%;top:25.19%;width:2.9px;height:2.9px;opacity:0.29;--o:0.29;--d:3.8s;--dl:-4.1s"></i><i style="left:3.40%;top:38.47%;width:1.9px;height:1.9px;opacity:0.35;--o:0.35;--d:3.6s;--dl:-5.6s"></i><i style="left:88.60%;top:57.52%;width:2.7px;height:2.7px;opacity:0.79;--o:0.79;--d:3.7s;--dl:-3.5s"></i><i style="left:64.74%;top:69.98%;width:2.6px;height:2.6px;opacity:0.17;--o:0.17;--d:3.4s;--dl:-0.2s"></i><i style="left:8.37%;top:4.25%;width:1.7px;height:1.7px;opacity:0.53;--o:0.53;--d:3.2s;--dl:-3.5s"></i><i style="left:3.45%;top:85.02%;width:1.2px;height:1.2px;opacity:0.40;--o:0.40;--d:3.8s;--dl:-2.6s"></i><i style="left:96.88%;top:55.51%;width:2.9px;height:2.9px;opacity:0.38;--o:0.38;--d:4.3s;--dl:-3.6s"></i><i style="left:8%;top:18%;width:5px;height:5px;opacity:.95;--o:.95;--d:5.5s;--dl:-1.1s"></i><i style="left:12%;top:30%;width:5px;height:5px;opacity:.95;--o:.95;--d:3.8s;--dl:-3.7s"></i><i style="left:17%;top:22%;width:5px;height:5px;opacity:.95;--o:.95;--d:4.0s;--dl:-3.5s"></i><i style="left:20%;top:40%;width:5px;height:5px;opacity:.95;--o:.95;--d:4.8s;--dl:-0.9s"></i><i class="moon"></i></div>
   <h1>Twill</h1>
-  <p>A Society of Fur toolkit for Wolvden</p>
+  <p>Toolkit by <a href="https://www.wolvden.com/profile/145906" target="_blank" rel="noopener noreferrer">Fallowe #145906</a></p>
   <div class="ver">version 0.38.0</div>
   <p class="guide"><a href="changelog_twill.html">What’s changed: the Twill Field Guide ›</a></p>
   <svg class="trees" viewBox="-1200 0 3600 130" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><g transform="matrix(-1 0 0 1 0 0)"><g style="--d:6.6s;--dl:-1.8s"><rect x="-22.5" y="108.0" width="5.0" height="11.7" fill="var(--trunk)"/><path d="M-20.0 34.8L2.1 99.0Q-20.0 93.0 -42.1 99.0Z" fill="var(--far)"/><path d="M-20.0 57.5L8.6 104.3Q-20.0 98.3 -48.6 104.3Z" fill="var(--far)"/><path d="M-20.0 80.3L15.0 109.7Q-20.0 103.7 -55.0 109.7Z" fill="var(--far)"/></g><g style="--d:7.4s;--dl:-5.0s"><rect x="16.4" y="105.1" width="6.4" height="15.0" fill="var(--trunk)"/><path d="M19.6 10.7L48.2 93.5Q19.6 87.5 -8.9 93.5Z" fill="var(--far)"/><path d="M19.6 40.0L56.5 100.4Q19.6 94.4 -17.2 100.4Z" fill="var(--far)"/><path d="M19.6 69.3L64.7 107.3Q19.6 101.3 -25.4 107.3Z" fill="var(--far)"/></g><g style="--d:5.1s;--dl:-0.9s"><rect x="60.7" y="106.4" width="5.8" height="13.5" fill="var(--trunk)"/><path d="M63.6 21.7L89.3 96.0Q63.6 90.0 38.0 96.0Z" fill="var(--far)"/><path d="M63.6 48.0L96.7 102.2Q63.6 96.2 30.6 102.2Z" fill="var(--far)"/><path d="M63.6 74.3L104.1 108.4Q63.6 102.4 23.2 108.4Z" fill="var(--far)"/></g><g style="--d:7.5s;--dl:-1.8s"><rect x="101.0" y="105.0" width="6.5" height="15.2" fill="var(--trunk)"/><path d="M104.2 9.5L133.1 93.2Q104.2 87.2 75.4 93.2Z" fill="var(--far)"/><path d="M104.2 39.2L141.4 100.2Q104.2 94.2 67.0 100.2Z" fill="var(--far)"/><path d="M104.2 68.8L149.8 107.2Q104.2 101.2 58.6 107.2Z" fill="var(--far)"/></g><g style="--d:6.4s;--dl:-5.7s"><rect x="146.8" y="107.8" width="5.1" height="11.9" fill="var(--trunk)"/><path d="M149.4 32.9L172.0 98.6Q149.4 92.6 126.8 98.6Z" fill="var(--far)"/><path d="M149.4 56.2L178.6 104.0Q149.4 98.0 120.2 104.0Z" fill="var(--far)"/><path d="M149.4 79.4L185.1 109.5Q149.4 103.5 113.7 109.5Z" fill="var(--far)"/></g><g style="--d:6.4s;--dl:-1.1s"><rect x="192.7" y="105.0" width="6.5" height="15.1" fill="var(--trunk)"/><path d="M196.0 10.0L224.7 93.3Q196.0 87.3 167.2 93.3Z" fill="var(--far)"/><path d="M196.0 39.5L233.0 100.3Q196.0 94.3 158.9 100.3Z" fill="var(--far)"/><path d="M196.0 69.0L241.3 107.2Q196.0 101.2 150.6 107.2Z" fill="var(--far)"/></g><g style="--d:6.7s;--dl:-5.7s"><rect x="246.1" y="107.9" width="5.1" height="11.8" fill="var(--trunk)"/><path d="M248.7 33.5L271.1 98.7Q248.7 92.7 226.2 98.7Z" fill="var(--far)"/><path d="M248.7 56.6L277.6 104.1Q248.7 98.1 219.7 104.1Z" fill="var(--far)"/><path d="M248.7 79.7L284.1 109.6Q248.7 103.6 213.2 109.6Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-0.9s"><rect x="296.2" y="106.2" width="5.9" height="13.7" fill="var(--trunk)"/><path d="M299.1 20.0L325.2 95.6Q299.1 89.6 273.1 95.6Z" fill="var(--far)"/><path d="M299.1 46.8L332.8 101.9Q299.1 95.9 265.5 101.9Z" fill="var(--far)"/><path d="M299.1 73.6L340.3 108.2Q299.1 102.2 258.0 108.2Z" fill="var(--far)"/></g><g style="--d:5.6s;--dl:-2.6s"><rect x="330.4" y="105.3" width="6.4" height="14.8" fill="var(--trunk)"/><path d="M333.6 12.0L361.8 93.8Q333.6 87.8 305.4 93.8Z" fill="var(--far)"/><path d="M333.6 41.0L369.9 100.6Q333.6 94.6 297.2 100.6Z" fill="var(--far)"/><path d="M333.6 70.0L378.1 107.4Q333.6 101.4 289.1 107.4Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-3.6s"><rect x="383.5" y="105.5" width="6.3" height="14.6" fill="var(--trunk)"/><path d="M386.6 13.4L414.4 94.1Q386.6 88.1 358.8 94.1Z" fill="var(--far)"/><path d="M386.6 42.0L422.5 100.8Q386.6 94.8 350.8 100.8Z" fill="var(--far)"/><path d="M386.6 70.6L430.5 107.5Q386.6 101.5 342.7 107.5Z" fill="var(--far)"/></g><g style="--d:7.4s;--dl:-4.8s"><rect x="422.5" y="108.5" width="4.8" height="11.1" fill="var(--trunk)"/><path d="M424.8 38.6L446.0 99.9Q424.8 93.9 403.7 99.9Z" fill="var(--far)"/><path d="M424.8 60.3L452.1 105.0Q424.8 99.0 397.6 105.0Z" fill="var(--far)"/><path d="M424.8 82.0L458.2 110.1Q424.8 104.1 391.5 110.1Z" fill="var(--far)"/></g><g style="--d:6.8s;--dl:-1.3s"><rect x="464.0" y="105.6" width="6.2" height="14.5" fill="var(--trunk)"/><path d="M467.1 14.4L494.7 94.4Q467.1 88.4 439.6 94.4Z" fill="var(--far)"/><path d="M467.1 42.7L502.7 101.0Q467.1 95.0 431.6 101.0Z" fill="var(--far)"/><path d="M467.1 71.0L510.6 107.6Q467.1 101.6 423.6 107.6Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-3.4s"><rect x="514.3" y="105.8" width="6.1" height="14.3" fill="var(--trunk)"/><path d="M517.4 16.0L544.5 94.7Q517.4 88.7 490.2 94.7Z" fill="var(--far)"/><path d="M517.4 43.9L552.4 101.2Q517.4 95.2 482.4 101.2Z" fill="var(--far)"/><path d="M517.4 71.7L560.2 107.8Q517.4 101.8 474.5 107.8Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-1.3s"><rect x="557.9" y="108.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M560.4 35.3L582.4 99.1Q560.4 93.1 538.4 99.1Z" fill="var(--far)"/><path d="M560.4 57.9L588.8 104.4Q560.4 98.4 532.1 104.4Z" fill="var(--far)"/><path d="M560.4 80.5L595.1 109.7Q560.4 103.7 525.7 109.7Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-5.3s"><rect x="611.0" y="109.1" width="4.4" height="10.4" fill="var(--trunk)"/><path d="M613.2 43.9L633.0 101.1Q613.2 95.1 593.5 101.1Z" fill="var(--far)"/><path d="M613.2 64.1L638.7 105.8Q613.2 99.8 587.8 105.8Z" fill="var(--far)"/><path d="M613.2 84.4L644.4 110.6Q613.2 104.6 582.1 110.6Z" fill="var(--far)"/></g><g style="--d:7.2s;--dl:-1.2s"><rect x="663.5" y="107.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M666.2 27.8L690.2 97.4Q666.2 91.4 642.2 97.4Z" fill="var(--far)"/><path d="M666.2 52.4L697.2 103.2Q666.2 97.2 635.2 103.2Z" fill="var(--far)"/><path d="M666.2 77.1L704.1 109.0Q666.2 103.0 628.3 109.0Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-4.4s"><rect x="711.4" y="108.3" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M713.8 36.9L735.4 99.5Q713.8 93.5 692.2 99.5Z" fill="var(--far)"/><path d="M713.8 59.0L741.6 104.7Q713.8 98.7 686.0 104.7Z" fill="var(--far)"/><path d="M713.8 81.2L747.9 109.9Q713.8 103.9 679.7 109.9Z" fill="var(--far)"/></g><g style="--d:7.0s;--dl:-4.6s"><rect x="760.3" y="109.5" width="4.3" height="9.9" fill="var(--trunk)"/><path d="M762.5 47.0L781.4 101.8Q762.5 95.8 743.6 101.8Z" fill="var(--far)"/><path d="M762.5 66.4L786.8 106.3Q762.5 100.3 738.1 106.3Z" fill="var(--far)"/><path d="M762.5 85.8L792.3 110.9Q762.5 104.9 732.7 110.9Z" fill="var(--far)"/></g><g style="--d:6.7s;--dl:-4.9s"><rect x="803.9" y="108.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M806.4 35.5L828.3 99.2Q806.4 93.2 784.4 99.2Z" fill="var(--far)"/><path d="M806.4 58.0L834.7 104.4Q806.4 98.4 778.1 104.4Z" fill="var(--far)"/><path d="M806.4 80.6L841.0 109.7Q806.4 103.7 771.7 109.7Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-4.1s"><rect x="838.3" y="107.4" width="5.3" height="12.3" fill="var(--trunk)"/><path d="M841.0 29.9L864.4 97.9Q841.0 91.9 817.6 97.9Z" fill="var(--far)"/><path d="M841.0 54.0L871.2 103.5Q841.0 97.5 810.8 103.5Z" fill="var(--far)"/><path d="M841.0 78.1L878.0 109.2Q841.0 103.2 804.0 109.2Z" fill="var(--far)"/></g><g style="--d:5.1s;--dl:-1.2s"><rect x="876.2" y="105.1" width="6.4" height="15.0" fill="var(--trunk)"/><path d="M879.5 10.5L908.1 93.5Q879.5 87.5 850.9 93.5Z" fill="var(--far)"/><path d="M879.5 39.9L916.3 100.4Q879.5 94.4 842.6 100.4Z" fill="var(--far)"/><path d="M879.5 69.3L924.6 107.3Q879.5 101.3 834.3 107.3Z" fill="var(--far)"/></g><g style="--d:6.5s;--dl:-4.6s"><rect x="934.4" y="106.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M937.2 25.8L961.7 96.9Q937.2 90.9 912.6 96.9Z" fill="var(--far)"/><path d="M937.2 51.0L968.8 102.9Q937.2 96.9 905.5 102.9Z" fill="var(--far)"/><path d="M937.2 76.2L975.9 108.8Q937.2 102.8 898.4 108.8Z" fill="var(--far)"/></g><g style="--d:7.0s;--dl:-2.4s"><rect x="973.6" y="108.8" width="4.6" height="10.8" fill="var(--trunk)"/><path d="M975.9 41.0L996.4 100.4Q975.9 94.4 955.4 100.4Z" fill="var(--far)"/><path d="M975.9 62.1L1002.3 105.4Q975.9 99.4 949.5 105.4Z" fill="var(--far)"/><path d="M975.9 83.1L1008.2 110.3Q975.9 104.3 943.6 110.3Z" fill="var(--far)"/></g><g style="--d:6.2s;--dl:-3.0s"><rect x="1030.5" y="108.8" width="4.6" height="10.8" fill="var(--trunk)"/><path d="M1032.8 41.1L1053.3 100.4Q1032.8 94.4 1012.4 100.4Z" fill="var(--far)"/><path d="M1032.8 62.1L1059.2 105.4Q1032.8 99.4 1006.4 105.4Z" fill="var(--far)"/><path d="M1032.8 83.1L1065.1 110.3Q1032.8 104.3 1000.5 110.3Z" fill="var(--far)"/></g><g style="--d:7.5s;--dl:-2.2s"><rect x="1081.1" y="106.9" width="5.6" height="13.0" fill="var(--trunk)"/><path d="M1083.9 25.3L1108.5 96.8Q1083.9 90.8 1059.2 96.8Z" fill="var(--far)"/><path d="M1083.9 50.7L1115.7 102.8Q1083.9 96.8 1052.1 102.8Z" fill="var(--far)"/><path d="M1083.9 76.0L1122.8 108.7Q1083.9 102.7 1044.9 108.7Z" fill="var(--far)"/></g><g style="--d:5.5s;--dl:-1.3s"><rect x="1123.4" y="105.9" width="6.1" height="14.1" fill="var(--trunk)"/><path d="M1126.4 17.0L1153.3 94.9Q1126.4 88.9 1099.6 94.9Z" fill="var(--far)"/><path d="M1126.4 44.6L1161.1 101.4Q1126.4 95.4 1091.8 101.4Z" fill="var(--far)"/><path d="M1126.4 72.2L1168.8 107.9Q1126.4 101.9 1084.0 107.9Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-0.2s"><rect x="1159.0" y="109.3" width="4.4" height="10.2" fill="var(--trunk)"/><path d="M1161.1 45.3L1180.5 101.4Q1161.1 95.4 1141.8 101.4Z" fill="var(--far)"/><path d="M1161.1 65.2L1186.1 106.1Q1161.1 100.1 1136.2 106.1Z" fill="var(--far)"/><path d="M1161.1 85.1L1191.7 110.7Q1161.1 104.7 1130.6 110.7Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-5.8s"><rect x="1216.8" y="106.3" width="5.8" height="13.6" fill="var(--trunk)"/><path d="M1219.7 20.8L1245.6 95.8Q1219.7 89.8 1193.9 95.8Z" fill="var(--far)"/><path d="M1219.7 47.4L1253.1 102.0Q1219.7 96.0 1186.4 102.0Z" fill="var(--far)"/><path d="M1219.7 73.9L1260.6 108.3Q1219.7 102.3 1178.9 108.3Z" fill="var(--far)"/></g><g style="--d:6.6s;--dl:-2.9s"><rect x="-2.4" y="114.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M0.0 44.0L19.7 104.5Q0.0 98.5 -19.7 104.5Z" fill="var(--mid)"/><path d="M0.0 60.4L24.4 108.3Q0.0 102.3 -24.4 108.3Z" fill="var(--mid)"/><path d="M0.0 76.8L29.0 112.2Q0.0 106.2 -29.0 112.2Z" fill="var(--mid)"/><path d="M0.0 93.2L33.6 116.0Q0.0 110.0 -33.6 116.0Z" fill="var(--mid)"/></g><g style="--d:6.3s;--dl:-0.6s"><rect x="80.9" y="112.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M83.6 31.6L106.4 101.4Q83.6 95.4 60.9 101.4Z" fill="var(--mid)"/><path d="M83.6 50.6L111.8 105.9Q83.6 99.9 55.5 105.9Z" fill="var(--mid)"/><path d="M83.6 69.5L117.1 110.3Q83.6 104.3 50.2 110.3Z" fill="var(--mid)"/><path d="M83.6 88.4L122.4 114.8Q83.6 108.8 44.9 114.8Z" fill="var(--mid)"/></g><g style="--d:5.5s;--dl:-5.3s"><rect x="132.3" y="115.9" width="4.1" height="9.5" fill="var(--trunk)"/><path d="M134.3 56.3L151.0 107.4Q134.3 101.4 117.6 107.4Z" fill="var(--mid)"/><path d="M134.3 70.1L154.9 110.7Q134.3 104.7 113.7 110.7Z" fill="var(--mid)"/><path d="M134.3 84.0L158.8 114.0Q134.3 108.0 109.7 114.0Z" fill="var(--mid)"/><path d="M134.3 97.9L162.7 117.2Q134.3 111.2 105.8 117.2Z" fill="var(--mid)"/></g><g style="--d:5.4s;--dl:-3.0s"><rect x="214.8" y="112.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M217.6 31.8L240.3 101.5Q217.6 95.5 194.8 101.5Z" fill="var(--mid)"/><path d="M217.6 50.7L245.6 105.9Q217.6 99.9 189.5 105.9Z" fill="var(--mid)"/><path d="M217.6 69.6L251.0 110.3Q217.6 104.3 184.2 110.3Z" fill="var(--mid)"/><path d="M217.6 88.5L256.3 114.8Q217.6 108.8 178.8 114.8Z" fill="var(--mid)"/></g><g style="--d:7.3s;--dl:-0.3s"><rect x="299.9" y="116.1" width="3.9" height="9.2" fill="var(--trunk)"/><path d="M301.8 58.6L318.0 108.0Q301.8 102.0 285.7 108.0Z" fill="var(--mid)"/><path d="M301.8 72.0L321.8 111.2Q301.8 105.2 281.9 111.2Z" fill="var(--mid)"/><path d="M301.8 85.4L325.5 114.3Q301.8 108.3 278.1 114.3Z" fill="var(--mid)"/><path d="M301.8 98.8L329.3 117.5Q301.8 111.5 274.3 117.5Z" fill="var(--mid)"/></g><g style="--d:7.5s;--dl:-2.7s"><rect x="365.4" y="114.6" width="4.7" height="11.0" fill="var(--trunk)"/><path d="M367.8 45.5L387.2 104.8Q367.8 98.8 348.4 104.8Z" fill="var(--mid)"/><path d="M367.8 61.6L391.7 108.6Q367.8 102.6 343.9 108.6Z" fill="var(--mid)"/><path d="M367.8 77.7L396.2 112.4Q367.8 106.4 339.3 112.4Z" fill="var(--mid)"/><path d="M367.8 93.8L400.8 116.1Q367.8 110.1 334.8 116.1Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-3.8s"><rect x="413.9" y="116.0" width="4.0" height="9.3" fill="var(--trunk)"/><path d="M415.9 57.6L432.3 107.8Q415.9 101.8 399.5 107.8Z" fill="var(--mid)"/><path d="M415.9 71.2L436.1 111.0Q415.9 105.0 395.7 111.0Z" fill="var(--mid)"/><path d="M415.9 84.9L439.9 114.2Q415.9 108.2 391.8 114.2Z" fill="var(--mid)"/><path d="M415.9 98.5L443.7 117.4Q415.9 111.4 388.0 117.4Z" fill="var(--mid)"/></g><g style="--d:6.2s;--dl:-1.2s"><rect x="476.4" y="116.7" width="3.7" height="8.5" fill="var(--trunk)"/><path d="M478.2 63.1L493.2 109.1Q478.2 103.1 463.2 109.1Z" fill="var(--mid)"/><path d="M478.2 75.6L496.7 112.1Q478.2 106.1 459.6 112.1Z" fill="var(--mid)"/><path d="M478.2 88.1L500.2 115.0Q478.2 109.0 456.1 115.0Z" fill="var(--mid)"/><path d="M478.2 100.6L503.7 117.9Q478.2 111.9 452.6 117.9Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-0.1s"><rect x="538.5" y="112.9" width="5.6" height="13.0" fill="var(--trunk)"/><path d="M541.3 31.3L564.2 101.3Q541.3 95.3 518.4 101.3Z" fill="var(--mid)"/><path d="M541.3 50.3L569.5 105.8Q541.3 99.8 513.1 105.8Z" fill="var(--mid)"/><path d="M541.3 69.3L574.9 110.3Q541.3 104.3 507.7 110.3Z" fill="var(--mid)"/><path d="M541.3 88.3L580.3 114.7Q541.3 108.7 502.4 114.7Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-1.1s"><rect x="604.7" y="114.2" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M607.2 42.3L627.4 104.0Q607.2 98.0 587.0 104.0Z" fill="var(--mid)"/><path d="M607.2 59.0L632.1 108.0Q607.2 102.0 582.3 108.0Z" fill="var(--mid)"/><path d="M607.2 75.8L636.8 111.9Q607.2 105.9 577.6 111.9Z" fill="var(--mid)"/><path d="M607.2 92.5L641.5 115.8Q607.2 109.8 572.9 115.8Z" fill="var(--mid)"/></g><g style="--d:7.1s;--dl:-5.5s"><rect x="675.6" y="113.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M678.3 34.0L700.5 102.0Q678.3 96.0 656.0 102.0Z" fill="var(--mid)"/><path d="M678.3 52.4L705.7 106.3Q678.3 100.3 650.9 106.3Z" fill="var(--mid)"/><path d="M678.3 70.9L710.9 110.7Q678.3 104.7 645.7 110.7Z" fill="var(--mid)"/><path d="M678.3 89.3L716.1 115.0Q678.3 109.0 640.5 115.0Z" fill="var(--mid)"/></g><g style="--d:7.4s;--dl:-5.4s"><rect x="731.1" y="113.5" width="5.3" height="12.3" fill="var(--trunk)"/><path d="M733.7 36.2L755.4 102.6Q733.7 96.6 712.1 102.6Z" fill="var(--mid)"/><path d="M733.7 54.2L760.5 106.8Q733.7 100.8 707.0 106.8Z" fill="var(--mid)"/><path d="M733.7 72.2L765.5 111.0Q733.7 105.0 701.9 111.0Z" fill="var(--mid)"/><path d="M733.7 90.2L770.6 115.2Q733.7 109.2 696.9 115.2Z" fill="var(--mid)"/></g><g style="--d:6.5s;--dl:-3.1s"><rect x="801.2" y="114.2" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M803.7 42.3L823.9 104.0Q803.7 98.0 783.5 104.0Z" fill="var(--mid)"/><path d="M803.7 59.1L828.6 108.0Q803.7 102.0 778.8 108.0Z" fill="var(--mid)"/><path d="M803.7 75.8L833.3 111.9Q803.7 105.9 774.1 111.9Z" fill="var(--mid)"/><path d="M803.7 92.6L838.0 115.8Q803.7 109.8 769.4 115.8Z" fill="var(--mid)"/></g><g style="--d:5.0s;--dl:-3.0s"><rect x="885.8" y="116.5" width="3.7" height="8.7" fill="var(--trunk)"/><path d="M887.6 61.8L903.0 108.8Q887.6 102.8 872.3 108.8Z" fill="var(--mid)"/><path d="M887.6 74.6L906.5 111.8Q887.6 105.8 868.7 111.8Z" fill="var(--mid)"/><path d="M887.6 87.3L910.1 114.8Q887.6 108.8 865.1 114.8Z" fill="var(--mid)"/><path d="M887.6 100.1L913.7 117.8Q887.6 111.8 861.5 117.8Z" fill="var(--mid)"/></g><g style="--d:7.3s;--dl:-2.7s"><rect x="941.7" y="115.0" width="4.5" height="10.5" fill="var(--trunk)"/><path d="M944.0 49.1L962.4 105.7Q944.0 99.7 925.5 105.7Z" fill="var(--mid)"/><path d="M944.0 64.5L966.8 109.3Q944.0 103.3 921.2 109.3Z" fill="var(--mid)"/><path d="M944.0 79.8L971.1 112.9Q944.0 106.9 916.8 112.9Z" fill="var(--mid)"/><path d="M944.0 95.2L975.4 116.5Q944.0 110.5 912.5 116.5Z" fill="var(--mid)"/></g><g style="--d:5.9s;--dl:-5.7s"><rect x="1015.3" y="114.7" width="4.7" height="10.9" fill="var(--trunk)"/><path d="M1017.6 46.5L1036.8 105.0Q1017.6 99.0 998.5 105.0Z" fill="var(--mid)"/><path d="M1017.6 62.3L1041.3 108.8Q1017.6 102.8 994.0 108.8Z" fill="var(--mid)"/><path d="M1017.6 78.2L1045.7 112.5Q1017.6 106.5 989.5 112.5Z" fill="var(--mid)"/><path d="M1017.6 94.1L1050.2 116.2Q1017.6 110.2 985.1 116.2Z" fill="var(--mid)"/></g><g style="--d:6.9s;--dl:-1.8s"><rect x="1089.1" y="113.1" width="5.4" height="12.7" fill="var(--trunk)"/><path d="M1091.8 33.3L1114.2 101.8Q1091.8 95.8 1069.4 101.8Z" fill="var(--mid)"/><path d="M1091.8 51.9L1119.4 106.2Q1091.8 100.2 1064.2 106.2Z" fill="var(--mid)"/><path d="M1091.8 70.5L1124.7 110.6Q1091.8 104.6 1059.0 110.6Z" fill="var(--mid)"/><path d="M1091.8 89.1L1129.9 114.9Q1091.8 108.9 1053.7 114.9Z" fill="var(--mid)"/></g><g style="--d:6.5s;--dl:-5.9s"><rect x="1168.9" y="116.1" width="3.9" height="9.2" fill="var(--trunk)"/><path d="M1170.9 58.5L1187.1 108.0Q1170.9 102.0 1154.7 108.0Z" fill="var(--mid)"/><path d="M1170.9 71.9L1190.8 111.1Q1170.9 105.1 1150.9 111.1Z" fill="var(--mid)"/><path d="M1170.9 85.3L1194.6 114.3Q1170.9 108.3 1147.2 114.3Z" fill="var(--mid)"/><path d="M1170.9 98.8L1198.4 117.4Q1170.9 111.4 1143.4 117.4Z" fill="var(--mid)"/></g><g style="--d:7.8s;--dl:-4.9s"><rect x="1218.8" y="114.3" width="4.8" height="11.3" fill="var(--trunk)"/><path d="M1221.2 43.3L1241.1 104.3Q1221.2 98.3 1201.3 104.3Z" fill="var(--mid)"/><path d="M1221.2 59.9L1245.8 108.2Q1221.2 102.2 1196.7 108.2Z" fill="var(--mid)"/><path d="M1221.2 76.4L1250.5 112.1Q1221.2 106.1 1192.0 112.1Z" fill="var(--mid)"/><path d="M1221.2 92.9L1255.1 115.9Q1221.2 109.9 1187.4 115.9Z" fill="var(--mid)"/></g><g style="--d:7.8s;--dl:-3.9s"><rect x="17.0" y="118.1" width="6.0" height="13.9" fill="var(--trunk)"/><path d="M20.0 30.8L43.3 104.8Q20.0 98.8 -3.3 104.8Z" fill="var(--near)"/><path d="M20.0 47.1L47.9 108.6Q20.0 102.6 -7.9 108.6Z" fill="var(--near)"/><path d="M20.0 63.3L52.5 112.4Q20.0 106.4 -12.5 112.4Z" fill="var(--near)"/><path d="M20.0 79.6L57.1 116.3Q20.0 110.3 -17.1 116.3Z" fill="var(--near)"/><path d="M20.0 95.9L61.7 120.1Q20.0 114.1 -21.7 120.1Z" fill="var(--near)"/></g><g style="--d:6.0s;--dl:-5.1s"><rect x="132.2" y="120.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M134.7 47.1L154.2 109.0Q134.7 103.0 115.2 109.0Z" fill="var(--near)"/><path d="M134.7 60.7L158.0 112.1Q134.7 106.1 111.4 112.1Z" fill="var(--near)"/><path d="M134.7 74.3L161.8 115.3Q134.7 109.3 107.6 115.3Z" fill="var(--near)"/><path d="M134.7 87.9L165.7 118.5Q134.7 112.5 103.7 118.5Z" fill="var(--near)"/><path d="M134.7 101.5L169.5 121.7Q134.7 115.7 99.9 121.7Z" fill="var(--near)"/></g><g style="--d:7.4s;--dl:-2.7s"><rect x="238.8" y="120.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M241.2 50.2L259.9 109.7Q241.2 103.7 222.4 109.7Z" fill="var(--near)"/><path d="M241.2 63.3L263.6 112.8Q241.2 106.8 218.7 112.8Z" fill="var(--near)"/><path d="M241.2 76.4L267.3 115.9Q241.2 109.9 215.0 115.9Z" fill="var(--near)"/><path d="M241.2 89.5L271.0 118.9Q241.2 112.9 211.3 118.9Z" fill="var(--near)"/><path d="M241.2 102.6L274.7 122.0Q241.2 116.0 207.7 122.0Z" fill="var(--near)"/></g><g style="--d:5.6s;--dl:-5.2s"><rect x="405.0" y="117.4" width="6.3" height="14.7" fill="var(--trunk)"/><path d="M408.2 24.7L433.0 103.2Q408.2 97.2 383.4 103.2Z" fill="var(--near)"/><path d="M408.2 41.9L437.8 107.3Q408.2 101.3 378.6 107.3Z" fill="var(--near)"/><path d="M408.2 59.2L442.7 111.4Q408.2 105.4 373.7 111.4Z" fill="var(--near)"/><path d="M408.2 76.5L447.6 115.4Q408.2 109.4 368.8 115.4Z" fill="var(--near)"/><path d="M408.2 93.8L452.4 119.5Q408.2 113.5 364.0 119.5Z" fill="var(--near)"/></g><g style="--d:6.8s;--dl:-2.2s"><rect x="580.0" y="120.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M582.4 50.0L601.2 109.7Q582.4 103.7 563.6 109.7Z" fill="var(--near)"/><path d="M582.4 63.1L604.9 112.8Q582.4 106.8 559.9 112.8Z" fill="var(--near)"/><path d="M582.4 76.3L608.6 115.8Q582.4 109.8 556.2 115.8Z" fill="var(--near)"/><path d="M582.4 89.4L612.3 118.9Q582.4 112.9 552.5 118.9Z" fill="var(--near)"/><path d="M582.4 102.5L616.0 122.0Q582.4 116.0 548.8 122.0Z" fill="var(--near)"/></g><g style="--d:5.7s;--dl:-1.2s"><rect x="691.7" y="117.9" width="6.0" height="14.1" fill="var(--trunk)"/><path d="M694.7 29.5L718.3 104.5Q694.7 98.5 671.1 104.5Z" fill="var(--near)"/><path d="M694.7 46.0L723.0 108.3Q694.7 102.3 666.4 108.3Z" fill="var(--near)"/><path d="M694.7 62.5L727.6 112.2Q694.7 106.2 661.8 112.2Z" fill="var(--near)"/><path d="M694.7 79.0L732.2 116.1Q694.7 110.1 657.1 116.1Z" fill="var(--near)"/><path d="M694.7 95.4L736.9 120.0Q694.7 114.0 652.5 120.0Z" fill="var(--near)"/></g><g style="--d:7.4s;--dl:-1.9s"><rect x="864.4" y="118.3" width="5.9" height="13.7" fill="var(--trunk)"/><path d="M867.3 32.3L890.3 105.2Q867.3 99.2 844.3 105.2Z" fill="var(--near)"/><path d="M867.3 48.3L894.8 108.9Q867.3 102.9 839.8 108.9Z" fill="var(--near)"/><path d="M867.3 64.3L899.3 112.7Q867.3 106.7 835.3 112.7Z" fill="var(--near)"/><path d="M867.3 80.3L903.8 116.5Q867.3 110.5 830.8 116.5Z" fill="var(--near)"/><path d="M867.3 96.4L908.3 120.2Q867.3 114.2 826.2 120.2Z" fill="var(--near)"/></g><g style="--d:6.9s;--dl:-5.3s"><rect x="967.7" y="120.3" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M970.1 48.9L989.2 109.4Q970.1 103.4 951.0 109.4Z" fill="var(--near)"/><path d="M970.1 62.2L992.9 112.5Q970.1 106.5 947.3 112.5Z" fill="var(--near)"/><path d="M970.1 75.5L996.7 115.6Q970.1 109.6 943.5 115.6Z" fill="var(--near)"/><path d="M970.1 88.8L1000.4 118.8Q970.1 112.8 939.8 118.8Z" fill="var(--near)"/><path d="M970.1 102.1L1004.2 121.9Q970.1 115.9 936.0 121.9Z" fill="var(--near)"/></g><g style="--d:6.6s;--dl:-2.2s"><rect x="1114.7" y="119.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M1117.4 40.3L1138.5 107.2Q1117.4 101.2 1096.3 107.2Z" fill="var(--near)"/><path d="M1117.4 55.0L1142.7 110.7Q1117.4 104.7 1092.2 110.7Z" fill="var(--near)"/><path d="M1117.4 69.7L1146.8 114.1Q1117.4 108.1 1088.0 114.1Z" fill="var(--near)"/><path d="M1117.4 84.4L1150.9 117.6Q1117.4 111.6 1083.9 117.6Z" fill="var(--near)"/><path d="M1117.4 99.1L1155.1 121.0Q1117.4 115.0 1079.8 121.0Z" fill="var(--near)"/></g><path fill="var(--cream)" d="M0 130V118c80-12 160-12 240-4s160 10 240 0 160-12 240-4 160 10 240 2 160-8 240-2v18z"/></g><g style="--d:6.6s;--dl:-1.8s"><rect x="-22.5" y="108.0" width="5.0" height="11.7" fill="var(--trunk)"/><path d="M-20.0 34.8L2.1 99.0Q-20.0 93.0 -42.1 99.0Z" fill="var(--far)"/><path d="M-20.0 57.5L8.6 104.3Q-20.0 98.3 -48.6 104.3Z" fill="var(--far)"/><path d="M-20.0 80.3L15.0 109.7Q-20.0 103.7 -55.0 109.7Z" fill="var(--far)"/></g><g style="--d:7.4s;--dl:-5.0s"><rect x="16.4" y="105.1" width="6.4" height="15.0" fill="var(--trunk)"/><path d="M19.6 10.7L48.2 93.5Q19.6 87.5 -8.9 93.5Z" fill="var(--far)"/><path d="M19.6 40.0L56.5 100.4Q19.6 94.4 -17.2 100.4Z" fill="var(--far)"/><path d="M19.6 69.3L64.7 107.3Q19.6 101.3 -25.4 107.3Z" fill="var(--far)"/></g><g style="--d:5.1s;--dl:-0.9s"><rect x="60.7" y="106.4" width="5.8" height="13.5" fill="var(--trunk)"/><path d="M63.6 21.7L89.3 96.0Q63.6 90.0 38.0 96.0Z" fill="var(--far)"/><path d="M63.6 48.0L96.7 102.2Q63.6 96.2 30.6 102.2Z" fill="var(--far)"/><path d="M63.6 74.3L104.1 108.4Q63.6 102.4 23.2 108.4Z" fill="var(--far)"/></g><g style="--d:7.5s;--dl:-1.8s"><rect x="101.0" y="105.0" width="6.5" height="15.2" fill="var(--trunk)"/><path d="M104.2 9.5L133.1 93.2Q104.2 87.2 75.4 93.2Z" fill="var(--far)"/><path d="M104.2 39.2L141.4 100.2Q104.2 94.2 67.0 100.2Z" fill="var(--far)"/><path d="M104.2 68.8L149.8 107.2Q104.2 101.2 58.6 107.2Z" fill="var(--far)"/></g><g style="--d:6.4s;--dl:-5.7s"><rect x="146.8" y="107.8" width="5.1" height="11.9" fill="var(--trunk)"/><path d="M149.4 32.9L172.0 98.6Q149.4 92.6 126.8 98.6Z" fill="var(--far)"/><path d="M149.4 56.2L178.6 104.0Q149.4 98.0 120.2 104.0Z" fill="var(--far)"/><path d="M149.4 79.4L185.1 109.5Q149.4 103.5 113.7 109.5Z" fill="var(--far)"/></g><g style="--d:6.4s;--dl:-1.1s"><rect x="192.7" y="105.0" width="6.5" height="15.1" fill="var(--trunk)"/><path d="M196.0 10.0L224.7 93.3Q196.0 87.3 167.2 93.3Z" fill="var(--far)"/><path d="M196.0 39.5L233.0 100.3Q196.0 94.3 158.9 100.3Z" fill="var(--far)"/><path d="M196.0 69.0L241.3 107.2Q196.0 101.2 150.6 107.2Z" fill="var(--far)"/></g><g style="--d:6.7s;--dl:-5.7s"><rect x="246.1" y="107.9" width="5.1" height="11.8" fill="var(--trunk)"/><path d="M248.7 33.5L271.1 98.7Q248.7 92.7 226.2 98.7Z" fill="var(--far)"/><path d="M248.7 56.6L277.6 104.1Q248.7 98.1 219.7 104.1Z" fill="var(--far)"/><path d="M248.7 79.7L284.1 109.6Q248.7 103.6 213.2 109.6Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-0.9s"><rect x="296.2" y="106.2" width="5.9" height="13.7" fill="var(--trunk)"/><path d="M299.1 20.0L325.2 95.6Q299.1 89.6 273.1 95.6Z" fill="var(--far)"/><path d="M299.1 46.8L332.8 101.9Q299.1 95.9 265.5 101.9Z" fill="var(--far)"/><path d="M299.1 73.6L340.3 108.2Q299.1 102.2 258.0 108.2Z" fill="var(--far)"/></g><g style="--d:5.6s;--dl:-2.6s"><rect x="330.4" y="105.3" width="6.4" height="14.8" fill="var(--trunk)"/><path d="M333.6 12.0L361.8 93.8Q333.6 87.8 305.4 93.8Z" fill="var(--far)"/><path d="M333.6 41.0L369.9 100.6Q333.6 94.6 297.2 100.6Z" fill="var(--far)"/><path d="M333.6 70.0L378.1 107.4Q333.6 101.4 289.1 107.4Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-3.6s"><rect x="383.5" y="105.5" width="6.3" height="14.6" fill="var(--trunk)"/><path d="M386.6 13.4L414.4 94.1Q386.6 88.1 358.8 94.1Z" fill="var(--far)"/><path d="M386.6 42.0L422.5 100.8Q386.6 94.8 350.8 100.8Z" fill="var(--far)"/><path d="M386.6 70.6L430.5 107.5Q386.6 101.5 342.7 107.5Z" fill="var(--far)"/></g><g style="--d:7.4s;--dl:-4.8s"><rect x="422.5" y="108.5" width="4.8" height="11.1" fill="var(--trunk)"/><path d="M424.8 38.6L446.0 99.9Q424.8 93.9 403.7 99.9Z" fill="var(--far)"/><path d="M424.8 60.3L452.1 105.0Q424.8 99.0 397.6 105.0Z" fill="var(--far)"/><path d="M424.8 82.0L458.2 110.1Q424.8 104.1 391.5 110.1Z" fill="var(--far)"/></g><g style="--d:6.8s;--dl:-1.3s"><rect x="464.0" y="105.6" width="6.2" height="14.5" fill="var(--trunk)"/><path d="M467.1 14.4L494.7 94.4Q467.1 88.4 439.6 94.4Z" fill="var(--far)"/><path d="M467.1 42.7L502.7 101.0Q467.1 95.0 431.6 101.0Z" fill="var(--far)"/><path d="M467.1 71.0L510.6 107.6Q467.1 101.6 423.6 107.6Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-3.4s"><rect x="514.3" y="105.8" width="6.1" height="14.3" fill="var(--trunk)"/><path d="M517.4 16.0L544.5 94.7Q517.4 88.7 490.2 94.7Z" fill="var(--far)"/><path d="M517.4 43.9L552.4 101.2Q517.4 95.2 482.4 101.2Z" fill="var(--far)"/><path d="M517.4 71.7L560.2 107.8Q517.4 101.8 474.5 107.8Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-1.3s"><rect x="557.9" y="108.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M560.4 35.3L582.4 99.1Q560.4 93.1 538.4 99.1Z" fill="var(--far)"/><path d="M560.4 57.9L588.8 104.4Q560.4 98.4 532.1 104.4Z" fill="var(--far)"/><path d="M560.4 80.5L595.1 109.7Q560.4 103.7 525.7 109.7Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-5.3s"><rect x="611.0" y="109.1" width="4.4" height="10.4" fill="var(--trunk)"/><path d="M613.2 43.9L633.0 101.1Q613.2 95.1 593.5 101.1Z" fill="var(--far)"/><path d="M613.2 64.1L638.7 105.8Q613.2 99.8 587.8 105.8Z" fill="var(--far)"/><path d="M613.2 84.4L644.4 110.6Q613.2 104.6 582.1 110.6Z" fill="var(--far)"/></g><g style="--d:7.2s;--dl:-1.2s"><rect x="663.5" y="107.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M666.2 27.8L690.2 97.4Q666.2 91.4 642.2 97.4Z" fill="var(--far)"/><path d="M666.2 52.4L697.2 103.2Q666.2 97.2 635.2 103.2Z" fill="var(--far)"/><path d="M666.2 77.1L704.1 109.0Q666.2 103.0 628.3 109.0Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-4.4s"><rect x="711.4" y="108.3" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M713.8 36.9L735.4 99.5Q713.8 93.5 692.2 99.5Z" fill="var(--far)"/><path d="M713.8 59.0L741.6 104.7Q713.8 98.7 686.0 104.7Z" fill="var(--far)"/><path d="M713.8 81.2L747.9 109.9Q713.8 103.9 679.7 109.9Z" fill="var(--far)"/></g><g style="--d:7.0s;--dl:-4.6s"><rect x="760.3" y="109.5" width="4.3" height="9.9" fill="var(--trunk)"/><path d="M762.5 47.0L781.4 101.8Q762.5 95.8 743.6 101.8Z" fill="var(--far)"/><path d="M762.5 66.4L786.8 106.3Q762.5 100.3 738.1 106.3Z" fill="var(--far)"/><path d="M762.5 85.8L792.3 110.9Q762.5 104.9 732.7 110.9Z" fill="var(--far)"/></g><g style="--d:6.7s;--dl:-4.9s"><rect x="803.9" y="108.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M806.4 35.5L828.3 99.2Q806.4 93.2 784.4 99.2Z" fill="var(--far)"/><path d="M806.4 58.0L834.7 104.4Q806.4 98.4 778.1 104.4Z" fill="var(--far)"/><path d="M806.4 80.6L841.0 109.7Q806.4 103.7 771.7 109.7Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-4.1s"><rect x="838.3" y="107.4" width="5.3" height="12.3" fill="var(--trunk)"/><path d="M841.0 29.9L864.4 97.9Q841.0 91.9 817.6 97.9Z" fill="var(--far)"/><path d="M841.0 54.0L871.2 103.5Q841.0 97.5 810.8 103.5Z" fill="var(--far)"/><path d="M841.0 78.1L878.0 109.2Q841.0 103.2 804.0 109.2Z" fill="var(--far)"/></g><g style="--d:5.1s;--dl:-1.2s"><rect x="876.2" y="105.1" width="6.4" height="15.0" fill="var(--trunk)"/><path d="M879.5 10.5L908.1 93.5Q879.5 87.5 850.9 93.5Z" fill="var(--far)"/><path d="M879.5 39.9L916.3 100.4Q879.5 94.4 842.6 100.4Z" fill="var(--far)"/><path d="M879.5 69.3L924.6 107.3Q879.5 101.3 834.3 107.3Z" fill="var(--far)"/></g><g style="--d:6.5s;--dl:-4.6s"><rect x="934.4" y="106.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M937.2 25.8L961.7 96.9Q937.2 90.9 912.6 96.9Z" fill="var(--far)"/><path d="M937.2 51.0L968.8 102.9Q937.2 96.9 905.5 102.9Z" fill="var(--far)"/><path d="M937.2 76.2L975.9 108.8Q937.2 102.8 898.4 108.8Z" fill="var(--far)"/></g><g style="--d:7.0s;--dl:-2.4s"><rect x="973.6" y="108.8" width="4.6" height="10.8" fill="var(--trunk)"/><path d="M975.9 41.0L996.4 100.4Q975.9 94.4 955.4 100.4Z" fill="var(--far)"/><path d="M975.9 62.1L1002.3 105.4Q975.9 99.4 949.5 105.4Z" fill="var(--far)"/><path d="M975.9 83.1L1008.2 110.3Q975.9 104.3 943.6 110.3Z" fill="var(--far)"/></g><g style="--d:6.2s;--dl:-3.0s"><rect x="1030.5" y="108.8" width="4.6" height="10.8" fill="var(--trunk)"/><path d="M1032.8 41.1L1053.3 100.4Q1032.8 94.4 1012.4 100.4Z" fill="var(--far)"/><path d="M1032.8 62.1L1059.2 105.4Q1032.8 99.4 1006.4 105.4Z" fill="var(--far)"/><path d="M1032.8 83.1L1065.1 110.3Q1032.8 104.3 1000.5 110.3Z" fill="var(--far)"/></g><g style="--d:7.5s;--dl:-2.2s"><rect x="1081.1" y="106.9" width="5.6" height="13.0" fill="var(--trunk)"/><path d="M1083.9 25.3L1108.5 96.8Q1083.9 90.8 1059.2 96.8Z" fill="var(--far)"/><path d="M1083.9 50.7L1115.7 102.8Q1083.9 96.8 1052.1 102.8Z" fill="var(--far)"/><path d="M1083.9 76.0L1122.8 108.7Q1083.9 102.7 1044.9 108.7Z" fill="var(--far)"/></g><g style="--d:5.5s;--dl:-1.3s"><rect x="1123.4" y="105.9" width="6.1" height="14.1" fill="var(--trunk)"/><path d="M1126.4 17.0L1153.3 94.9Q1126.4 88.9 1099.6 94.9Z" fill="var(--far)"/><path d="M1126.4 44.6L1161.1 101.4Q1126.4 95.4 1091.8 101.4Z" fill="var(--far)"/><path d="M1126.4 72.2L1168.8 107.9Q1126.4 101.9 1084.0 107.9Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-0.2s"><rect x="1159.0" y="109.3" width="4.4" height="10.2" fill="var(--trunk)"/><path d="M1161.1 45.3L1180.5 101.4Q1161.1 95.4 1141.8 101.4Z" fill="var(--far)"/><path d="M1161.1 65.2L1186.1 106.1Q1161.1 100.1 1136.2 106.1Z" fill="var(--far)"/><path d="M1161.1 85.1L1191.7 110.7Q1161.1 104.7 1130.6 110.7Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-5.8s"><rect x="1216.8" y="106.3" width="5.8" height="13.6" fill="var(--trunk)"/><path d="M1219.7 20.8L1245.6 95.8Q1219.7 89.8 1193.9 95.8Z" fill="var(--far)"/><path d="M1219.7 47.4L1253.1 102.0Q1219.7 96.0 1186.4 102.0Z" fill="var(--far)"/><path d="M1219.7 73.9L1260.6 108.3Q1219.7 102.3 1178.9 108.3Z" fill="var(--far)"/></g><g style="--d:6.6s;--dl:-2.9s"><rect x="-2.4" y="114.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M0.0 44.0L19.7 104.5Q0.0 98.5 -19.7 104.5Z" fill="var(--mid)"/><path d="M0.0 60.4L24.4 108.3Q0.0 102.3 -24.4 108.3Z" fill="var(--mid)"/><path d="M0.0 76.8L29.0 112.2Q0.0 106.2 -29.0 112.2Z" fill="var(--mid)"/><path d="M0.0 93.2L33.6 116.0Q0.0 110.0 -33.6 116.0Z" fill="var(--mid)"/></g><g style="--d:6.3s;--dl:-0.6s"><rect x="80.9" y="112.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M83.6 31.6L106.4 101.4Q83.6 95.4 60.9 101.4Z" fill="var(--mid)"/><path d="M83.6 50.6L111.8 105.9Q83.6 99.9 55.5 105.9Z" fill="var(--mid)"/><path d="M83.6 69.5L117.1 110.3Q83.6 104.3 50.2 110.3Z" fill="var(--mid)"/><path d="M83.6 88.4L122.4 114.8Q83.6 108.8 44.9 114.8Z" fill="var(--mid)"/></g><g style="--d:5.5s;--dl:-5.3s"><rect x="132.3" y="115.9" width="4.1" height="9.5" fill="var(--trunk)"/><path d="M134.3 56.3L151.0 107.4Q134.3 101.4 117.6 107.4Z" fill="var(--mid)"/><path d="M134.3 70.1L154.9 110.7Q134.3 104.7 113.7 110.7Z" fill="var(--mid)"/><path d="M134.3 84.0L158.8 114.0Q134.3 108.0 109.7 114.0Z" fill="var(--mid)"/><path d="M134.3 97.9L162.7 117.2Q134.3 111.2 105.8 117.2Z" fill="var(--mid)"/></g><g style="--d:5.4s;--dl:-3.0s"><rect x="214.8" y="112.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M217.6 31.8L240.3 101.5Q217.6 95.5 194.8 101.5Z" fill="var(--mid)"/><path d="M217.6 50.7L245.6 105.9Q217.6 99.9 189.5 105.9Z" fill="var(--mid)"/><path d="M217.6 69.6L251.0 110.3Q217.6 104.3 184.2 110.3Z" fill="var(--mid)"/><path d="M217.6 88.5L256.3 114.8Q217.6 108.8 178.8 114.8Z" fill="var(--mid)"/></g><g style="--d:7.3s;--dl:-0.3s"><rect x="299.9" y="116.1" width="3.9" height="9.2" fill="var(--trunk)"/><path d="M301.8 58.6L318.0 108.0Q301.8 102.0 285.7 108.0Z" fill="var(--mid)"/><path d="M301.8 72.0L321.8 111.2Q301.8 105.2 281.9 111.2Z" fill="var(--mid)"/><path d="M301.8 85.4L325.5 114.3Q301.8 108.3 278.1 114.3Z" fill="var(--mid)"/><path d="M301.8 98.8L329.3 117.5Q301.8 111.5 274.3 117.5Z" fill="var(--mid)"/></g><g style="--d:7.5s;--dl:-2.7s"><rect x="365.4" y="114.6" width="4.7" height="11.0" fill="var(--trunk)"/><path d="M367.8 45.5L387.2 104.8Q367.8 98.8 348.4 104.8Z" fill="var(--mid)"/><path d="M367.8 61.6L391.7 108.6Q367.8 102.6 343.9 108.6Z" fill="var(--mid)"/><path d="M367.8 77.7L396.2 112.4Q367.8 106.4 339.3 112.4Z" fill="var(--mid)"/><path d="M367.8 93.8L400.8 116.1Q367.8 110.1 334.8 116.1Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-3.8s"><rect x="413.9" y="116.0" width="4.0" height="9.3" fill="var(--trunk)"/><path d="M415.9 57.6L432.3 107.8Q415.9 101.8 399.5 107.8Z" fill="var(--mid)"/><path d="M415.9 71.2L436.1 111.0Q415.9 105.0 395.7 111.0Z" fill="var(--mid)"/><path d="M415.9 84.9L439.9 114.2Q415.9 108.2 391.8 114.2Z" fill="var(--mid)"/><path d="M415.9 98.5L443.7 117.4Q415.9 111.4 388.0 117.4Z" fill="var(--mid)"/></g><g style="--d:6.2s;--dl:-1.2s"><rect x="476.4" y="116.7" width="3.7" height="8.5" fill="var(--trunk)"/><path d="M478.2 63.1L493.2 109.1Q478.2 103.1 463.2 109.1Z" fill="var(--mid)"/><path d="M478.2 75.6L496.7 112.1Q478.2 106.1 459.6 112.1Z" fill="var(--mid)"/><path d="M478.2 88.1L500.2 115.0Q478.2 109.0 456.1 115.0Z" fill="var(--mid)"/><path d="M478.2 100.6L503.7 117.9Q478.2 111.9 452.6 117.9Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-0.1s"><rect x="538.5" y="112.9" width="5.6" height="13.0" fill="var(--trunk)"/><path d="M541.3 31.3L564.2 101.3Q541.3 95.3 518.4 101.3Z" fill="var(--mid)"/><path d="M541.3 50.3L569.5 105.8Q541.3 99.8 513.1 105.8Z" fill="var(--mid)"/><path d="M541.3 69.3L574.9 110.3Q541.3 104.3 507.7 110.3Z" fill="var(--mid)"/><path d="M541.3 88.3L580.3 114.7Q541.3 108.7 502.4 114.7Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-1.1s"><rect x="604.7" y="114.2" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M607.2 42.3L627.4 104.0Q607.2 98.0 587.0 104.0Z" fill="var(--mid)"/><path d="M607.2 59.0L632.1 108.0Q607.2 102.0 582.3 108.0Z" fill="var(--mid)"/><path d="M607.2 75.8L636.8 111.9Q607.2 105.9 577.6 111.9Z" fill="var(--mid)"/><path d="M607.2 92.5L641.5 115.8Q607.2 109.8 572.9 115.8Z" fill="var(--mid)"/></g><g style="--d:7.1s;--dl:-5.5s"><rect x="675.6" y="113.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M678.3 34.0L700.5 102.0Q678.3 96.0 656.0 102.0Z" fill="var(--mid)"/><path d="M678.3 52.4L705.7 106.3Q678.3 100.3 650.9 106.3Z" fill="var(--mid)"/><path d="M678.3 70.9L710.9 110.7Q678.3 104.7 645.7 110.7Z" fill="var(--mid)"/><path d="M678.3 89.3L716.1 115.0Q678.3 109.0 640.5 115.0Z" fill="var(--mid)"/></g><g style="--d:7.4s;--dl:-5.4s"><rect x="731.1" y="113.5" width="5.3" height="12.3" fill="var(--trunk)"/><path d="M733.7 36.2L755.4 102.6Q733.7 96.6 712.1 102.6Z" fill="var(--mid)"/><path d="M733.7 54.2L760.5 106.8Q733.7 100.8 707.0 106.8Z" fill="var(--mid)"/><path d="M733.7 72.2L765.5 111.0Q733.7 105.0 701.9 111.0Z" fill="var(--mid)"/><path d="M733.7 90.2L770.6 115.2Q733.7 109.2 696.9 115.2Z" fill="var(--mid)"/></g><g style="--d:6.5s;--dl:-3.1s"><rect x="801.2" y="114.2" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M803.7 42.3L823.9 104.0Q803.7 98.0 783.5 104.0Z" fill="var(--mid)"/><path d="M803.7 59.1L828.6 108.0Q803.7 102.0 778.8 108.0Z" fill="var(--mid)"/><path d="M803.7 75.8L833.3 111.9Q803.7 105.9 774.1 111.9Z" fill="var(--mid)"/><path d="M803.7 92.6L838.0 115.8Q803.7 109.8 769.4 115.8Z" fill="var(--mid)"/></g><g style="--d:5.0s;--dl:-3.0s"><rect x="885.8" y="116.5" width="3.7" height="8.7" fill="var(--trunk)"/><path d="M887.6 61.8L903.0 108.8Q887.6 102.8 872.3 108.8Z" fill="var(--mid)"/><path d="M887.6 74.6L906.5 111.8Q887.6 105.8 868.7 111.8Z" fill="var(--mid)"/><path d="M887.6 87.3L910.1 114.8Q887.6 108.8 865.1 114.8Z" fill="var(--mid)"/><path d="M887.6 100.1L913.7 117.8Q887.6 111.8 861.5 117.8Z" fill="var(--mid)"/></g><g style="--d:7.3s;--dl:-2.7s"><rect x="941.7" y="115.0" width="4.5" height="10.5" fill="var(--trunk)"/><path d="M944.0 49.1L962.4 105.7Q944.0 99.7 925.5 105.7Z" fill="var(--mid)"/><path d="M944.0 64.5L966.8 109.3Q944.0 103.3 921.2 109.3Z" fill="var(--mid)"/><path d="M944.0 79.8L971.1 112.9Q944.0 106.9 916.8 112.9Z" fill="var(--mid)"/><path d="M944.0 95.2L975.4 116.5Q944.0 110.5 912.5 116.5Z" fill="var(--mid)"/></g><g style="--d:5.9s;--dl:-5.7s"><rect x="1015.3" y="114.7" width="4.7" height="10.9" fill="var(--trunk)"/><path d="M1017.6 46.5L1036.8 105.0Q1017.6 99.0 998.5 105.0Z" fill="var(--mid)"/><path d="M1017.6 62.3L1041.3 108.8Q1017.6 102.8 994.0 108.8Z" fill="var(--mid)"/><path d="M1017.6 78.2L1045.7 112.5Q1017.6 106.5 989.5 112.5Z" fill="var(--mid)"/><path d="M1017.6 94.1L1050.2 116.2Q1017.6 110.2 985.1 116.2Z" fill="var(--mid)"/></g><g style="--d:6.9s;--dl:-1.8s"><rect x="1089.1" y="113.1" width="5.4" height="12.7" fill="var(--trunk)"/><path d="M1091.8 33.3L1114.2 101.8Q1091.8 95.8 1069.4 101.8Z" fill="var(--mid)"/><path d="M1091.8 51.9L1119.4 106.2Q1091.8 100.2 1064.2 106.2Z" fill="var(--mid)"/><path d="M1091.8 70.5L1124.7 110.6Q1091.8 104.6 1059.0 110.6Z" fill="var(--mid)"/><path d="M1091.8 89.1L1129.9 114.9Q1091.8 108.9 1053.7 114.9Z" fill="var(--mid)"/></g><g style="--d:6.5s;--dl:-5.9s"><rect x="1168.9" y="116.1" width="3.9" height="9.2" fill="var(--trunk)"/><path d="M1170.9 58.5L1187.1 108.0Q1170.9 102.0 1154.7 108.0Z" fill="var(--mid)"/><path d="M1170.9 71.9L1190.8 111.1Q1170.9 105.1 1150.9 111.1Z" fill="var(--mid)"/><path d="M1170.9 85.3L1194.6 114.3Q1170.9 108.3 1147.2 114.3Z" fill="var(--mid)"/><path d="M1170.9 98.8L1198.4 117.4Q1170.9 111.4 1143.4 117.4Z" fill="var(--mid)"/></g><g style="--d:7.8s;--dl:-4.9s"><rect x="1218.8" y="114.3" width="4.8" height="11.3" fill="var(--trunk)"/><path d="M1221.2 43.3L1241.1 104.3Q1221.2 98.3 1201.3 104.3Z" fill="var(--mid)"/><path d="M1221.2 59.9L1245.8 108.2Q1221.2 102.2 1196.7 108.2Z" fill="var(--mid)"/><path d="M1221.2 76.4L1250.5 112.1Q1221.2 106.1 1192.0 112.1Z" fill="var(--mid)"/><path d="M1221.2 92.9L1255.1 115.9Q1221.2 109.9 1187.4 115.9Z" fill="var(--mid)"/></g><g style="--d:7.8s;--dl:-3.9s"><rect x="17.0" y="118.1" width="6.0" height="13.9" fill="var(--trunk)"/><path d="M20.0 30.8L43.3 104.8Q20.0 98.8 -3.3 104.8Z" fill="var(--near)"/><path d="M20.0 47.1L47.9 108.6Q20.0 102.6 -7.9 108.6Z" fill="var(--near)"/><path d="M20.0 63.3L52.5 112.4Q20.0 106.4 -12.5 112.4Z" fill="var(--near)"/><path d="M20.0 79.6L57.1 116.3Q20.0 110.3 -17.1 116.3Z" fill="var(--near)"/><path d="M20.0 95.9L61.7 120.1Q20.0 114.1 -21.7 120.1Z" fill="var(--near)"/></g><g style="--d:6.0s;--dl:-5.1s"><rect x="132.2" y="120.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M134.7 47.1L154.2 109.0Q134.7 103.0 115.2 109.0Z" fill="var(--near)"/><path d="M134.7 60.7L158.0 112.1Q134.7 106.1 111.4 112.1Z" fill="var(--near)"/><path d="M134.7 74.3L161.8 115.3Q134.7 109.3 107.6 115.3Z" fill="var(--near)"/><path d="M134.7 87.9L165.7 118.5Q134.7 112.5 103.7 118.5Z" fill="var(--near)"/><path d="M134.7 101.5L169.5 121.7Q134.7 115.7 99.9 121.7Z" fill="var(--near)"/></g><g style="--d:7.4s;--dl:-2.7s"><rect x="238.8" y="120.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M241.2 50.2L259.9 109.7Q241.2 103.7 222.4 109.7Z" fill="var(--near)"/><path d="M241.2 63.3L263.6 112.8Q241.2 106.8 218.7 112.8Z" fill="var(--near)"/><path d="M241.2 76.4L267.3 115.9Q241.2 109.9 215.0 115.9Z" fill="var(--near)"/><path d="M241.2 89.5L271.0 118.9Q241.2 112.9 211.3 118.9Z" fill="var(--near)"/><path d="M241.2 102.6L274.7 122.0Q241.2 116.0 207.7 122.0Z" fill="var(--near)"/></g><g style="--d:5.6s;--dl:-5.2s"><rect x="405.0" y="117.4" width="6.3" height="14.7" fill="var(--trunk)"/><path d="M408.2 24.7L433.0 103.2Q408.2 97.2 383.4 103.2Z" fill="var(--near)"/><path d="M408.2 41.9L437.8 107.3Q408.2 101.3 378.6 107.3Z" fill="var(--near)"/><path d="M408.2 59.2L442.7 111.4Q408.2 105.4 373.7 111.4Z" fill="var(--near)"/><path d="M408.2 76.5L447.6 115.4Q408.2 109.4 368.8 115.4Z" fill="var(--near)"/><path d="M408.2 93.8L452.4 119.5Q408.2 113.5 364.0 119.5Z" fill="var(--near)"/></g><g style="--d:6.8s;--dl:-2.2s"><rect x="580.0" y="120.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M582.4 50.0L601.2 109.7Q582.4 103.7 563.6 109.7Z" fill="var(--near)"/><path d="M582.4 63.1L604.9 112.8Q582.4 106.8 559.9 112.8Z" fill="var(--near)"/><path d="M582.4 76.3L608.6 115.8Q582.4 109.8 556.2 115.8Z" fill="var(--near)"/><path d="M582.4 89.4L612.3 118.9Q582.4 112.9 552.5 118.9Z" fill="var(--near)"/><path d="M582.4 102.5L616.0 122.0Q582.4 116.0 548.8 122.0Z" fill="var(--near)"/></g><g style="--d:5.7s;--dl:-1.2s"><rect x="691.7" y="117.9" width="6.0" height="14.1" fill="var(--trunk)"/><path d="M694.7 29.5L718.3 104.5Q694.7 98.5 671.1 104.5Z" fill="var(--near)"/><path d="M694.7 46.0L723.0 108.3Q694.7 102.3 666.4 108.3Z" fill="var(--near)"/><path d="M694.7 62.5L727.6 112.2Q694.7 106.2 661.8 112.2Z" fill="var(--near)"/><path d="M694.7 79.0L732.2 116.1Q694.7 110.1 657.1 116.1Z" fill="var(--near)"/><path d="M694.7 95.4L736.9 120.0Q694.7 114.0 652.5 120.0Z" fill="var(--near)"/></g><g style="--d:7.4s;--dl:-1.9s"><rect x="864.4" y="118.3" width="5.9" height="13.7" fill="var(--trunk)"/><path d="M867.3 32.3L890.3 105.2Q867.3 99.2 844.3 105.2Z" fill="var(--near)"/><path d="M867.3 48.3L894.8 108.9Q867.3 102.9 839.8 108.9Z" fill="var(--near)"/><path d="M867.3 64.3L899.3 112.7Q867.3 106.7 835.3 112.7Z" fill="var(--near)"/><path d="M867.3 80.3L903.8 116.5Q867.3 110.5 830.8 116.5Z" fill="var(--near)"/><path d="M867.3 96.4L908.3 120.2Q867.3 114.2 826.2 120.2Z" fill="var(--near)"/></g><g style="--d:6.9s;--dl:-5.3s"><rect x="967.7" y="120.3" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M970.1 48.9L989.2 109.4Q970.1 103.4 951.0 109.4Z" fill="var(--near)"/><path d="M970.1 62.2L992.9 112.5Q970.1 106.5 947.3 112.5Z" fill="var(--near)"/><path d="M970.1 75.5L996.7 115.6Q970.1 109.6 943.5 115.6Z" fill="var(--near)"/><path d="M970.1 88.8L1000.4 118.8Q970.1 112.8 939.8 118.8Z" fill="var(--near)"/><path d="M970.1 102.1L1004.2 121.9Q970.1 115.9 936.0 121.9Z" fill="var(--near)"/></g><g style="--d:6.6s;--dl:-2.2s"><rect x="1114.7" y="119.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M1117.4 40.3L1138.5 107.2Q1117.4 101.2 1096.3 107.2Z" fill="var(--near)"/><path d="M1117.4 55.0L1142.7 110.7Q1117.4 104.7 1092.2 110.7Z" fill="var(--near)"/><path d="M1117.4 69.7L1146.8 114.1Q1117.4 108.1 1088.0 114.1Z" fill="var(--near)"/><path d="M1117.4 84.4L1150.9 117.6Q1117.4 111.6 1083.9 117.6Z" fill="var(--near)"/><path d="M1117.4 99.1L1155.1 121.0Q1117.4 115.0 1079.8 121.0Z" fill="var(--near)"/></g><path fill="var(--cream)" d="M0 130V118c80-12 160-12 240-4s160 10 240 0 160-12 240-4 160 10 240 2 160-8 240-2v18z"/><g transform="matrix(-1 0 0 1 2400 0)"><g style="--d:6.6s;--dl:-1.8s"><rect x="-22.5" y="108.0" width="5.0" height="11.7" fill="var(--trunk)"/><path d="M-20.0 34.8L2.1 99.0Q-20.0 93.0 -42.1 99.0Z" fill="var(--far)"/><path d="M-20.0 57.5L8.6 104.3Q-20.0 98.3 -48.6 104.3Z" fill="var(--far)"/><path d="M-20.0 80.3L15.0 109.7Q-20.0 103.7 -55.0 109.7Z" fill="var(--far)"/></g><g style="--d:7.4s;--dl:-5.0s"><rect x="16.4" y="105.1" width="6.4" height="15.0" fill="var(--trunk)"/><path d="M19.6 10.7L48.2 93.5Q19.6 87.5 -8.9 93.5Z" fill="var(--far)"/><path d="M19.6 40.0L56.5 100.4Q19.6 94.4 -17.2 100.4Z" fill="var(--far)"/><path d="M19.6 69.3L64.7 107.3Q19.6 101.3 -25.4 107.3Z" fill="var(--far)"/></g><g style="--d:5.1s;--dl:-0.9s"><rect x="60.7" y="106.4" width="5.8" height="13.5" fill="var(--trunk)"/><path d="M63.6 21.7L89.3 96.0Q63.6 90.0 38.0 96.0Z" fill="var(--far)"/><path d="M63.6 48.0L96.7 102.2Q63.6 96.2 30.6 102.2Z" fill="var(--far)"/><path d="M63.6 74.3L104.1 108.4Q63.6 102.4 23.2 108.4Z" fill="var(--far)"/></g><g style="--d:7.5s;--dl:-1.8s"><rect x="101.0" y="105.0" width="6.5" height="15.2" fill="var(--trunk)"/><path d="M104.2 9.5L133.1 93.2Q104.2 87.2 75.4 93.2Z" fill="var(--far)"/><path d="M104.2 39.2L141.4 100.2Q104.2 94.2 67.0 100.2Z" fill="var(--far)"/><path d="M104.2 68.8L149.8 107.2Q104.2 101.2 58.6 107.2Z" fill="var(--far)"/></g><g style="--d:6.4s;--dl:-5.7s"><rect x="146.8" y="107.8" width="5.1" height="11.9" fill="var(--trunk)"/><path d="M149.4 32.9L172.0 98.6Q149.4 92.6 126.8 98.6Z" fill="var(--far)"/><path d="M149.4 56.2L178.6 104.0Q149.4 98.0 120.2 104.0Z" fill="var(--far)"/><path d="M149.4 79.4L185.1 109.5Q149.4 103.5 113.7 109.5Z" fill="var(--far)"/></g><g style="--d:6.4s;--dl:-1.1s"><rect x="192.7" y="105.0" width="6.5" height="15.1" fill="var(--trunk)"/><path d="M196.0 10.0L224.7 93.3Q196.0 87.3 167.2 93.3Z" fill="var(--far)"/><path d="M196.0 39.5L233.0 100.3Q196.0 94.3 158.9 100.3Z" fill="var(--far)"/><path d="M196.0 69.0L241.3 107.2Q196.0 101.2 150.6 107.2Z" fill="var(--far)"/></g><g style="--d:6.7s;--dl:-5.7s"><rect x="246.1" y="107.9" width="5.1" height="11.8" fill="var(--trunk)"/><path d="M248.7 33.5L271.1 98.7Q248.7 92.7 226.2 98.7Z" fill="var(--far)"/><path d="M248.7 56.6L277.6 104.1Q248.7 98.1 219.7 104.1Z" fill="var(--far)"/><path d="M248.7 79.7L284.1 109.6Q248.7 103.6 213.2 109.6Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-0.9s"><rect x="296.2" y="106.2" width="5.9" height="13.7" fill="var(--trunk)"/><path d="M299.1 20.0L325.2 95.6Q299.1 89.6 273.1 95.6Z" fill="var(--far)"/><path d="M299.1 46.8L332.8 101.9Q299.1 95.9 265.5 101.9Z" fill="var(--far)"/><path d="M299.1 73.6L340.3 108.2Q299.1 102.2 258.0 108.2Z" fill="var(--far)"/></g><g style="--d:5.6s;--dl:-2.6s"><rect x="330.4" y="105.3" width="6.4" height="14.8" fill="var(--trunk)"/><path d="M333.6 12.0L361.8 93.8Q333.6 87.8 305.4 93.8Z" fill="var(--far)"/><path d="M333.6 41.0L369.9 100.6Q333.6 94.6 297.2 100.6Z" fill="var(--far)"/><path d="M333.6 70.0L378.1 107.4Q333.6 101.4 289.1 107.4Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-3.6s"><rect x="383.5" y="105.5" width="6.3" height="14.6" fill="var(--trunk)"/><path d="M386.6 13.4L414.4 94.1Q386.6 88.1 358.8 94.1Z" fill="var(--far)"/><path d="M386.6 42.0L422.5 100.8Q386.6 94.8 350.8 100.8Z" fill="var(--far)"/><path d="M386.6 70.6L430.5 107.5Q386.6 101.5 342.7 107.5Z" fill="var(--far)"/></g><g style="--d:7.4s;--dl:-4.8s"><rect x="422.5" y="108.5" width="4.8" height="11.1" fill="var(--trunk)"/><path d="M424.8 38.6L446.0 99.9Q424.8 93.9 403.7 99.9Z" fill="var(--far)"/><path d="M424.8 60.3L452.1 105.0Q424.8 99.0 397.6 105.0Z" fill="var(--far)"/><path d="M424.8 82.0L458.2 110.1Q424.8 104.1 391.5 110.1Z" fill="var(--far)"/></g><g style="--d:6.8s;--dl:-1.3s"><rect x="464.0" y="105.6" width="6.2" height="14.5" fill="var(--trunk)"/><path d="M467.1 14.4L494.7 94.4Q467.1 88.4 439.6 94.4Z" fill="var(--far)"/><path d="M467.1 42.7L502.7 101.0Q467.1 95.0 431.6 101.0Z" fill="var(--far)"/><path d="M467.1 71.0L510.6 107.6Q467.1 101.6 423.6 107.6Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-3.4s"><rect x="514.3" y="105.8" width="6.1" height="14.3" fill="var(--trunk)"/><path d="M517.4 16.0L544.5 94.7Q517.4 88.7 490.2 94.7Z" fill="var(--far)"/><path d="M517.4 43.9L552.4 101.2Q517.4 95.2 482.4 101.2Z" fill="var(--far)"/><path d="M517.4 71.7L560.2 107.8Q517.4 101.8 474.5 107.8Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-1.3s"><rect x="557.9" y="108.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M560.4 35.3L582.4 99.1Q560.4 93.1 538.4 99.1Z" fill="var(--far)"/><path d="M560.4 57.9L588.8 104.4Q560.4 98.4 532.1 104.4Z" fill="var(--far)"/><path d="M560.4 80.5L595.1 109.7Q560.4 103.7 525.7 109.7Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-5.3s"><rect x="611.0" y="109.1" width="4.4" height="10.4" fill="var(--trunk)"/><path d="M613.2 43.9L633.0 101.1Q613.2 95.1 593.5 101.1Z" fill="var(--far)"/><path d="M613.2 64.1L638.7 105.8Q613.2 99.8 587.8 105.8Z" fill="var(--far)"/><path d="M613.2 84.4L644.4 110.6Q613.2 104.6 582.1 110.6Z" fill="var(--far)"/></g><g style="--d:7.2s;--dl:-1.2s"><rect x="663.5" y="107.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M666.2 27.8L690.2 97.4Q666.2 91.4 642.2 97.4Z" fill="var(--far)"/><path d="M666.2 52.4L697.2 103.2Q666.2 97.2 635.2 103.2Z" fill="var(--far)"/><path d="M666.2 77.1L704.1 109.0Q666.2 103.0 628.3 109.0Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-4.4s"><rect x="711.4" y="108.3" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M713.8 36.9L735.4 99.5Q713.8 93.5 692.2 99.5Z" fill="var(--far)"/><path d="M713.8 59.0L741.6 104.7Q713.8 98.7 686.0 104.7Z" fill="var(--far)"/><path d="M713.8 81.2L747.9 109.9Q713.8 103.9 679.7 109.9Z" fill="var(--far)"/></g><g style="--d:7.0s;--dl:-4.6s"><rect x="760.3" y="109.5" width="4.3" height="9.9" fill="var(--trunk)"/><path d="M762.5 47.0L781.4 101.8Q762.5 95.8 743.6 101.8Z" fill="var(--far)"/><path d="M762.5 66.4L786.8 106.3Q762.5 100.3 738.1 106.3Z" fill="var(--far)"/><path d="M762.5 85.8L792.3 110.9Q762.5 104.9 732.7 110.9Z" fill="var(--far)"/></g><g style="--d:6.7s;--dl:-4.9s"><rect x="803.9" y="108.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M806.4 35.5L828.3 99.2Q806.4 93.2 784.4 99.2Z" fill="var(--far)"/><path d="M806.4 58.0L834.7 104.4Q806.4 98.4 778.1 104.4Z" fill="var(--far)"/><path d="M806.4 80.6L841.0 109.7Q806.4 103.7 771.7 109.7Z" fill="var(--far)"/></g><g style="--d:7.1s;--dl:-4.1s"><rect x="838.3" y="107.4" width="5.3" height="12.3" fill="var(--trunk)"/><path d="M841.0 29.9L864.4 97.9Q841.0 91.9 817.6 97.9Z" fill="var(--far)"/><path d="M841.0 54.0L871.2 103.5Q841.0 97.5 810.8 103.5Z" fill="var(--far)"/><path d="M841.0 78.1L878.0 109.2Q841.0 103.2 804.0 109.2Z" fill="var(--far)"/></g><g style="--d:5.1s;--dl:-1.2s"><rect x="876.2" y="105.1" width="6.4" height="15.0" fill="var(--trunk)"/><path d="M879.5 10.5L908.1 93.5Q879.5 87.5 850.9 93.5Z" fill="var(--far)"/><path d="M879.5 39.9L916.3 100.4Q879.5 94.4 842.6 100.4Z" fill="var(--far)"/><path d="M879.5 69.3L924.6 107.3Q879.5 101.3 834.3 107.3Z" fill="var(--far)"/></g><g style="--d:6.5s;--dl:-4.6s"><rect x="934.4" y="106.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M937.2 25.8L961.7 96.9Q937.2 90.9 912.6 96.9Z" fill="var(--far)"/><path d="M937.2 51.0L968.8 102.9Q937.2 96.9 905.5 102.9Z" fill="var(--far)"/><path d="M937.2 76.2L975.9 108.8Q937.2 102.8 898.4 108.8Z" fill="var(--far)"/></g><g style="--d:7.0s;--dl:-2.4s"><rect x="973.6" y="108.8" width="4.6" height="10.8" fill="var(--trunk)"/><path d="M975.9 41.0L996.4 100.4Q975.9 94.4 955.4 100.4Z" fill="var(--far)"/><path d="M975.9 62.1L1002.3 105.4Q975.9 99.4 949.5 105.4Z" fill="var(--far)"/><path d="M975.9 83.1L1008.2 110.3Q975.9 104.3 943.6 110.3Z" fill="var(--far)"/></g><g style="--d:6.2s;--dl:-3.0s"><rect x="1030.5" y="108.8" width="4.6" height="10.8" fill="var(--trunk)"/><path d="M1032.8 41.1L1053.3 100.4Q1032.8 94.4 1012.4 100.4Z" fill="var(--far)"/><path d="M1032.8 62.1L1059.2 105.4Q1032.8 99.4 1006.4 105.4Z" fill="var(--far)"/><path d="M1032.8 83.1L1065.1 110.3Q1032.8 104.3 1000.5 110.3Z" fill="var(--far)"/></g><g style="--d:7.5s;--dl:-2.2s"><rect x="1081.1" y="106.9" width="5.6" height="13.0" fill="var(--trunk)"/><path d="M1083.9 25.3L1108.5 96.8Q1083.9 90.8 1059.2 96.8Z" fill="var(--far)"/><path d="M1083.9 50.7L1115.7 102.8Q1083.9 96.8 1052.1 102.8Z" fill="var(--far)"/><path d="M1083.9 76.0L1122.8 108.7Q1083.9 102.7 1044.9 108.7Z" fill="var(--far)"/></g><g style="--d:5.5s;--dl:-1.3s"><rect x="1123.4" y="105.9" width="6.1" height="14.1" fill="var(--trunk)"/><path d="M1126.4 17.0L1153.3 94.9Q1126.4 88.9 1099.6 94.9Z" fill="var(--far)"/><path d="M1126.4 44.6L1161.1 101.4Q1126.4 95.4 1091.8 101.4Z" fill="var(--far)"/><path d="M1126.4 72.2L1168.8 107.9Q1126.4 101.9 1084.0 107.9Z" fill="var(--far)"/></g><g style="--d:5.3s;--dl:-0.2s"><rect x="1159.0" y="109.3" width="4.4" height="10.2" fill="var(--trunk)"/><path d="M1161.1 45.3L1180.5 101.4Q1161.1 95.4 1141.8 101.4Z" fill="var(--far)"/><path d="M1161.1 65.2L1186.1 106.1Q1161.1 100.1 1136.2 106.1Z" fill="var(--far)"/><path d="M1161.1 85.1L1191.7 110.7Q1161.1 104.7 1130.6 110.7Z" fill="var(--far)"/></g><g style="--d:7.9s;--dl:-5.8s"><rect x="1216.8" y="106.3" width="5.8" height="13.6" fill="var(--trunk)"/><path d="M1219.7 20.8L1245.6 95.8Q1219.7 89.8 1193.9 95.8Z" fill="var(--far)"/><path d="M1219.7 47.4L1253.1 102.0Q1219.7 96.0 1186.4 102.0Z" fill="var(--far)"/><path d="M1219.7 73.9L1260.6 108.3Q1219.7 102.3 1178.9 108.3Z" fill="var(--far)"/></g><g style="--d:6.6s;--dl:-2.9s"><rect x="-2.4" y="114.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M0.0 44.0L19.7 104.5Q0.0 98.5 -19.7 104.5Z" fill="var(--mid)"/><path d="M0.0 60.4L24.4 108.3Q0.0 102.3 -24.4 108.3Z" fill="var(--mid)"/><path d="M0.0 76.8L29.0 112.2Q0.0 106.2 -29.0 112.2Z" fill="var(--mid)"/><path d="M0.0 93.2L33.6 116.0Q0.0 110.0 -33.6 116.0Z" fill="var(--mid)"/></g><g style="--d:6.3s;--dl:-0.6s"><rect x="80.9" y="112.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M83.6 31.6L106.4 101.4Q83.6 95.4 60.9 101.4Z" fill="var(--mid)"/><path d="M83.6 50.6L111.8 105.9Q83.6 99.9 55.5 105.9Z" fill="var(--mid)"/><path d="M83.6 69.5L117.1 110.3Q83.6 104.3 50.2 110.3Z" fill="var(--mid)"/><path d="M83.6 88.4L122.4 114.8Q83.6 108.8 44.9 114.8Z" fill="var(--mid)"/></g><g style="--d:5.5s;--dl:-5.3s"><rect x="132.3" y="115.9" width="4.1" height="9.5" fill="var(--trunk)"/><path d="M134.3 56.3L151.0 107.4Q134.3 101.4 117.6 107.4Z" fill="var(--mid)"/><path d="M134.3 70.1L154.9 110.7Q134.3 104.7 113.7 110.7Z" fill="var(--mid)"/><path d="M134.3 84.0L158.8 114.0Q134.3 108.0 109.7 114.0Z" fill="var(--mid)"/><path d="M134.3 97.9L162.7 117.2Q134.3 111.2 105.8 117.2Z" fill="var(--mid)"/></g><g style="--d:5.4s;--dl:-3.0s"><rect x="214.8" y="112.9" width="5.5" height="12.9" fill="var(--trunk)"/><path d="M217.6 31.8L240.3 101.5Q217.6 95.5 194.8 101.5Z" fill="var(--mid)"/><path d="M217.6 50.7L245.6 105.9Q217.6 99.9 189.5 105.9Z" fill="var(--mid)"/><path d="M217.6 69.6L251.0 110.3Q217.6 104.3 184.2 110.3Z" fill="var(--mid)"/><path d="M217.6 88.5L256.3 114.8Q217.6 108.8 178.8 114.8Z" fill="var(--mid)"/></g><g style="--d:7.3s;--dl:-0.3s"><rect x="299.9" y="116.1" width="3.9" height="9.2" fill="var(--trunk)"/><path d="M301.8 58.6L318.0 108.0Q301.8 102.0 285.7 108.0Z" fill="var(--mid)"/><path d="M301.8 72.0L321.8 111.2Q301.8 105.2 281.9 111.2Z" fill="var(--mid)"/><path d="M301.8 85.4L325.5 114.3Q301.8 108.3 278.1 114.3Z" fill="var(--mid)"/><path d="M301.8 98.8L329.3 117.5Q301.8 111.5 274.3 117.5Z" fill="var(--mid)"/></g><g style="--d:7.5s;--dl:-2.7s"><rect x="365.4" y="114.6" width="4.7" height="11.0" fill="var(--trunk)"/><path d="M367.8 45.5L387.2 104.8Q367.8 98.8 348.4 104.8Z" fill="var(--mid)"/><path d="M367.8 61.6L391.7 108.6Q367.8 102.6 343.9 108.6Z" fill="var(--mid)"/><path d="M367.8 77.7L396.2 112.4Q367.8 106.4 339.3 112.4Z" fill="var(--mid)"/><path d="M367.8 93.8L400.8 116.1Q367.8 110.1 334.8 116.1Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-3.8s"><rect x="413.9" y="116.0" width="4.0" height="9.3" fill="var(--trunk)"/><path d="M415.9 57.6L432.3 107.8Q415.9 101.8 399.5 107.8Z" fill="var(--mid)"/><path d="M415.9 71.2L436.1 111.0Q415.9 105.0 395.7 111.0Z" fill="var(--mid)"/><path d="M415.9 84.9L439.9 114.2Q415.9 108.2 391.8 114.2Z" fill="var(--mid)"/><path d="M415.9 98.5L443.7 117.4Q415.9 111.4 388.0 117.4Z" fill="var(--mid)"/></g><g style="--d:6.2s;--dl:-1.2s"><rect x="476.4" y="116.7" width="3.7" height="8.5" fill="var(--trunk)"/><path d="M478.2 63.1L493.2 109.1Q478.2 103.1 463.2 109.1Z" fill="var(--mid)"/><path d="M478.2 75.6L496.7 112.1Q478.2 106.1 459.6 112.1Z" fill="var(--mid)"/><path d="M478.2 88.1L500.2 115.0Q478.2 109.0 456.1 115.0Z" fill="var(--mid)"/><path d="M478.2 100.6L503.7 117.9Q478.2 111.9 452.6 117.9Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-0.1s"><rect x="538.5" y="112.9" width="5.6" height="13.0" fill="var(--trunk)"/><path d="M541.3 31.3L564.2 101.3Q541.3 95.3 518.4 101.3Z" fill="var(--mid)"/><path d="M541.3 50.3L569.5 105.8Q541.3 99.8 513.1 105.8Z" fill="var(--mid)"/><path d="M541.3 69.3L574.9 110.3Q541.3 104.3 507.7 110.3Z" fill="var(--mid)"/><path d="M541.3 88.3L580.3 114.7Q541.3 108.7 502.4 114.7Z" fill="var(--mid)"/></g><g style="--d:5.8s;--dl:-1.1s"><rect x="604.7" y="114.2" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M607.2 42.3L627.4 104.0Q607.2 98.0 587.0 104.0Z" fill="var(--mid)"/><path d="M607.2 59.0L632.1 108.0Q607.2 102.0 582.3 108.0Z" fill="var(--mid)"/><path d="M607.2 75.8L636.8 111.9Q607.2 105.9 577.6 111.9Z" fill="var(--mid)"/><path d="M607.2 92.5L641.5 115.8Q607.2 109.8 572.9 115.8Z" fill="var(--mid)"/></g><g style="--d:7.1s;--dl:-5.5s"><rect x="675.6" y="113.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M678.3 34.0L700.5 102.0Q678.3 96.0 656.0 102.0Z" fill="var(--mid)"/><path d="M678.3 52.4L705.7 106.3Q678.3 100.3 650.9 106.3Z" fill="var(--mid)"/><path d="M678.3 70.9L710.9 110.7Q678.3 104.7 645.7 110.7Z" fill="var(--mid)"/><path d="M678.3 89.3L716.1 115.0Q678.3 109.0 640.5 115.0Z" fill="var(--mid)"/></g><g style="--d:7.4s;--dl:-5.4s"><rect x="731.1" y="113.5" width="5.3" height="12.3" fill="var(--trunk)"/><path d="M733.7 36.2L755.4 102.6Q733.7 96.6 712.1 102.6Z" fill="var(--mid)"/><path d="M733.7 54.2L760.5 106.8Q733.7 100.8 707.0 106.8Z" fill="var(--mid)"/><path d="M733.7 72.2L765.5 111.0Q733.7 105.0 701.9 111.0Z" fill="var(--mid)"/><path d="M733.7 90.2L770.6 115.2Q733.7 109.2 696.9 115.2Z" fill="var(--mid)"/></g><g style="--d:6.5s;--dl:-3.1s"><rect x="801.2" y="114.2" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M803.7 42.3L823.9 104.0Q803.7 98.0 783.5 104.0Z" fill="var(--mid)"/><path d="M803.7 59.1L828.6 108.0Q803.7 102.0 778.8 108.0Z" fill="var(--mid)"/><path d="M803.7 75.8L833.3 111.9Q803.7 105.9 774.1 111.9Z" fill="var(--mid)"/><path d="M803.7 92.6L838.0 115.8Q803.7 109.8 769.4 115.8Z" fill="var(--mid)"/></g><g style="--d:5.0s;--dl:-3.0s"><rect x="885.8" y="116.5" width="3.7" height="8.7" fill="var(--trunk)"/><path d="M887.6 61.8L903.0 108.8Q887.6 102.8 872.3 108.8Z" fill="var(--mid)"/><path d="M887.6 74.6L906.5 111.8Q887.6 105.8 868.7 111.8Z" fill="var(--mid)"/><path d="M887.6 87.3L910.1 114.8Q887.6 108.8 865.1 114.8Z" fill="var(--mid)"/><path d="M887.6 100.1L913.7 117.8Q887.6 111.8 861.5 117.8Z" fill="var(--mid)"/></g><g style="--d:7.3s;--dl:-2.7s"><rect x="941.7" y="115.0" width="4.5" height="10.5" fill="var(--trunk)"/><path d="M944.0 49.1L962.4 105.7Q944.0 99.7 925.5 105.7Z" fill="var(--mid)"/><path d="M944.0 64.5L966.8 109.3Q944.0 103.3 921.2 109.3Z" fill="var(--mid)"/><path d="M944.0 79.8L971.1 112.9Q944.0 106.9 916.8 112.9Z" fill="var(--mid)"/><path d="M944.0 95.2L975.4 116.5Q944.0 110.5 912.5 116.5Z" fill="var(--mid)"/></g><g style="--d:5.9s;--dl:-5.7s"><rect x="1015.3" y="114.7" width="4.7" height="10.9" fill="var(--trunk)"/><path d="M1017.6 46.5L1036.8 105.0Q1017.6 99.0 998.5 105.0Z" fill="var(--mid)"/><path d="M1017.6 62.3L1041.3 108.8Q1017.6 102.8 994.0 108.8Z" fill="var(--mid)"/><path d="M1017.6 78.2L1045.7 112.5Q1017.6 106.5 989.5 112.5Z" fill="var(--mid)"/><path d="M1017.6 94.1L1050.2 116.2Q1017.6 110.2 985.1 116.2Z" fill="var(--mid)"/></g><g style="--d:6.9s;--dl:-1.8s"><rect x="1089.1" y="113.1" width="5.4" height="12.7" fill="var(--trunk)"/><path d="M1091.8 33.3L1114.2 101.8Q1091.8 95.8 1069.4 101.8Z" fill="var(--mid)"/><path d="M1091.8 51.9L1119.4 106.2Q1091.8 100.2 1064.2 106.2Z" fill="var(--mid)"/><path d="M1091.8 70.5L1124.7 110.6Q1091.8 104.6 1059.0 110.6Z" fill="var(--mid)"/><path d="M1091.8 89.1L1129.9 114.9Q1091.8 108.9 1053.7 114.9Z" fill="var(--mid)"/></g><g style="--d:6.5s;--dl:-5.9s"><rect x="1168.9" y="116.1" width="3.9" height="9.2" fill="var(--trunk)"/><path d="M1170.9 58.5L1187.1 108.0Q1170.9 102.0 1154.7 108.0Z" fill="var(--mid)"/><path d="M1170.9 71.9L1190.8 111.1Q1170.9 105.1 1150.9 111.1Z" fill="var(--mid)"/><path d="M1170.9 85.3L1194.6 114.3Q1170.9 108.3 1147.2 114.3Z" fill="var(--mid)"/><path d="M1170.9 98.8L1198.4 117.4Q1170.9 111.4 1143.4 117.4Z" fill="var(--mid)"/></g><g style="--d:7.8s;--dl:-4.9s"><rect x="1218.8" y="114.3" width="4.8" height="11.3" fill="var(--trunk)"/><path d="M1221.2 43.3L1241.1 104.3Q1221.2 98.3 1201.3 104.3Z" fill="var(--mid)"/><path d="M1221.2 59.9L1245.8 108.2Q1221.2 102.2 1196.7 108.2Z" fill="var(--mid)"/><path d="M1221.2 76.4L1250.5 112.1Q1221.2 106.1 1192.0 112.1Z" fill="var(--mid)"/><path d="M1221.2 92.9L1255.1 115.9Q1221.2 109.9 1187.4 115.9Z" fill="var(--mid)"/></g><g style="--d:7.8s;--dl:-3.9s"><rect x="17.0" y="118.1" width="6.0" height="13.9" fill="var(--trunk)"/><path d="M20.0 30.8L43.3 104.8Q20.0 98.8 -3.3 104.8Z" fill="var(--near)"/><path d="M20.0 47.1L47.9 108.6Q20.0 102.6 -7.9 108.6Z" fill="var(--near)"/><path d="M20.0 63.3L52.5 112.4Q20.0 106.4 -12.5 112.4Z" fill="var(--near)"/><path d="M20.0 79.6L57.1 116.3Q20.0 110.3 -17.1 116.3Z" fill="var(--near)"/><path d="M20.0 95.9L61.7 120.1Q20.0 114.1 -21.7 120.1Z" fill="var(--near)"/></g><g style="--d:6.0s;--dl:-5.1s"><rect x="132.2" y="120.1" width="5.0" height="11.6" fill="var(--trunk)"/><path d="M134.7 47.1L154.2 109.0Q134.7 103.0 115.2 109.0Z" fill="var(--near)"/><path d="M134.7 60.7L158.0 112.1Q134.7 106.1 111.4 112.1Z" fill="var(--near)"/><path d="M134.7 74.3L161.8 115.3Q134.7 109.3 107.6 115.3Z" fill="var(--near)"/><path d="M134.7 87.9L165.7 118.5Q134.7 112.5 103.7 118.5Z" fill="var(--near)"/><path d="M134.7 101.5L169.5 121.7Q134.7 115.7 99.9 121.7Z" fill="var(--near)"/></g><g style="--d:7.4s;--dl:-2.7s"><rect x="238.8" y="120.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M241.2 50.2L259.9 109.7Q241.2 103.7 222.4 109.7Z" fill="var(--near)"/><path d="M241.2 63.3L263.6 112.8Q241.2 106.8 218.7 112.8Z" fill="var(--near)"/><path d="M241.2 76.4L267.3 115.9Q241.2 109.9 215.0 115.9Z" fill="var(--near)"/><path d="M241.2 89.5L271.0 118.9Q241.2 112.9 211.3 118.9Z" fill="var(--near)"/><path d="M241.2 102.6L274.7 122.0Q241.2 116.0 207.7 122.0Z" fill="var(--near)"/></g><g style="--d:5.6s;--dl:-5.2s"><rect x="405.0" y="117.4" width="6.3" height="14.7" fill="var(--trunk)"/><path d="M408.2 24.7L433.0 103.2Q408.2 97.2 383.4 103.2Z" fill="var(--near)"/><path d="M408.2 41.9L437.8 107.3Q408.2 101.3 378.6 107.3Z" fill="var(--near)"/><path d="M408.2 59.2L442.7 111.4Q408.2 105.4 373.7 111.4Z" fill="var(--near)"/><path d="M408.2 76.5L447.6 115.4Q408.2 109.4 368.8 115.4Z" fill="var(--near)"/><path d="M408.2 93.8L452.4 119.5Q408.2 113.5 364.0 119.5Z" fill="var(--near)"/></g><g style="--d:6.8s;--dl:-2.2s"><rect x="580.0" y="120.4" width="4.8" height="11.2" fill="var(--trunk)"/><path d="M582.4 50.0L601.2 109.7Q582.4 103.7 563.6 109.7Z" fill="var(--near)"/><path d="M582.4 63.1L604.9 112.8Q582.4 106.8 559.9 112.8Z" fill="var(--near)"/><path d="M582.4 76.3L608.6 115.8Q582.4 109.8 556.2 115.8Z" fill="var(--near)"/><path d="M582.4 89.4L612.3 118.9Q582.4 112.9 552.5 118.9Z" fill="var(--near)"/><path d="M582.4 102.5L616.0 122.0Q582.4 116.0 548.8 122.0Z" fill="var(--near)"/></g><g style="--d:5.7s;--dl:-1.2s"><rect x="691.7" y="117.9" width="6.0" height="14.1" fill="var(--trunk)"/><path d="M694.7 29.5L718.3 104.5Q694.7 98.5 671.1 104.5Z" fill="var(--near)"/><path d="M694.7 46.0L723.0 108.3Q694.7 102.3 666.4 108.3Z" fill="var(--near)"/><path d="M694.7 62.5L727.6 112.2Q694.7 106.2 661.8 112.2Z" fill="var(--near)"/><path d="M694.7 79.0L732.2 116.1Q694.7 110.1 657.1 116.1Z" fill="var(--near)"/><path d="M694.7 95.4L736.9 120.0Q694.7 114.0 652.5 120.0Z" fill="var(--near)"/></g><g style="--d:7.4s;--dl:-1.9s"><rect x="864.4" y="118.3" width="5.9" height="13.7" fill="var(--trunk)"/><path d="M867.3 32.3L890.3 105.2Q867.3 99.2 844.3 105.2Z" fill="var(--near)"/><path d="M867.3 48.3L894.8 108.9Q867.3 102.9 839.8 108.9Z" fill="var(--near)"/><path d="M867.3 64.3L899.3 112.7Q867.3 106.7 835.3 112.7Z" fill="var(--near)"/><path d="M867.3 80.3L903.8 116.5Q867.3 110.5 830.8 116.5Z" fill="var(--near)"/><path d="M867.3 96.4L908.3 120.2Q867.3 114.2 826.2 120.2Z" fill="var(--near)"/></g><g style="--d:6.9s;--dl:-5.3s"><rect x="967.7" y="120.3" width="4.9" height="11.4" fill="var(--trunk)"/><path d="M970.1 48.9L989.2 109.4Q970.1 103.4 951.0 109.4Z" fill="var(--near)"/><path d="M970.1 62.2L992.9 112.5Q970.1 106.5 947.3 112.5Z" fill="var(--near)"/><path d="M970.1 75.5L996.7 115.6Q970.1 109.6 943.5 115.6Z" fill="var(--near)"/><path d="M970.1 88.8L1000.4 118.8Q970.1 112.8 939.8 118.8Z" fill="var(--near)"/><path d="M970.1 102.1L1004.2 121.9Q970.1 115.9 936.0 121.9Z" fill="var(--near)"/></g><g style="--d:6.6s;--dl:-2.2s"><rect x="1114.7" y="119.2" width="5.4" height="12.6" fill="var(--trunk)"/><path d="M1117.4 40.3L1138.5 107.2Q1117.4 101.2 1096.3 107.2Z" fill="var(--near)"/><path d="M1117.4 55.0L1142.7 110.7Q1117.4 104.7 1092.2 110.7Z" fill="var(--near)"/><path d="M1117.4 69.7L1146.8 114.1Q1117.4 108.1 1088.0 114.1Z" fill="var(--near)"/><path d="M1117.4 84.4L1150.9 117.6Q1117.4 111.6 1083.9 117.6Z" fill="var(--near)"/><path d="M1117.4 99.1L1155.1 121.0Q1117.4 115.0 1079.8 121.0Z" fill="var(--near)"/></g><path fill="var(--cream)" d="M0 130V118c80-12 160-12 240-4s160 10 240 0 160-12 240-4 160 10 240 2 160-8 240-2v18z"/></g></svg>
@@ -392,21 +442,21 @@
 
   <h2 style="margin-top:34px">What is Twill?</h2>
   <div class="lede" style="margin-top:14px">
-    <p>Twill reads the page you already have open, allows you to expand on details you otherwise would need a separate document to do and gives you space to grow your pack in a lore rich environment.</p>
-    <p>Hover over a gene and get expanded details on where it comes from, how it might look bred with another marking and if they can be a combo. Maybe you want to add more detail to your wolf that you simply don't have the ability to see at a glance without a separate lore document. Breeding challenges and planning your pack has become easier than ever.</p>
-    <p><strong>Twill will never play the game for you, we leave that to you!</strong></p>
+    <p><strong>Understand your wolves.</strong> <span class="hl">Genetics</span> explains every gene on a wolf's page: where it comes from, how rare it is, and what it could become when bred. <span class="hl">Collection</span> keeps count of what you own.</p>
+    <p><strong>Plan your breeding.</strong> Pin wolves in the <span class="hl">Tray</span> and pair them to see their pups' chances, then plan a whole line in <span class="hl">Breeding projects</span> with heats and a timeline. <span class="hl">Pair Lists</span> puts ready pairs first.</p>
+    <p><strong>Keep your pack's story.</strong> <span class="hl">Lore</span>, <span class="hl">Reminders</span> and the <span class="hl">Notepad</span> keep your words on each wolf's page, and <span class="hl">Den Manager</span> sorts your den by what needs you.</p>
+    <p><strong>Stay in control.</strong> Twill only reads the page you're on. It never clicks or sends anything, and never plays the game for you.</p>
   </div>
+  <div class="cta"><a href="#install">Get Twill ↓</a></div>
+
   <div class="stats">
-    <div class="stat"><b>2,593</b><span>markings, plus 255 bases and 198 eyes</span></div>
+    <div class="stat"><b>2,609</b><span>markings, plus 256 bases and 199 eyes</span></div>
     <div class="stat"><b>40</b><span>personalities explained</span></div>
-    <div class="stat"><b>9</b><span>guides, kept offline</span></div>
+    <div class="stat"><b>11</b><span>guides, kept offline</span></div>
     <div class="stat"><b>36</b><span>themes: 12 in light and dark, plus 24 seasonal</span></div>
   </div>
 
-  <h2>Colour it your way</h2>
-  <p class="say">4 things it actually puts on screen. Pick a colourway and they repaint,
-  the same way the kit does.</p>
-
+  <div class="seeh"><h2>See it</h2><div class="tpick"><span class="tname" aria-live="polite"></span>
   <div class="tswitch" role="group" aria-label="Preview colourway"><!-- themes:chips -->
     <button type="button" data-t="cypres" aria-pressed="true">Cypr&egrave;s</button>
     <button type="button" data-t="parchment" aria-pressed="false">Parchment</button>
@@ -421,9 +471,16 @@
     <button type="button" data-t="hclight" aria-pressed="false">High Contrast Light</button>
     <button type="button" data-t="hcdark" aria-pressed="false">High Contrast Dark</button>
   <!-- /themes:chips --></div>
-
+  </div></div>
+  <p class="say" style="margin-top:0">Things Twill actually puts on screen. Pick a colour above and they repaint, the way Twill does.</p>
+  <div class="ptabs" role="tablist" aria-label="Examples">
+    <button type="button" role="tab" data-p="0" aria-selected="true">Understand your wolves</button>
+    <button type="button" role="tab" data-p="1" aria-selected="false">Plan your breeding</button>
+    <button type="button" role="tab" data-p="2" aria-selected="false">Keep your pack's story</button>
+    <button type="button" role="tab" data-p="3" aria-selected="false">Everyday</button>
+  </div>
   <div class="demos" id="demos">
-
+    <div class="pane" data-p="0">
     <div class="demo">
       <div class="demo-h">Genetics <span>hover any gene</span></div>
       <div class="demo-b">
@@ -440,7 +497,70 @@
         trait is obtained, the same way on every row of the page.</div>
       </div>
     </div>
-
+    <div class="demo">
+      <div class="demo-h">Collection <span>in the hub</span></div>
+      <div class="demo-b">
+        <div class="ctabs"><span class="ctab on">Markings<small>412 of 2,609</small></span><span class="ctab">Bases<small>88 of 256</small></span><span class="ctab">Eyes<small>61 of 199</small></span></div>
+        <div class="cbar"><i style="width:16%"></i></div>
+        <div class="cgrp"><span>&#9662; Socks</span><span>9 of 15</span></div>
+        <div class="cchips"><span class="got">Beige</span><span class="got">Deira</span><span>Argent</span><span class="got">Honey</span><span>Ducat</span></div>
+        <div class="cap">A checklist you tick yourself. Twill never fills it in from a page.</div>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="demo-h">Wardrobe <span>gene colours</span></div>
+      <div class="demo-b">
+        <div class="lb">Your look</div>
+        <div class="wbox" style="--wc:#d9c98a">Base <b>Fox</b></div>
+        <div class="wbox" style="--wc:#7fd3b0">Eyes <b>Circadian</b></div>
+        <div class="wbox" style="--wc:#e39cae">Slot 1 <b>Deira Socks</b> <span class="dots">&#9679;&#9679;&#9679;&#9675;</span></div>
+        <div class="wbox" style="--wc:#9fc8d8">Slot 2 <b>Penumbra Gleam</b></div>
+        <div class="cap">Every box is coloured by where that gene comes from, with a key one click away.</div>
+      </div>
+    </div>
+    </div>
+    <div class="pane" data-p="1" hidden>
+    <div class="demo">
+      <div class="demo-h">Pairing <span>two wolves in the tray</span></div>
+      <div class="demo-b">
+        <div class="pairbox"><span class="pchip">Sun &#9792;</span><span class="pchip">Mossbrook &#9794;</span></div>
+        <div class="lb">Generation</div>
+        <div>4th generation</div>
+        <div class="lb">Combos in reach</div>
+        <div class="rowline"><span class="tip">Silver Dilution</span><span class="r">tier 6 &middot; slot 4</span></div>
+        <div style="color:var(--t-muted)">from White Dilution &times; Black Dilution</div>
+        <div class="lb">Shared ancestors</div>
+        <div><span class="tip" style="font-size:19px">0.78%</span> <span style="color:var(--t-muted)">predicted pup COI, at least</span></div>
+        <div class="rowline"><span class="acc">Roustame Diodore</span><span class="r">great-grandsire on both sides</span></div>
+        <div class="cap">Wolvden gives each wolf its own coefficient. This is the pairing you have
+        not made yet, worked out from the two pinned wolves' trees.</div>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="demo-h">Timeline <span>Pennant line</span></div>
+      <div class="demo-b">
+        <div class="tlw"><span>23 Nov</span><span>30</span><span>7 Dec</span><span>14</span><span>21</span><span>28</span></div>
+        <div class="tll"><i class="h" style="left:8%;width:11%">heat</i><i class="p" style="left:19%;width:10%">pregnant</i><i class="d" style="left:29%;width:3%"></i><i class="w" style="left:32%;width:40%">nursing, cooldown</i><b style="left:3%"></b></div>
+        <div class="lb">This week</div>
+        <div class="rowline"><span>Wed 25 Nov</span><span class="r">Sun comes into heat</span></div>
+        <div class="lb">Next week</div>
+        <div class="rowline"><span>Thu 3 Dec</span><span class="r">Sun's pups due</span></div>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="demo-h">Pair Lists <span>11 of 13 used</span></div>
+      <div class="demo-b">
+        <div class="lb">Ready to breed &middot; 2</div>
+        <div class="rowline"><span class="acc">Sun &times; Mossbrook</span><span class="r">in heat, 4</span></div>
+        <div class="pnote"><b>Pennant line</b> &middot; step 1: breed them</div>
+        <div class="rowline"><span class="acc">Ash &times; Bramble</span><span class="r">in heat, 2</span></div>
+        <div class="lb">Cooldown, soonest first &middot; 9</div>
+        <div class="rowline"><span>Thistle &times; Moss</span><span class="r">1 rollover</span></div>
+        <div class="cap">Ready pairs move to the top. Nothing on the page is pressed.</div>
+      </div>
+    </div>
+    </div>
+    <div class="pane" data-p="2" hidden>
     <div class="demo">
       <div class="demo-h">Den Manager <span>255 food &middot; 5 need attention</span></div>
       <div class="demo-b">
@@ -455,23 +575,48 @@
         never use can be switched off entirely.</div>
       </div>
     </div>
-
     <div class="demo">
-      <div class="demo-h">Pairing <span>two wolves in the tray</span></div>
+      <div class="demo-h">Lore <span>Asagi</span></div>
       <div class="demo-b">
-        <div class="lb">Generation</div>
-        <div>4th generation</div>
-        <div class="lb">Combos in reach</div>
-        <div class="rowline"><span class="tip">Silver Dilution</span><span class="r">tier 6 &middot; slot 4</span></div>
-        <div style="color:var(--t-muted)">from White Dilution &times; Black Dilution</div>
-        <div class="lb">Shared ancestors</div>
-        <div><span class="tip" style="font-size:19px">0.78%</span> <span style="color:var(--t-muted)">predicted pup COI, at least</span></div>
-        <div class="rowline"><span class="acc">Roustame Diodore</span><span class="r">great-grandsire on both sides</span></div>
-        <div class="cap">Wolvden gives each wolf its own coefficient. This is the pairing you have
-        not made yet, worked out from the two pinned wolves' trees.</div>
+        <div class="lb">Who they are</div>
+        <div class="rowline"><span>Role</span><span class="r">Scout</span></div>
+        <div class="rowline"><span>Bonded to</span><span class="r acc">Mossbrook</span></div>
+        <div class="lb">Story</div>
+        <div>Found as a pup on the glacier and raised by the pack's oldest scout.</div>
+        <div class="cap">Your own fields. Public ones become a block for the wolf's Biography.</div>
       </div>
     </div>
-
+    <div class="demo">
+      <div class="demo-h">Reminders &amp; Notepad <span>on any page</span></div>
+      <div class="demo-b">
+        <div class="lb">Reminder on Sun</div>
+        <div class="rowline"><span>Breed after her cooldown</span><span class="r">due in 5 days</span></div>
+        <div class="lb">Notepad &middot; Pennant plan</div>
+        <div>Ask Wren about the Pennant pup before the Lunar Shoppe closes.</div>
+        <div class="cap">Notes can be pinned to a wolf and show on its page.</div>
+      </div>
+    </div>
+    </div>
+    <div class="pane" data-p="3" hidden>
+    <div class="demo">
+      <div class="demo-h">The hub <span>Good evening</span></div>
+      <div class="demo-b">
+        <div class="glw"><div class="gl wide"><small>Happening now</small>Lunar Dreams &middot; until Thu 26 Nov</div>
+          <div class="gl"><small>Next in a project</small>Sun comes into heat</div><div class="gl"><small>Goals</small>2 of 5 done</div>
+          <div class="gl"><small>Reminders</small>Sun: breed after cooldown</div><div class="gl"><small>Shopping list</small>3 to buy</div></div>
+        <div class="cap">Cards for what's going on. You choose which, and their order.</div>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="demo-h">Compose a post <span>snippets</span></div>
+      <div class="demo-b">
+        <div class="snips"><span>Raffle header <b>{2}</b></span><span>Signature</span><span>Sale footer</span></div>
+        <div class="lb">Fill in: Raffle header</div>
+        <div class="rowline"><span>prize</span><span class="r">Pennant pup</span></div>
+        <div class="rowline"><span>ends</span><span class="r">Sunday</span></div>
+        <div class="cap">&#10003; Nothing will be stripped. It warns before Wolvden would remove anything.</div>
+      </div>
+    </div>
     <div class="demo">
       <div class="demo-h">Guides <span>searched: "cough"</span></div>
       <div class="demo-b">
@@ -487,7 +632,7 @@
         to go and find them in.</div>
       </div>
     </div>
-
+    </div>
   </div>
 
   <script>
@@ -587,11 +732,94 @@
     /* The page opens in Vellum or Antler Night, whichever suits the computer
        or the sun and moon last chose; the buttons above still preview the rest. */
     window.twillPaint = paint;
+    window.twillThemes = T;
     paint(document.documentElement.getAttribute('data-mode') === 'dark' ? 'antlernight' : 'vellum');
   })();
   </script>
 
-  <h2>Under the hood</h2>
+
+  <script>
+  (function(){
+    /* The colourways as dots: each shows its own panel and accent, named on hover. */
+    var T = window.twillThemes || {};
+    var name = document.querySelector('.seeh .tname');
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.tswitch button'));
+    function show(b){ if (name) name.textContent = b ? b.textContent.trim() : ''; }
+    dots.forEach(function(b){
+      var t = T[b.getAttribute('data-t')];
+      var label = b.textContent.trim();
+      b.title = label; b.setAttribute('aria-label', label);
+      if (t) b.style.background = 'linear-gradient(135deg,' + t.panel + ' 50%,' + t.accent + ' 50%)';
+      b.addEventListener('mouseenter', function(){ show(b); });
+      b.addEventListener('focus', function(){ show(b); });
+      b.addEventListener('mouseleave', function(){ show(document.querySelector('.tswitch button.on')); });
+      b.addEventListener('click', function(){ show(b); });
+    });
+    show(document.querySelector('.tswitch button.on'));
+    /* The four tabs, one set of examples at a time. */
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.ptabs button'));
+    var pns = Array.prototype.slice.call(document.querySelectorAll('#demos .pane'));
+    tabs.forEach(function(b){
+      b.addEventListener('click', function(){
+        var k = b.getAttribute('data-p');
+        tabs.forEach(function(x){ x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+        pns.forEach(function(x){ x.hidden = x.getAttribute('data-p') !== k; });
+      });
+    });
+  })();
+  </script>
+
+  <h2 id="install">Get Twill</h2>
+
+  <ol class="steps">
+    <li>
+      <b>Install Tampermonkey</b>
+      <p>A free browser extension that runs userscripts. Get it from
+      <a href="https://www.tampermonkey.net/" target="_blank" rel="noopener noreferrer">tampermonkey.net</a>
+      and pick your browser. Chrome, Firefox, Edge, Safari and Opera all work.</p>
+      <div class="note"><b>Chrome and Edge only:</b> open <code>chrome://extensions</code> (or
+      <code>edge://extensions</code>), click <b>Details</b> on Tampermonkey, and switch on
+      <b>Allow User Scripts</b>, or Tampermonkey will refuse to run anything. On older versions
+      without that switch, turn on <b>Developer mode</b> on the same page instead.</div>
+    </li>
+    <li>
+      <b>Click the install link</b>
+      <p>With Tampermonkey in place, this one link is the whole install:</p>
+      <div class="cta" style="margin:12px 0 4px">
+        <a href="https://trashgremlinx.github.io/Twill/twill.user.js">Install Twill</a>
+      </div>
+      <p>Tampermonkey catches it and shows you the script with an <b>Install</b> button. Press it.
+      Then go to <a href="https://www.wolvden.com/" target="_blank" rel="noopener noreferrer">wolvden.com</a>
+      and the <b>Twill</b> mark is in the bottom right corner of every page. Click it, or press
+      <code>Alt+K</code>.</p>
+      <div class="note"><b>If the link opens as a wall of text instead,</b> Tampermonkey did not
+      catch it. Select all of it, then open the Tampermonkey dashboard, click the <b>+</b> tab,
+      delete the starter script that appears, paste, and save with <code>Ctrl+S</code>. That is the
+      old way round and it works just as well.</div>
+    </li>
+  </ol>
+
+  <h3>Other scripts</h3>
+  <p><b>HoLMod:</b> compatible with Twill.</p>
+
+  <h3>Updating later</h3>
+  <p><b>Nothing to do.</b> Tampermonkey checks for a new version on its own and updates you.
+  Everything you have written and set stays exactly where it is, every time.</p>
+  <p><b>Don't want to wait?</b> Click the Tampermonkey icon in your browser and choose <b>Check for
+  userscript updates</b>, or simply click the <a href="https://trashgremlinx.github.io/Twill/twill.user.js">install
+  link</a> again. Either way, if Tampermonkey asks before installing the new version, say yes.</p>
+
+  <h2>Explore more</h2>
+  <p class="say">Open any of these for the full detail.</p>
+  <div class="xtiles">
+    <button type="button" data-x="mods" aria-expanded="false" aria-controls="x-mods"><b>Every module</b><small>19, up close</small></button>
+    <button type="button" data-x="try" aria-expanded="false" aria-controls="x-try"><b>Try it yourself</b><small>5 live demos</small></button>
+    <button type="button" data-x="guides" aria-expanded="false" aria-controls="x-guides"><b>The 11 guides</b><small>kept offline</small></button>
+    <button type="button" data-x="access" aria-expanded="false" aria-controls="x-access"><b>Accessibility and themes</b><small>fishing colours, fonts, 36 themes</small></button>
+    <button type="button" data-x="faq" aria-expanded="false" aria-controls="x-faq"><b>Questions</b><small>is it allowed? my data? phones?</small></button>
+  </div>
+  <section class="xpane" id="x-mods" data-x="mods" hidden>
+  <h3>Every module, up close</h3>
   <p class="say">All 19, each with what it does and a slice of what it actually draws.
   Pick one. They repaint in whichever colourway you chose above.</p>
   <div class="gchips" id="pchips" role="group" aria-label="Panels"></div>
@@ -609,7 +837,7 @@
         say: ['Hovering a gene opens a card: what it is, which category and tier, how it is ' +
               'obtained, what it can breed into, and whether it is lethal. Clicking pins the ' +
               'card so it can be scrolled.',
-              'The coloured mark beside each gene says at a glance how that trait is obtained, ' +
+              'Each gene is coloured by how that trait is obtained, on wolf pages and in the Wardrobe, ' +
               'so a page of markings can be read without opening anything. The personality gets ' +
               'a pill naming its disposition, and a card with its stats, what pups inherit, and ' +
               'who it argues with on a hunt.'],
@@ -618,7 +846,7 @@
                ['lb','SOURCE'], ['m','Breeding'],
                ['lb','OPACITY'], ['m','65%'],
                ['lb','COMBO FACTORS'], ['m','Beige + Honey, in the same slot on both parents'],
-               ['cap','Built from 255 bases, 198 eye colours, 2,593 markings and 28 mutations, all bundled in the file.']]
+               ['cap','Built from 256 bases, 199 eye colours, 2,609 markings and 28 mutations, all bundled in the file.']]
       },
       lore: {
         name: 'Lore', right: 'a wolf’s page', where: 'On a wolf’s page',
@@ -646,7 +874,7 @@
               'ticks themselves, with a running count against the full catalogue.',
               'Markings are grouped by shape, bases by Wolvden’s own colour groups and eyes by ' +
               'where they come from. Twill never fills it in from a page.'],
-        rows: [['ctabs', [['Markings','412 of 2,593',1], ['Bases','88 of 255'], ['Eyes','61 of 198']]],
+        rows: [['ctabs', [['Markings','412 of 2,609',1], ['Bases','88 of 256'], ['Eyes','61 of 199']]],
                ['cbar', 17],
                ['cfind', 'socks'],
                ['cfilt', 'Tier: Any', ['All','Still to get','Got'], 0],
@@ -671,15 +899,15 @@
                ['cap','Pair this wolf with another in the tray: the pups’ generation, the shared ancestors and the pup’s COI show up there.']]
       },
       tray: {
-        name: 'Tray', right: 'two wolves pinned', where: 'Anywhere, docked at the bottom',
+        name: 'Tray', right: 'two wolves pinned', where: 'Anywhere, wherever you drag it',
         title: 'Scrying on a new level',
         say: ['Wolvden has no screen showing two wolves at once, so the player pins them as they ' +
               'browse and the comparison happens in Twill. Pair reads everything Twill already ' +
               'has of both and works out what the pups could inherit, slot by slot.',
               'Twill keeps a pinned wolf’s genes and family tree only while it is in the tray, ' +
               '8 at most. It does not breed anything and has no connection to the breeding form.',
-              'Copy for Discord sits beside the pin on a wolf’s page: the player ticks what goes in and ' +
-              'Twill puts a tidy message on the clipboard to paste into Discord. Nothing is sent.'],
+              'Bonded wolves get a rose edge, and a bonded pair sits together. The Tray can be dragged ' +
+              'anywhere on the page, and Copy for Discord puts a tidy message about a wolf on the clipboard.'],
         rows: [['lb','GENERATION'],
                ['m','4th generation'],
                ['lb','COMBOS IN REACH'],
@@ -698,16 +926,17 @@
               'their own pages, and the pairings planned in order. Every step shows the goal genes ' +
               'in reach, the pup COI and the personality odds.',
               'Matchmaking ranks every pair for the goal and says when a pair bond would unlock the ' +
-              'best one. The heat counter counts forward from what the player types. Nothing is ' +
-              'bonded, bred or read from Pair Lists.'],
+              'best one. The heat counter counts forward from what the player types, and the Timeline ' +
+              'lays every step across the next six weeks. Nothing is bonded or bred.'],
         rows: [['t','Argent Cape line','step 2 of 3'],
                ['lb','GOAL'],
                ['m','\u2713 Argent Cape  \u00b7  \u2713 Marble Half Mask  \u00b7  \u25cb Cocoa Ear Tips'],
                ['lb','GEN 2  \u00b7  PAIR BOND'],
                ['r','Sorrel \u00d7 Wren','COI 3.1%'],
                ['m','3 of 4 goal genes in reach'],
-               ['lb','WREN\u2019S CYCLE'],
-               ['r','In heat','in 5 rollovers'],
+               ['lb','TIMELINE'],
+               ['r','Wren comes into heat','Wed 25 Nov'],
+               ['r','Wren\u2019s pups due','Thu 3 Dec'],
                ['cap','Shares as a Wolvden post, a Discord message, a spreadsheet or a project code.']]
       },
       pairlists: {
@@ -716,12 +945,14 @@
         say: ['Pair Lists shows every bond in one long list, so after a failed attempt the player ' +
               'scrolls back to find the pair again. This moves the pairs whose Breed button works ' +
               'to the top, then the rest by how soon they will be back.',
-              'It reads each card\u2019s own status icon and only moves the cards. It never selects ' +
-              'or presses anything.'],
+              'It reads each card\u2019s own status icon and only moves the cards. A pair in a breeding ' +
+              'project gets a note saying which step it is, and the month\u2019s pair breedings are ' +
+              'counted from the page. It never selects or presses anything.'],
         rows: [['t','2 pairs ready to breed','11 of 13 used'],
                ['lb','READY TO BREED \u00b7 2'],
                ['r','Ash \u00d7 Bramble','in heat, 4'],
                ['r','Sorrel \u00d7 Wren','in heat, 4'],
+               ['m','Argent Cape line \u00b7 step 2: breed them'],
                ['lb','COOLDOWN, SOONEST FIRST \u00b7 12'],
                ['r','Thistle \u00d7 Moss','1 rollover'],
                ['cap','\u201cOnly show ready pairs\u201d folds the rest away until it is unticked.']]
@@ -817,8 +1048,8 @@
         title: 'Custom decor, drawn where it would sit',
         say: ['Wolvden’s own list has no room for custom decor, so this draws an image into ' +
               'the preview alongside ordinary decor, from an address the player pastes in.',
-              'A look can be saved as an outfit and tried on again in the preview later, without ' +
-              'touching Wolvden’s own slots. It does not apply, buy or equip anything.'],
+              'Every gene box is coloured the way it is on a wolf’s page, with a colour key, and a ' +
+              'look can be saved as an outfit and tried on again later. It does not apply, buy or equip anything.'],
         rows: [['t','Twill','custom decor, outfits'],
                ['lb','CUSTOM DECOR AND OTHER ART'],
                ['m','Paste the address of an image and it is drawn into the preview with everything else.'],
@@ -828,7 +1059,7 @@
                ['cap','Nothing leaves the preview. Wolvden is never told about any of this.']]
       },
       xbars: {
-        name: 'Explore bars', right: 'phones', where: 'Above the explore box',
+        name: 'Explore bars', right: 'explore', where: 'Above the explore box',
         title: 'Energy and HP where you are looking',
         say: ['On a phone Wolvden puts the Energy and HP bars at the very bottom of the explore ' +
               'page. This draws a small copy of them just above the explore box, and it follows the ' +
@@ -836,7 +1067,7 @@
               'The game’s bars are never moved, and nothing is clicked or stored. On by default on ' +
               'phones and narrow windows, with a switch for computers.'],
         rows: [['xbars', [['Energy','60%',60,'#f0a12c'], ['HP','41 / 41',100,'#1d84c6']]],
-               ['cap','Hunger and EXP can be added in its settings.']]
+               ['cap','Lunar Essence joins them during a lunar event. Hunger and EXP can be added in its settings.']]
       },
       fishing: {
         name: 'Fishing colours', right: 'accessibility', where: 'On the fishing page',
@@ -1032,7 +1263,43 @@
   </script>
 
 
-  <h2>Try it yourself</h2>
+  <h3 class="xsub">Everything, in a line each</h3>
+
+  <h3>Understand your wolves</h3>
+  <div class="tablecard"><table>
+    <tr><td class="n">Genetics</td><td class="d">Hover any gene for a card: what it is, where it comes from, what it pairs into, whether it is lethal. Each row is coloured by how the trait is obtained, and the personality gets a pill naming its group. 256 bases, 199 eyes, 2,609 markings, 28 mutations and 40 personalities</td></tr>
+    <tr><td class="n">Collection</td><td class="d">A checklist of every base, eye colour and marking. Tick what you have and Twill keeps count</td></tr>
+    <tr><td class="n">Wardrobe</td><td class="d">The same gene colours while you plan a look, a colour key, custom decor layers, and looks you can save and try on again</td></tr>
+  </table></div>
+
+  <h3>Plan your breeding</h3>
+  <div class="tablecard"><table>
+    <tr><td class="n">Tray</td><td class="d">Pin wolves as you browse, then Pair two: what pups could inherit slot by slot, their generation, personality odds and shared ancestors. Bonded pairs sit together, Compare puts any number side by side, and the Tray moves wherever you drag it</td></tr>
+    <tr><td class="n">Breeding projects</td><td class="d">Up to 4 projects of 8 wolves, Alt+B: a goal, pairings planned step by step, matchmaking, a heat counter, a six-week timeline, and sharing as a post, a Discord message or a spreadsheet</td></tr>
+    <tr><td class="n">Pair Lists</td><td class="d">Pairs that can breed go to the top, a note marks pairs in a project, and this month's pair breedings are counted from the page</td></tr>
+    <tr><td class="n">Pedigree</td><td class="d">Keeps the family trees the pairing check needs, for the wolves in your Tray and projects</td></tr>
+  </table></div>
+
+  <h3>Keep your pack's story</h3>
+  <div class="tablecard"><table>
+    <tr><td class="n">Lore</td><td class="d">Your own fields on your wolves. Linked fields show on both wolves' pages, and Public ones become a block for the Biography</td></tr>
+    <tr><td class="n">Den Manager</td><td class="d">A card above your caves: care, breeding, pups, roles and old age, in any den listing</td></tr>
+    <tr><td class="n">Reminders</td><td class="d">A one-line note on a wolf, with a date if you like, shown on its page and in Den Manager</td></tr>
+    <tr><td class="n">Notepad</td><td class="d">A movable notepad on every page, Alt+N. A note can be pinned to a wolf</td></tr>
+  </table></div>
+
+  <h3>Everyday</h3>
+  <div class="tablecard"><table>
+    <tr><td class="n">The hub</td><td class="d">Opens on cards for what's going on: events, your Puppy quest, the next project step, Goals, reminders and more. You choose which, and the ? holds Help, About and Backup</td></tr>
+    <tr><td class="n">Compose a post</td><td class="d">Shows what Wolvden will strip before you post, and keeps snippets with blanks to fill in</td></tr>
+    <tr><td class="n">Item Lookup and Shopping List</td><td class="d">287 recipes and catalogue links on your Hoard and trades; buy and in stock tags with your own price notes</td></tr>
+    <tr><td class="n">Explore bars</td><td class="d">Energy and HP, and Lunar Essence during a lunar event, just above the explore box</td></tr>
+    <tr><td class="n">Also</td><td class="d">The Enclave Puppy Quest in your sidebar, Store Front restocks, Filter for posts you'd rather not read, and a switch for hard-to-read den layouts</td></tr>
+  </table></div>
+
+  </section>
+  <section class="xpane" id="x-try" data-x="try" hidden>
+  <h3>Try it yourself</h3>
   <p class="say">These run on the same data Twill carries, so what you see here is what you get on Wolvden.
   They wear whichever colourway you picked above.</p>
   <div id="tryit">
@@ -1045,7 +1312,7 @@
   </div>
 
   <div class="tpane" data-p="genes">
-    <div class="tbar"><span>Look up any of the 2,593 markings:</span><input id="tryGeneFind" list="tryGeneList" placeholder="Try Beige Orca, Deira Socks, Silver Dilution"><datalist id="tryGeneList"></datalist></div>
+    <div class="tbar"><span>Look up any of the 2,609 markings:</span><input id="tryGeneFind" list="tryGeneList" placeholder="Try Beige Orca, Deira Socks, Silver Dilution"><datalist id="tryGeneList"></datalist></div>
     <div class="tstage split"><table class="wdt" id="tryGeneTable"></table><div class="pop" id="tryGenePop"></div></div>
     <p class="say">Hover a gene on the example wolf, the way you would on its page.</p>
   </div>
@@ -1238,98 +1505,8 @@ cf.oninput = col; col();
   })();
 </script>
 
-  <h2>Set up steps</h2>
-
-  <ol class="steps">
-    <li>
-      <b>Install Tampermonkey</b>
-      <p>A free browser extension that runs userscripts. Get it from
-      <a href="https://www.tampermonkey.net/" target="_blank" rel="noopener noreferrer">tampermonkey.net</a>
-      and pick your browser. Chrome, Firefox, Edge, Safari and Opera all work.</p>
-      <div class="note"><b>Chrome and Edge only:</b> open <code>chrome://extensions</code> (or
-      <code>edge://extensions</code>), click <b>Details</b> on Tampermonkey, and switch on
-      <b>Allow User Scripts</b>, or Tampermonkey will refuse to run anything. On older versions
-      without that switch, turn on <b>Developer mode</b> on the same page instead.</div>
-    </li>
-    <li>
-      <b>Click the install link</b>
-      <p>With Tampermonkey in place, this one link is the whole install:</p>
-      <div class="cta" style="margin:12px 0 4px">
-        <a href="https://trashgremlinx.github.io/Twill/twill.user.js">Install Twill</a>
-      </div>
-      <p>Tampermonkey catches it and shows you the script with an <b>Install</b> button. Press it.
-      Then go to <a href="https://www.wolvden.com/" target="_blank" rel="noopener noreferrer">wolvden.com</a>
-      and the <b>Twill</b> mark is in the bottom right corner of every page. Click it, or press
-      <code>Alt+K</code>.</p>
-      <div class="note"><b>If the link opens as a wall of text instead,</b> Tampermonkey did not
-      catch it. Select all of it, then open the Tampermonkey dashboard, click the <b>+</b> tab,
-      delete the starter script that appears, paste, and save with <code>Ctrl+S</code>. That is the
-      old way round and it works just as well.</div>
-    </li>
-  </ol>
-
-  <h3>Other scripts</h3>
-  <p><b>HoLMod:</b> compatible with Twill.</p>
-
-  <h3>Updating later</h3>
-  <p><b>Nothing to do.</b> Tampermonkey checks for a new version on its own and updates you.
-  Everything you have written and set stays exactly where it is, every time.</p>
-  <p><b>Don't want to wait?</b> Click the Tampermonkey icon in your browser and choose <b>Check for
-  userscript updates</b>, or simply click the <a href="https://trashgremlinx.github.io/Twill/twill.user.js">install
-  link</a> again. Either way, if Tampermonkey asks before installing the new version, say yes.</p>
-
-  <h2>The whole Kitchen Sink</h2>
-
-  <h3>On a wolf's page</h3>
-  <div class="tablecard"><table>
-    <tr><td class="n">Genetics</td><td class="d">Hover any gene for a card: what it is, where it
-      comes from, what it pairs into, whether it is lethal. A coloured mark on each row says how
-      that trait is obtained, and the personality gets a pill naming its disposition. Built from 255
-      bases, 198 eye colours, 2,593 markings, 28 mutations and 40 personalities</td></tr>
-    <tr><td class="n">Lore</td><td class="d">Your own fields on your own wolves, in sections you name.
-      Wolf-link fields cross-reference both ways, so if one wolf is bonded to another, both pages say
-      so. Switch any field to Public and Twill makes a block for the wolf's Biography, so other players
-      can read it too</td></tr>
-    <tr><td class="n">Pedigree</td><td class="d">Keeps the family trees the pairing check needs,
-      for the wolves in your tray and breeding projects</td></tr>
-  </table></div>
-
-  <h3>Across the site</h3>
-  <div class="tablecard"><table>
-    <tr><td class="n">Den Manager</td><td class="d">A card above your caves: care, breeding, pups,
-      roles, old age, trades, in any den listing. Sections fold individually and unused ones switch off</td></tr>
-    <tr><td class="n">Tray</td><td class="d">Pin two wolves, then <b>Pair</b>: what the pups could
-      inherit slot by slot, what generation they will be, which personality groups they are likely
-      to get, plus shared ancestors. <b>Compare</b> puts any number side by side, and <b>Copy for
-      Discord</b> copies a tidy message about a wolf</td></tr>
-    <tr><td class="n">Breeding projects</td><td class="d">Up to 4 projects with 8 wolves each, started from scratch or from the Tray, <code>Alt+B</code>:
-      a goal, pairings planned step by step with the goal genes in reach and the pup COI, matchmaking
-      that ranks every pair, a heat counter you type into, and sharing as a Wolvden post, a Discord
-      message or a spreadsheet</td></tr>
-    <tr><td class="n">Pair Lists order</td><td class="d">The pairs that can breed right now go to the
-      top of Pair Lists, so a failed attempt never sends you scrolling</td></tr>
-    <tr><td class="n">Puppy quest</td><td class="d">Keep the Enclave Puppy Quest in your sidebar and hub, and a
-      puppy's page says whether that pup could fit</td></tr>
-    <tr><td class="n">Wardrobe</td><td class="d">Custom decor as extra layers, which Wolvden's own
-      list has no room for. Save a look and try it on again in the picture. Each slot says what that decor is crafted
-      from</td></tr>
-    <tr><td class="n">Item Lookup</td><td class="d">A magnifier on every item in your Hoard and on
-      trades: 287 recipes, the catalogue, or the trading centre, already searched</td></tr>
-    <tr><td class="n">Shopping List</td><td class="d">Items you want are tagged <b>buy</b>, items
-      you would trade away are tagged <b>in stock</b>, wherever they appear, with your own price notes</td></tr>
-    <tr><td class="n">Store Front</td><td class="d">On Manage Your Trades: what to restock, and
-      which trades have offers waiting</td></tr>
-    <tr><td class="n">Notepad</td><td class="d">A movable notepad on every page, <code>Alt+N</code>.
-      Pictures by web address, and a note can be pinned to a wolf so it shows on their page</td></tr>
-    <tr><td class="n">Collection</td><td class="d">A checklist of every base, eye colour and marking
-      in the game. Tick what you have and Twill keeps count</td></tr>
-    <tr><td class="n">Explore bars</td><td class="d">Your Energy and HP drawn just above the explore
-      box, so a phone never has to scroll down for them. On by default on phones, with a switch for computers</td></tr>
-    <tr><td class="n">Filter</td><td class="d">Collapses posts from players you would rather not read, and folds chatter topics with words you choose</td></tr>
-    <tr><td class="n">Reminders</td><td class="d">A one-line reminder on a wolf, with a date if you like, shown on its page and in Den Manager</td></tr>
-    <tr><td class="n">Custom layouts</td><td class="d">Switch a hard-to-read den layout off, for one page or everywhere. Only you see the change</td></tr>
-  </table></div>
-
+  </section>
+  <section class="xpane" id="x-guides" data-x="guides" hidden>
   <h3>11 guides, kept offline</h3>
   <p class="say">Pick one to see what it holds. Every example below is the guide's own output,
   in whichever colourway you chose above.</p>
@@ -1645,27 +1822,23 @@ cf.oninput = col; col();
   })();
   </script>
 
+  </section>
+  <section class="xpane" id="x-access" data-x="access" hidden>
   <h3>Accessibility</h3>
-  <p>Fishing colours are now given an upgrade for those with red-blind or green-blind colour vision, or those who may struggle to see the ripple during fishing. Twill does not point to the fish, but merely acts as a coloured pane put over the browser to add a little more contrast.</p>
-  <p><b>Comfort</b> in the hub adds a reading font (OpenDyslexic, Atkinson Hyperlegible or Lexend if you have them installed, or Verdana, Tahoma and others), letter, word and line spacing for Twill or the whole site, reduced motion, and a switch to turn off a hard-to-read den layout for just that page. There are also <b>High Contrast</b> Light and Dark themes.</p>
+  <p><b>Fishing colours</b> lay a coloured pane over the game, so red-blind and green-blind players, or anyone who struggles to see the ripple, can fish more easily. It never points to the fish.</p>
+  <p><b>Comfort</b> adds a reading font (OpenDyslexic, Atkinson Hyperlegible or Lexend if you have them, or Verdana and others), letter, word and line spacing, a reading ruler, reduced motion, and High Contrast Light and Dark themes.</p>
 
   <h3>Everywhere</h3>
-  <p><b>Twelve themes in light and dark</b>, with a sun and moon to swap between them, <b>24 seasonal
-  themes</b> that turn up in their own month, a <b>font picker</b>, a live editor, a corner button that can wear the mark in any of its
-  three colourways or stay a plain labelled button, three of the themes (Tree Bark, Understory and
-  Frosted Cranberries) drawn from Twill's own colours, and every swatch in every one of
-  them is yours to change, a <b>post composer</b> that catches those pesky HTML breaks, and
-  <b>Backup</b>, with a gentle reminder when it has been a while, so you can carry everything with you to another computer.</p>
+  <p><b>Twelve themes</b> in light and dark with a sun and moon to swap them, <b>24 seasonal themes</b>, a font picker, and a live editor where every colour is yours to change. <b>Backup</b> carries everything to another computer, with a gentle reminder when it has been a while.</p>
 
-  <h2>Questions</h2>
+  </section>
+  <section class="xpane" id="x-faq" data-x="faq" hidden>
+  <h3>Questions</h3>
 
   <details>
     <summary>Is this allowed? Will I get in trouble?</summary>
-    <p>Wolvden's rules forbid scripts that <em>play</em> the game: automation, auto-refreshers,
-    anything that clicks or submits for you. Twill does none of that. It reads a page you opened
-    yourself and changes how it looks, which is the same thing a custom den layout does.</p>
-    <p>Twill has been approved by the Wolvden mod team. It is still an unofficial user script, not affiliated with Wolvden or Lioden Ltd, and
-    you use it at your own risk.</p>
+    <p>We have received the green light from the Wolvden support team to publicly share Twill with you. It only reads the page you have open and never plays the game for you.</p>
+    <p>It is still an unofficial user script, not affiliated with Wolvden or Lioden Ltd, and you use it at your own risk.</p>
   </details>
 
   <details>
@@ -1741,9 +1914,8 @@ cf.oninput = col; col();
     guild-locked.</p>
   </details>
 
-  <h2>What it will not do</h2>
+  <h3>What it will not do</h3>
   <ul class="rules">
-    <li>It <b>never loads a page for you</b>. No randomly opened tabs.</li>
     <li>It <b>never clicks, submits or fills a form for you</b>. No auto-explore, bump tools or
       pre-chosen answers for battles and befriending.</li>
     <li>It <b>never refreshes</b> anything on a timer. You must manually bump all trade, raffles
@@ -1751,6 +1923,25 @@ cf.oninput = col; col();
     <li>It <b>sends nothing anywhere</b>. No server, no account, no tracking, no analytics.</li>
     <li>It <b>does not gather up the site</b>. Nothing is kept from Wolvden beyond the wolves you pick yourself: up to 8 in the tray and 8 in each of up to 4 breeding projects, plus Lillemor’s puppy quest if you choose to keep it. They are forgotten when you take them out.</li>
   </ul>
+
+  </section>
+
+  <script>
+  (function(){
+    /* Explore more: one section open at a time; press its tile again to fold it. */
+    var tiles = Array.prototype.slice.call(document.querySelectorAll('.xtiles button'));
+    var panes = Array.prototype.slice.call(document.querySelectorAll('.xpane'));
+    tiles.forEach(function(b){
+      b.addEventListener('click', function(){
+        var k = b.getAttribute('data-x');
+        var open = b.getAttribute('aria-expanded') !== 'true';
+        tiles.forEach(function(x){ x.setAttribute('aria-expanded', open && x === b ? 'true' : 'false'); });
+        panes.forEach(function(x){ x.hidden = !(open && x.getAttribute('data-x') === k); });
+        if (open) { var pn = document.getElementById('x-' + k); if (pn) pn.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      });
+    });
+  })();
+  </script>
 
   <h2>Thanks</h2>
   <div class="thanks">
